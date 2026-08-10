@@ -152,6 +152,23 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 .rule-nav .m-btn{margin:0;}
 .rule-nav .m-btn.ghost{background:var(--paper); color:var(--brown); border:2px solid var(--brown); box-shadow:var(--shadow);}
 
+/* ---------- reveal（ネタバラシ） ---------- */
+.rv-btn{margin-top:10px; font-size:13px;}
+.rv-list{display:flex; flex-direction:column; gap:14px; margin-bottom:14px;}
+.rv-door{background:var(--paper); border:2px solid var(--brown); border-radius:14px; padding:12px 14px;}
+.rv-title{font-weight:900; font-size:15px; margin-bottom:8px;}
+.rv-opt{display:flex; gap:10px; align-items:flex-start; padding:8px 10px; border-radius:10px; border:2px solid transparent; text-align:left;}
+.rv-opt + .rv-opt{margin-top:6px;}
+.rv-opt.chosen{background:#EDF7DC; border-color:var(--green);}
+.rv-opt.locked{background:#F3EFE8;}
+.rv-opt.unseen{background:#FFF3DC; border-color:var(--orange); border-style:dashed;}
+.rv-ic{font-size:18px; flex:none;}
+.rv-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
+.rv-t{font-weight:900; font-size:13.5px;}
+.rv-d{font-size:12px; opacity:.8; line-height:1.6;}
+.rv-meta{font-size:12px; font-weight:700;}
+.rv-st{flex:none; font-size:11px; font-weight:900; opacity:.75; padding-top:3px;}
+
 /* ---------- modal ---------- */
 .overlay{
   position:fixed; inset:0; background:rgba(74,58,48,.5); z-index:100;
@@ -545,7 +562,7 @@ $("startBtn").onclick = ()=>{
       pos:0, money:fam.money, initMoney:fam.money,
       allow:fam.allow, learn:1 + (fam.perk==="dandori"?1:0), happy:0,
       hidden:new Set(fam.hide),
-      open:0, locked:0, unseen:0,
+      open:0, locked:0, unseen:0, doorLog:[],
       seidoDiscount:false, seidoUsed:false,
       hadHeavy:false, disasterTurns:0, letterIn:null,
       done:false, rankAt:null,
@@ -897,12 +914,14 @@ function showChoiceModal(idx, def, type, skipCount){
     if(o.tag && p.hidden.has(o.tag)) return "unseen";
     return meetsReq(p, o) ? "open" : "locked";
   });
+  const logEntry = {title:def.title, opts:def.opts, states, chosen:null};
   if(!skipCount){
     states.forEach(s=>{
       if(s === "unseen") p.unseen++;
       else if(s === "open") p.open++;
       else p.locked++;
     });
+    p.doorLog.push(logEntry);
   }
   const doors = def.opts.map((o,i)=>{
     const st = states[i];
@@ -933,6 +952,7 @@ function showChoiceModal(idx, def, type, skipCount){
     <div class="door-list">${doors}</div>`);
   document.querySelectorAll("#modalBox .door:not(:disabled)").forEach(btn=>{
     btn.onclick = ()=>{
+      logEntry.chosen = +btn.dataset.i;
       const o = def.opts[+btn.dataset.i];
       const fx = {...o.fx};
       const notes = [];
@@ -1020,8 +1040,12 @@ function showResult(){
         <div class="seg-lock" style="width:${pct(p.locked)}%"></div>
         <div class="seg-unseen" style="width:${pct(p.unseen)}%"></div>
       </div>
-      <div class="doorbar-label">出会ったトビラ ${total}枚 ── 🚪 開けられた <b>${p.open}</b>／🔒 カギが足りなかった <b>${p.locked}</b>／👁 見えていなかった <b>${p.unseen}</b></div>`;
+      <div class="doorbar-label">出会ったトビラ ${total}枚 ── 🚪 開けられた <b>${p.open}</b>／🔒 カギが足りなかった <b>${p.locked}</b>／👁 見えていなかった <b>${p.unseen}</b></div>
+      <button class="chip-btn rv-btn" data-p="${players.indexOf(p)}">🚪 トビラのネタバラシを見る</button>`;
     list.appendChild(card);
+  });
+  list.querySelectorAll(".rv-btn").forEach(b=>{
+    b.onclick = ()=>showRevealModal(+b.dataset.p);
   });
 
   const totalUnseen = players.reduce((s,p)=>s+p.unseen, 0);
@@ -1032,10 +1056,62 @@ function showResult(){
     でも今日いちばん大事なのは、たぶんこっち——<br>
     このテーブル全体で、<b>${totalUnseen}枚のトビラが「見えてすら いなかった」</b>ということ。<br>
     カギが足りないのと、扉があることを知らないのは、ぜんぜん違う。<br><br>
+    🚪 それぞれのカードの<b>「ネタバラシ」ボタン</b>で、？？？の中身をのぞいてみよう。<br><br>
     🗣 話してみよう：<br>
     ・開けたかったのに、届かなかった／見えていなかったトビラはあった？<br>
     ・家庭カードを見せ合おう。同じマスで、見えていた景色はどう違った？<br>
     ・現実の世界で「カギ」になるものは、お金のほかに何があるだろう？`;
+}
+
+/* ===================== reveal（ネタバラシ） ===================== */
+function rawReqLabel(o){
+  const parts = [];
+  if(o.req.money) parts.push(`おかね${o.req.money}万`);
+  if(o.req.learn) parts.push(`★${o.req.learn}`);
+  return parts.join("＋");
+}
+function fxInline(fx){
+  const parts = [];
+  if(fx.money) parts.push(`💰${fx.money>0?"+":""}${fx.money}万`);
+  if(fx.learn) parts.push(`★+${fx.learn}`);
+  if(fx.happy) parts.push(`♥+${fx.happy}`);
+  return parts.join(" ");
+}
+const RV_META = {
+  chosen:["✅","えらんだ"], open:["🚪","開けられた"],
+  locked:["🔒","カギ不足"], unseen:["👁","見えてなかった！"],
+};
+function showRevealModal(pIdx){
+  const p = players[pIdx];
+  const secs = p.doorLog.map(e=>{
+    const rows = e.opts.map((o,i)=>{
+      const st = e.chosen === i ? "chosen" : e.states[i];
+      const [ic, label] = RV_META[st];
+      const key = rawReqLabel(o);
+      const fx = fxInline(o.fx);
+      return `<div class="rv-opt ${st}">
+        <span class="rv-ic">${ic}</span>
+        <span class="rv-main">
+          <span class="rv-t">${o.t}</span>
+          <span class="rv-d">${o.d}</span>
+          <span class="rv-meta">🔑 ${key || "カギなし"}${fx ? `　→ ${fx}` : ""}</span>
+        </span>
+        <span class="rv-st">${label}</span>
+      </div>`;
+    }).join("");
+    return `<div class="rv-door"><div class="rv-title">${e.title}</div>${rows}</div>`;
+  }).join("");
+  openModal(`
+    <div class="rule-page">
+      <button class="rule-close" id="rvClose" aria-label="とじる">✕</button>
+      <span class="m-tag" style="background:var(--brown)">🚪 ネタバラシ</span>
+      <h2>${p.name} さんが出会ったトビラ、ぜんぶ</h2>
+      <p class="m-body">👁は、ゲーム中「？？？」で中身が見えなかったトビラ。<br>ほんとうは、こんな選択肢だった——</p>
+      <div class="rv-list">${secs || "<p class='m-body'>トビラには出会わなかったみたい。</p>"}</div>
+      <button class="m-btn" id="rvOk">とじる</button>
+    </div>`);
+  $("rvClose").onclick = closeModal;
+  $("rvOk").onclick = closeModal;
 }
 
 /* ===================== rules ===================== */
