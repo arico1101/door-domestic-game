@@ -1057,8 +1057,10 @@ function showChoiceModal(idx, def, type, skipCount){
     }
     const key = reqLabel(p, o);
     const ok = st === "open";
-    /* お金の増減だけは選ぶ前に見せる（★とハートは選ぶまでのお楽しみ） */
-    const cost = o.fx.money
+    /* お金の増減だけは選ぶ前に見せる（★とハートは選ぶまでのお楽しみ）
+       カギの金額と支払い額が同じときはカギ表示だけにする（冗長回避） */
+    const redundant = o.req.money && o.fx.money === -o.req.money && effectiveMoneyReq(p, o) === o.req.money;
+    const cost = (o.fx.money && !redundant)
       ? `<span class="d-key d-cost ${o.fx.money<0?"minus":"plus"}">${o.fx.money<0?"💸":"💰"} おかね ${o.fx.money>0?"+":""}${o.fx.money}万${o.special==="shogakukin"?"＋返済":""}</span>`
       : "";
     return `<button class="door" data-i="${i}" ${ok?"":"disabled"}>
