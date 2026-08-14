@@ -926,7 +926,8 @@ function reqLabel(p, o){
   return parts.join(" ＋ ");
 }
 function meetsReq(p, o){
-  if(effectiveMoneyReq(p, o) > p.money) return false;
+  const em = effectiveMoneyReq(p, o);
+  if(em > 0 && em > p.money) return false;  // カギなし(0円)の選択肢は借金中でも選べる
   if(o.req.learn && p.learn < o.req.learn) return false;
   return true;
 }
@@ -969,11 +970,17 @@ function showChoiceModal(idx, def, type, skipCount){
       </span>
     </button>`;
   }).join("");
+  const stuck = !states.includes("open");
   openModal(`
     <span class="m-tag" style="background:${m.tag}">${m.ic} ${def.heavy ? "できごと" : m.label}</span>
     <h2>${def.title}</h2>
     <p class="m-body">${def.body}<br><b>${p.name}</b> さん：おかね ${p.money}万 ／ まなび ★${p.learn}</p>
-    <div class="door-list">${doors}</div>`);
+    <div class="door-list">${doors}</div>
+    ${stuck ? `<div class="m-note" style="margin-top:14px">開けられるトビラが、ひとつもなかった…。</div>
+    <button class="m-btn" id="mPass">今回は見送る</button>` : ""}`);
+  if(stuck){
+    $("mPass").onclick = ()=>{ closeModal(); endTurn(); };
+  }
   document.querySelectorAll("#modalBox .door:not(:disabled)").forEach(btn=>{
     btn.onclick = ()=>{
       logEntry.chosen = +btn.dataset.i;
