@@ -341,7 +341,7 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
   <div class="controls">
     <button class="dice-btn" id="diceBtn">
       <span class="dice-face" id="diceFace">?</span>
-      <span>サイコロを回す</span>
+      <span id="diceLabel">サイコロを回す</span>
     </button>
   </div>
 </section>
@@ -747,14 +747,22 @@ function beginTurn(){
   busy = false;
   $("diceBtn").disabled = false;
   $("diceFace").textContent = "?";
+  /* 高校時代(進路の手前まで)はサイコロを使わず1マスずつ */
+  const hs = p.pos < 4;
+  $("diceFace").style.display = hs ? "none" : "grid";
+  $("diceLabel").textContent = hs ? "🏫 一歩すすむ" : "サイコロを回す";
 }
 
 $("diceBtn").onclick = async ()=>{
   if(busy) return;
   busy = true;
   $("diceBtn").disabled = true;
-  const n = await spinDice();
-  await movePlayer(turn, n);
+  if(players[turn].pos < 4){
+    await movePlayer(turn, 1);
+  } else {
+    const n = await spinDice();
+    await movePlayer(turn, n);
+  }
 };
 
 function spinDice(){
@@ -1278,7 +1286,7 @@ $("allDoorsBtn").onclick = showAllDoorsModal;
 const RULE_PAGES = [
   {tag:"🏁 めざすもの", title:"順位を決めるのは ♥ハッピー", items:[
     ["🎲","これは<b>16歳から45歳までの29年間</b>をたどる人生すごろく。サイコロを回して、みんなでゴールをめざそう。"],
-    ["🏫","<b>高校時代（16〜18歳）だけは1マスずつ</b>止まりながら進む。進路を選ぶ前の、準備の時間だ。"],
+    ["🏫","<b>高校時代（16〜18歳）はサイコロを使わず、1マスずつ</b>進む。進路を選ぶ前の、準備の時間だ。"],
     ["♥","最後の順位は、おかねの多さじゃなく <b>♥ハッピーの数</b>で決まる！"],
     ["🚪","♥は、人生の選択「<b>トビラ</b>」を開けるともらえる。<b>♥の数＝じぶんの意思で選べた数</b>だ。"],
   ]},
