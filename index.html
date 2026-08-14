@@ -733,21 +733,34 @@ async function movePlayer(idx, steps){
 }
 
 /* ===================== square resolution ===================== */
+/* ★まなびの数（＝お給料）に応じたいまの仕事 */
+function jobTitle(p){
+  const L = p.learn;
+  if(L <= 1) return {ic:"🍔", t:"アルバイトかけもち"};
+  if(L <= 2) return {ic:"🔧", t:"工場・現場のスタッフ"};
+  if(L <= 3) return {ic:"🗂", t:"会社の一般事務"};
+  if(L <= 4) return {ic:"🤝", t:"営業・販売のリーダー"};
+  if(L <= 5) return {ic:"💻", t:"専門職・エンジニア"};
+  if(L <= 6) return {ic:"🏢", t:"大手企業の社員"};
+  return {ic:"👑", t:"マネージャー・専門家"};
+}
 function resolveSquare(idx){
   const p = players[idx];
   const sq = SQUARES[p.pos];
   if(sq.t === "income"){
-    let amt, note;
+    let amt, note, title = sq.name || "おしごと";
     if(sq.fixed != null){
       amt = sq.fixed;
       note = "はじめてのお給料！";
     } else {
       amt = 20 + p.learn*10 + p.allow;
-      note = `お給料は <b>20万 ＋ まなび×10万${p.allow>0 ? " ＋ 仕送り"+p.allow+"万" : ""}</b>`;
+      const job = jobTitle(p);
+      title = `${job.ic} いまの仕事：${job.t}`;
+      note = `お給料は <b>20万 ＋ まなび×10万${p.allow>0 ? " ＋ 仕送り"+p.allow+"万" : ""}</b><br>まなびが増えると、仕事もお給料も変わっていく`;
       if(p.disasterTurns > 0){ amt -= 10; note += `<br>⚠️ 被災の影響で −10万（あと${p.disasterTurns}ターン）`; }
       if(p.loanLeft > 0){ p.loanLeft--; amt -= 10; note += `<br>🎓 奨学金の返済 −10万（あと${p.loanLeft}回）`; }
     }
-    showInfoModal("income", sq.name || "おしごと", note, {money:amt}, idx);
+    showInfoModal("income", title, note, {money:amt}, idx);
   }
   else if(sq.t === "cost"){
     showInfoModal("cost", sq.name, "生きているとお金はかかる。固定費、だいじ。", {money:-sq.amt}, idx);
