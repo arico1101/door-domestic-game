@@ -740,8 +740,23 @@ function updateTurnUI(){
 }
 
 /* ===================== turn flow ===================== */
+/* 手番プレイヤーのマスが見えるように画面を追従させる */
+function focusSquare(pos){
+  const el = $(`sq-${pos}`);
+  if(!el) return;
+  const r = el.getBoundingClientRect();
+  const wrap = document.querySelector(".board-wrap");
+  if(wrap){
+    const wr = wrap.getBoundingClientRect();
+    const x = wrap.scrollLeft + (r.left - wr.left) - (wrap.clientWidth - r.width) / 2;
+    wrap.scrollTo({left: Math.max(0, x), behavior:"auto"});
+  }
+  const y = el.getBoundingClientRect().top + window.scrollY - (window.innerHeight - r.height) / 2;
+  window.scrollTo({top: Math.max(0, y), behavior:"smooth"});
+}
 function beginTurn(){
   updateTurnUI();
+  focusSquare(players[turn].pos);
   const p = players[turn];
   if(p.letterIn !== null){
     p.letterIn--;
@@ -798,6 +813,7 @@ async function movePlayer(idx, steps){
   while(p.pos < target){
     p.pos++;
     renderTokens();
+    focusSquare(p.pos);
     const tk = $(`tok-${idx}`);
     if(tk) tk.classList.add("hop");
     await wait(230);
