@@ -318,6 +318,23 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 }
 .insight b{color:var(--orange);}
 .res-btns{text-align:center; margin-top:26px;}
+/* ---------- スマホ対応: 盤面3列＋トップバー調整 ---------- */
+@media (max-width:640px){
+  .board{min-width:0;}
+  .sq{font-size:11.5px;}
+  .sq .ic{font-size:24px;}
+  .sq.t-choice .ic{font-size:28px;}
+  .sq .num{font-size:12px;}
+  .topbar{gap:6px;}
+  .topbar .logo{font-size:15px; white-space:nowrap; flex:none;}
+  .turn-pill{
+    flex:1; min-width:0; justify-content:center;
+    font-size:13px; padding:7px 10px; white-space:nowrap;
+  }
+  .help-btn{width:32px; height:32px; font-size:14px;}
+  .chapter{white-space:normal;}
+}
+
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important; transition:none!important;}
 }
@@ -711,18 +728,25 @@ function showHomeConfirm(){
 }
 
 /* ===================== board ===================== */
+/* スマホ(〜640px)は3列×12行、それ以外は6列×6行。1章=6マスはどちらでも整数行になる */
+const mqMobile = window.matchMedia("(max-width:640px)");
+function boardCols(){ return mqMobile.matches ? 3 : 6; }
 function gridPos(i){
-  const row = Math.floor(i/6);
-  const col = (row % 2 === 0) ? (i % 6) : (5 - (i % 6));
+  const cols = boardCols();
+  const row = Math.floor(i/cols);
+  const col = (row % 2 === 0) ? (i % cols) : (cols-1 - (i % cols));
   return {row, col};
 }
 function renderBoard(){
   const b = $("board");
   b.innerHTML = "";
+  const cols = boardCols();
+  const rpc = 6 / cols;  /* 1章あたりのマス行数 */
+  b.style.gridTemplateColumns = `repeat(${cols},1fr)`;
   CHAPTERS.forEach((c,r)=>{
     const lab = document.createElement("div");
     lab.className = "chapter";
-    lab.style.gridRow = r*2+1;
+    lab.style.gridRow = r*(rpc+1)+1;
     lab.style.gridColumn = "1 / -1";
     lab.innerHTML = c.t + (c.note ? `<span class="ch-note">${c.note}</span>` : "");
     b.appendChild(lab);
@@ -733,12 +757,19 @@ function renderBoard(){
     el.className = `sq t-${sq.t}`;
     el.id = `sq-${i}`;
     const {row,col} = gridPos(i);
-    el.style.gridRow = row*2+2; el.style.gridColumn = col+1;
+    const chap = Math.floor(i/6);
+    el.style.gridRow = chap*(rpc+1) + (row - chap*rpc) + 2;
+    el.style.gridColumn = col+1;
     const ageLabel = (sq.t === "choice" || sq.t === "start" || sq.t === "goal") ? `<span class="num">${AGES[i]}歳</span>` : "";
     el.innerHTML = `${ageLabel}<span class="ic">${m.ic}</span><span>${sq.name || m.label}</span><div class="tokens"></div>`;
     b.appendChild(el);
   });
 }
+/* 画面幅が切り替わったら盤面を組み直す */
+mqMobile.addEventListener("change", ()=>{
+  renderBoard();
+  if(players.length) renderTokens();
+});
 function renderTokens(){
   document.querySelectorAll(".sq .tokens").forEach(t=>t.innerHTML="");
   players.forEach((p,idx)=>{
