@@ -17,8 +17,8 @@
 html,body{background:#888;}
 body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color:var(--brown);}
 .sheet{
-  width:210mm; min-height:297mm; margin:0 auto; background:var(--cream);
-  padding:9mm 10mm; display:flex; flex-direction:column; gap:3.2mm;
+  width:210mm; height:297mm; margin:0 auto; background:var(--cream);
+  padding:9mm 10mm; display:flex; flex-direction:column; gap:3mm;
   -webkit-print-color-adjust:exact; print-color-adjust:exact;
 }
 @media print{ html,body{background:var(--cream);} .sheet{margin:0; box-shadow:none;} }
@@ -44,34 +44,86 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
 }
 .goal-band b{color:var(--orange);}
 
-/* columns */
-.cols{display:flex; gap:3.2mm; flex:1;}
-.col{flex:1; display:flex; flex-direction:column; gap:3.2mm;}
-.box{background:var(--paper); border:.6mm solid var(--brown); border-radius:3mm; padding:3mm 3.5mm;}
+/* section bars */
+.sec-bar{
+  border-radius:2.5mm; padding:1.6mm 4mm; font-size:11pt; font-weight:900;
+  color:#fff; display:flex; align-items:baseline; gap:2.5mm; letter-spacing:.05em;
+}
+.sec-bar small{font-size:7.8pt; font-weight:700; opacity:.95; margin-left:auto; letter-spacing:0;}
+.bar-green{background:var(--green);}
+.bar-teal{background:var(--teal);}
+.bar-orange{background:var(--orange); color:var(--brown);}
+
+/* steps（すすめかた） */
+.steps{display:flex; gap:1.5mm; align-items:stretch;}
+.step{
+  flex:1; background:var(--paper); border:.6mm solid var(--brown); border-radius:3mm;
+  padding:2.4mm 2.8mm; display:flex; flex-direction:column; gap:1.2mm;
+}
+.step .top{display:flex; align-items:center; gap:1.8mm;}
+.step .n{
+  flex:none; width:6mm; height:6mm; border-radius:50%; background:var(--green); color:#fff;
+  display:grid; place-items:center; font-family:DotGothic16,monospace; font-size:9.5pt;
+}
+.step h3{font-size:9.4pt; font-weight:900; line-height:1.2;}
+.step p{font-size:7.8pt; line-height:1.5; font-weight:500;}
+.step b{font-weight:900;}
+.step-arrow{align-self:center; font-size:10pt; font-weight:900; color:var(--brown); flex:none;}
+
+/* tools（ゲームのツール） */
+.tools{display:flex; gap:3mm; flex:1;}
+.tools .col{flex:1; display:flex; flex-direction:column; gap:3mm;}
+.box{background:var(--paper); border:.6mm solid var(--brown); border-radius:3mm; padding:2.8mm 3.2mm;}
+.box.grow{flex:1; display:flex; flex-direction:column; justify-content:space-between;}
+.box.grow .sq-row{margin-bottom:0;}
 .box h2{
-  font-size:10.5pt; font-weight:900; margin-bottom:1.6mm; display:flex; align-items:center; gap:1.5mm;
+  font-size:10pt; font-weight:900; margin-bottom:1.6mm; display:flex; align-items:center; gap:1.5mm;
   border-bottom:.4mm dashed rgba(74,58,48,.35); padding-bottom:1.2mm;
 }
-.box p, .box li{font-size:8.6pt; line-height:1.6; font-weight:500;}
+.box p, .box li{font-size:8.8pt; line-height:1.65; font-weight:500;}
 .box b{font-weight:900;}
-.box ol, .box ul{padding-left:4.5mm;}
-.box li{margin-bottom:.8mm;}
+.box ul{padding-left:4.5mm;}
+.box li{margin-bottom:1mm;}
 .note{font-size:7.8pt; opacity:.75; margin-top:1mm;}
 
-/* squares table */
-.sq-row{display:flex; align-items:flex-start; gap:2mm; margin-bottom:1.4mm;}
+/* squares rows */
+.sq-row{display:flex; align-items:flex-start; gap:2mm; margin-bottom:1.6mm;}
+.sq-row:last-child{margin-bottom:0;}
 .sq-tag{
-  flex:none; width:19mm; text-align:center; border-radius:2mm; border:.5mm solid var(--brown);
-  font-size:8pt; font-weight:900; padding:.8mm 0;
+  flex:none; width:20mm; text-align:center; border-radius:2mm; border:.5mm solid var(--brown);
+  font-size:8.4pt; font-weight:900; padding:.9mm 0;
 }
-.sq-row p{flex:1; font-size:8.2pt; line-height:1.5;}
+.sq-row p{flex:1; font-size:8.6pt; line-height:1.55;}
 .t-income{background:#EDF7DC;} .t-cost{background:#FFE9E7;} .t-event{background:#FFF3DC;}
 .t-learn{background:#E0F4F8;} .t-door{background:var(--brown); color:var(--cream); border-color:var(--orange);}
 
-.kv{display:flex; gap:1.5mm; flex-wrap:wrap; margin-top:1mm;}
+/* door age chips */
+.door-ages{display:flex; flex-wrap:wrap; gap:1.2mm; margin-top:1.2mm;}
+.door-ages span{
+  border:.4mm solid var(--brown); background:var(--cream); border-radius:99mm;
+  padding:.5mm 2.6mm; font-size:7.8pt; font-weight:900; white-space:nowrap;
+}
+.door-ages span i{font-style:normal; font-family:DotGothic16,monospace; margin-right:.6mm;}
+
+.kv{display:flex; gap:1.5mm; flex-wrap:wrap; margin-top:1.4mm;}
 .kv span{border:.4mm solid var(--brown); background:var(--cream); border-radius:99mm; padding:.5mm 2.8mm; font-size:7.8pt; font-weight:900;}
 .kv .minus{color:#d24a3c; border-color:#d24a3c; background:var(--paper);}
 .kv .plus{color:#5a9114; border-color:#5a9114; background:var(--paper);}
+
+/* 奨学金 mini rows */
+.loan-row{display:flex; align-items:flex-start; gap:2mm; margin-bottom:1.4mm;}
+.loan-row:last-child{margin-bottom:0;}
+.loan-tag{
+  flex:none; width:16mm; text-align:center; border-radius:2mm; border:.5mm solid var(--brown);
+  font-size:7.8pt; font-weight:900; padding:.8mm 0;
+}
+.l-kashiyo{background:#FFE9E7;} .l-kyufu{background:#EDF7DC;}
+.loan-row p{flex:1; font-size:8.6pt; line-height:1.55;}
+
+/* result row（けっか発表・ふりかえり） */
+.result-row{display:flex; gap:3mm;}
+.result-row .box{flex:1;}
+.result-row .box.slim{flex:.85;}
 
 /* footer */
 .foot{
@@ -102,69 +154,92 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
     ♥の数＝<b>人生の選択肢をたくさん持ち、じぶんの意思で選べた数</b>。お金とまなびは、そのための「カギ」。
   </div>
 
-  <div class="cols">
+  <!-- ═══ すすめかた ═══ -->
+  <div class="sec-bar bar-green">🎲 ゲームのすすめかた<small>スタートからゴールまで、この4ステップ</small></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="top"><span class="n">1</span><h3>🏠 家庭カード</h3></div>
+      <p><b>こっそり</b>引く。はじめのお金・仕送りが決まる。選択肢が<b>「？？？」で見えない</b>人も</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step">
+      <div class="top"><span class="n">2</span><h3>🚶 高校時代</h3></div>
+      <p><b>16〜18歳</b>はサイコロなしで<b>1マスずつ</b>。進路を選ぶ前の、準備の時間</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step">
+      <div class="top"><span class="n">3</span><h3>🎲 サイコロで進む</h3></div>
+      <p><b>18歳の進路トビラ</b>からは順番にサイコロ。止まったマスの指示にしたがう</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step">
+      <div class="top"><span class="n">4</span><h3>🏁 45歳でゴール</h3></div>
+      <p>全員が着いたら<b>けっか発表</b>へ。順位は<b>♥の数</b>（同点なら残金）</p>
+    </div>
+  </div>
+
+  <!-- ═══ ゲームのツール ═══ -->
+  <div class="sec-bar bar-teal">🧰 ゲームのツール<small>画面に出てくるマスとしくみ</small></div>
+
+  <div class="tools">
     <div class="col">
-      <div class="box">
-        <h2>🏠 はじめに：家庭カード</h2>
-        <ol>
-          <li>それぞれが家庭カードを<b>こっそり</b>引く（ほかの人に見せない）</li>
-          <li>カードで<b>はじめのお金・仕送り・まち</b>が決まる。スタート地点は人それぞれ</li>
-          <li>人によっては、いくつかの選択肢が<b>「？？？」で見えない</b>。なぜかは……遊びおわってからのお楽しみ</li>
-        </ol>
-      </div>
-
-      <div class="box">
-        <h2>🎲 すすみ方</h2>
-        <ul>
-          <li><b>高校時代（16〜18歳）</b>はサイコロを使わず<b>1マスずつ</b>。進路を選ぶ前の準備の時間</li>
-          <li><b>18歳の進路トビラから</b>はサイコロで進む。順番にふって、止まったマスの指示にしたがう</li>
-          <li>全員が<b>45歳のゴール</b>に着いたら、けっか発表へ</li>
-        </ul>
-      </div>
-
-      <div class="box">
+      <div class="box grow">
         <h2>🗺 マスの種類</h2>
-        <div class="sq-row"><span class="sq-tag t-income">💰 おしごと</span><p>お給料が入る。<b>20万＋まなび★×10万</b>＋仕送り。★が増えると職業もステップアップ</p></div>
+        <div class="sq-row"><span class="sq-tag t-income">💰 おしごと</span><p>お給料が入る。<b>20万＋★×10万</b>＋仕送り。★が増えると職業もステップアップ</p></div>
         <div class="sq-row"><span class="sq-tag t-cost">💸 しゅっぴ</span><p>生きているとお金はかかる。決まった額を支払う</p></div>
         <div class="sq-row"><span class="sq-tag t-event">⚡ できごと</span><p>カードを1枚引く。ラッキーもアクシデントも。情報が手に入ることも</p></div>
         <div class="sq-row"><span class="sq-tag t-learn">📚 まなび</span><p>自分に投資するチャンス。お金をかけても、ゼロ円でも学べる</p></div>
-        <div class="sq-row"><span class="sq-tag t-door">🚪 トビラ</span><p><b>光るマス＝人生の分岐点</b>。18歳進路・20歳住まい・22歳まち・25歳資格・28歳転職・30歳海外・33歳学びなおし・35歳挑戦・40歳大きな夢</p></div>
+        <div class="sq-row"><span class="sq-tag t-door">🚪 トビラ</span><p><b>光るマス＝人生の分岐点</b>。29年間に9つ</p></div>
+        <div class="door-ages">
+          <span><i>18</i>進路</span><span><i>20</i>住まい</span><span><i>22</i>まち</span>
+          <span><i>25</i>資格</span><span><i>28</i>転職</span><span><i>30</i>海外</span>
+          <span><i>33</i>学びなおし</span><span><i>35</i>挑戦</span><span><i>40</i>大きな夢</span>
+        </div>
       </div>
     </div>
 
     <div class="col">
-      <div class="box">
+      <div class="box grow">
         <h2>🔑 トビラとカギ</h2>
         <ul>
-          <li>いい選択には<b>カギ</b>（必要なお金・★まなび）がいる。足りないと🔒開けられない</li>
+          <li>いい選択には<b>カギ</b>（必要なお金・★まなび）がいる。足りないと🔒</li>
           <li>カギなし（0円）の道は、<b>借金中でもかならず選べる</b></li>
-          <li>お金の増減は選ぶ前に見える。<b>★と♥は選ぶまでわからない</b>——値段はわかっても、価値はわからない</li>
+          <li><b>★と♥は選ぶまでわからない</b>——値段はわかっても、価値はわからない</li>
         </ul>
         <div class="kv"><span>カギ：おかね150万</span><span class="minus">💸 おかね −30万</span><span class="plus">💰 おかね +100万</span></div>
       </div>
 
       <div class="box">
         <h2>🎓 奨学金</h2>
-        <ul>
-          <li>進路で「奨学金を借りて進学」を選ぶと<b>貸与型（総額48万）</b>。働くたびに−6万ずつ、<b>45歳まで返しつづける</b></li>
-          <li><b>制度を知っている人</b>は、返さなくていい<b>給付型</b>に出会える。「知っていること」自体がチカラになる</li>
-        </ul>
+        <div class="loan-row"><span class="loan-tag l-kashiyo">貸与型</span><p>総額48万を借りる。働くたびに<b>−6万、45歳まで返す</b></p></div>
+        <div class="loan-row"><span class="loan-tag l-kyufu">給付型</span><p><b>制度を知っている人</b>だけ出会える。<b>返さなくていい</b></p></div>
       </div>
+    </div>
+  </div>
 
-      <div class="box">
-        <h2>🎉 けっか発表とふりかえり</h2>
-        <ul>
-          <li>順位は<b>♥の数</b>（同点なら残金）。家庭カードをみんなに公開</li>
-          <li><b>ネタバラシ</b>：出会ったトビラと「見えなかった？？？」の中身を全公開</li>
-          <li><b>トビラ一覧</b>：29年間の全トビラを年齢順に。通らなかったトビラも</li>
-        </ul>
-        <p class="note">🗣 話してみよう：開けたかったのに届かなかったトビラは？／同じマスで見えていた景色はどう違った？／現実の世界で「カギ」になるものは、お金のほかに何がある？</p>
-      </div>
+  <!-- ═══ けっか発表 ═══ -->
+  <div class="sec-bar bar-orange">🎉 けっか発表とふりかえり<small>ここからが本番！</small></div>
 
-      <div class="box">
-        <h2>⚠️ ファシリテーターの方へ</h2>
-        <p>スタート画面の設定で、<b>死別・被災のライフイベント</b>を含めるか選べます。参加者の状況にあわせてONにしてください。</p>
-      </div>
+  <div class="result-row">
+    <div class="box">
+      <h2>📢 ネタバラシ</h2>
+      <ul>
+        <li>家庭カードをみんなに<b>公開</b>。「？？？」の中身も全部見える</li>
+        <li><b>トビラ一覧</b>：29年間の全トビラを年齢順に。<b>通らなかったトビラ</b>も</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>🗣 話してみよう</h2>
+      <ul>
+        <li>開けたかったのに届かなかったトビラは？</li>
+        <li>同じマスで、見えていた景色はどう違った？</li>
+        <li>お金のほかに「カギ」になるものは？</li>
+      </ul>
+    </div>
+    <div class="box slim">
+      <h2>⚠️ 進行する方へ</h2>
+      <p><b>死別・被災のライフイベント</b>は、スタート画面の設定でON/OFFできます。参加者の状況にあわせてください。</p>
     </div>
   </div>
 
