@@ -18,14 +18,14 @@ html,body{background:#888;}
 body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color:var(--brown);}
 .sheet{
   width:210mm; height:297mm; margin:0 auto; background:var(--cream);
-  padding:9mm 10mm; display:flex; flex-direction:column; gap:3mm;
+  padding:8mm 10mm; display:flex; flex-direction:column; gap:2.4mm;
   -webkit-print-color-adjust:exact; print-color-adjust:exact;
 }
 @media print{ html,body{background:var(--cream);} .sheet{margin:0; box-shadow:none;} }
 @media screen{ .sheet{box-shadow:0 4px 30px rgba(0,0,0,.4); margin:20px auto;} }
 
 /* header */
-.head{display:flex; align-items:center; gap:5mm; border-bottom:1mm solid var(--brown); padding-bottom:2.5mm;}
+.head{display:flex; align-items:center; gap:5mm; border-bottom:1mm solid var(--brown); padding-bottom:2mm;}
 .door-mark{
   width:12mm; height:15mm; background:var(--brown); border-radius:6mm 6mm 1mm 1mm;
   display:grid; place-items:center; flex:none;
@@ -39,10 +39,17 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
 
 /* goal band */
 .goal-band{
-  background:var(--brown); color:var(--cream); border-radius:3mm; padding:3mm 5mm;
-  font-size:10.5pt; font-weight:700; line-height:1.55;
+  background:var(--brown); color:var(--cream); border-radius:3mm; padding:2.5mm 5mm;
+  font-size:10pt; font-weight:700; line-height:1.55;
 }
 .goal-band b{color:var(--orange);}
+
+/* why band */
+.why-band{
+  background:var(--paper); border:.5mm dashed var(--brown); border-radius:3mm;
+  padding:1.6mm 4mm; font-size:8.2pt; font-weight:500; line-height:1.55;
+}
+.why-band b{font-weight:900;}
 
 /* section bars */
 .sec-bar{
@@ -80,10 +87,10 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
   font-size:10pt; font-weight:900; margin-bottom:1.6mm; display:flex; align-items:center; gap:1.5mm;
   border-bottom:.4mm dashed rgba(74,58,48,.35); padding-bottom:1.2mm;
 }
-.box p, .box li{font-size:8.8pt; line-height:1.65; font-weight:500;}
+.box p, .box li{font-size:8.4pt; line-height:1.55; font-weight:500;}
 .box b{font-weight:900;}
 .box ul{padding-left:4.5mm;}
-.box li{margin-bottom:1mm;}
+.box li{margin-bottom:.6mm;}
 .note{font-size:7.8pt; opacity:.75; margin-top:1mm;}
 
 /* squares rows */
@@ -93,7 +100,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
   flex:none; width:20mm; text-align:center; border-radius:2mm; border:.5mm solid var(--brown);
   font-size:8.4pt; font-weight:900; padding:.9mm 0;
 }
-.sq-row p{flex:1; font-size:8.6pt; line-height:1.55;}
+.sq-row p{flex:1; font-size:8.4pt; line-height:1.5;}
 .t-income{background:#EDF7DC;} .t-cost{background:#FFE9E7;} .t-event{background:#FFF3DC;}
 .t-learn{background:#E0F4F8;} .t-door{background:var(--brown); color:var(--cream); border-color:var(--orange);}
 
@@ -118,7 +125,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
   font-size:7.8pt; font-weight:900; padding:.8mm 0;
 }
 .l-kashiyo{background:#FFE9E7;} .l-kyufu{background:#EDF7DC;}
-.loan-row p{flex:1; font-size:8.6pt; line-height:1.55;}
+.loan-row p{flex:1; font-size:8.4pt; line-height:1.5;}
 
 /* result row（けっか発表・ふりかえり） */
 .result-row{display:flex; gap:3mm;}
@@ -127,8 +134,8 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
 
 /* footer */
 .foot{
-  background:var(--brown); color:var(--cream); border-radius:3mm; padding:3mm 5mm;
-  font-size:8.6pt; font-weight:700; line-height:1.65;
+  background:var(--brown); color:var(--cream); border-radius:3mm; padding:2.5mm 5mm;
+  font-size:8.4pt; font-weight:700; line-height:1.6;
 }
 .foot b{color:var(--orange);}
 </style>
@@ -154,13 +161,17 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
     ♥の数＝<b>人生の選択肢をたくさん持ち、じぶんの意思で選べた数</b>。お金とまなびは、そのための「カギ」。
   </div>
 
+  <div class="why-band">
+    ❓ <b>なぜ16歳から45歳？</b>——16歳は、じぶんの意思で人生を<b>選びはじめる</b>年ごろ。45歳は、選択の積み重ねが<b>それぞれの景色</b>になっているころ。人生のトビラがいちばん多くひらく29年間だから。
+  </div>
+
   <!-- ═══ すすめかた ═══ -->
   <div class="sec-bar bar-green">🎲 ゲームのすすめかた<small>スタートからゴールまで、この4ステップ</small></div>
 
   <div class="steps">
     <div class="step">
       <div class="top"><span class="n">1</span><h3>🏠 家庭カード</h3></div>
-      <p><b>こっそり</b>引く。はじめのお金・仕送りが決まる。選択肢が<b>「？？？」で見えない</b>人も</p>
+      <p>画面に名前を入れて<b>スタート</b>。家庭カードは<b>こっそり</b>確認（ほかの人は見ない）。はじめのお金・仕送りが決まる</p>
     </div>
     <div class="step-arrow">▶</div>
     <div class="step">
@@ -170,7 +181,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
     <div class="step-arrow">▶</div>
     <div class="step">
       <div class="top"><span class="n">3</span><h3>🎲 サイコロで進む</h3></div>
-      <p><b>18歳の進路トビラ</b>からは順番にサイコロ。止まったマスの指示にしたがう</p>
+      <p><b>18歳の進路トビラ</b>からは、じぶんの番に<b>画面のサイコロ</b>をタップ。止まったマスの指示にしたがう</p>
     </div>
     <div class="step-arrow">▶</div>
     <div class="step">
@@ -188,8 +199,8 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
         <h2>🗺 マスの種類</h2>
         <div class="sq-row"><span class="sq-tag t-income">💰 おしごと</span><p>お給料が入る。<b>20万＋★×10万</b>＋仕送り。★が増えると職業もステップアップ</p></div>
         <div class="sq-row"><span class="sq-tag t-cost">💸 しゅっぴ</span><p>生きているとお金はかかる。決まった額を支払う</p></div>
-        <div class="sq-row"><span class="sq-tag t-event">⚡ できごと</span><p>カードを1枚引く。ラッキーもアクシデントも。情報が手に入ることも</p></div>
-        <div class="sq-row"><span class="sq-tag t-learn">📚 まなび</span><p>自分に投資するチャンス。お金をかけても、ゼロ円でも学べる</p></div>
+        <div class="sq-row"><span class="sq-tag t-event">⚡ できごと</span><p>カードを1枚引く。ラッキーもアクシデントも。★や情報が手に入ることも</p></div>
+        <div class="sq-row"><span class="sq-tag t-learn">📚 まなび</span><p><b>★まなびが貯まる</b>。お金をかけても、ゼロ円でも学べる</p></div>
         <div class="sq-row"><span class="sq-tag t-door">🚪 トビラ</span><p><b>光るマス＝人生の分岐点</b>。29年間に9つ</p></div>
         <div class="door-ages">
           <span><i>18</i>進路</span><span><i>20</i>住まい</span><span><i>22</i>まち</span>
@@ -203,7 +214,9 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
       <div class="box grow">
         <h2>🔑 トビラとカギ</h2>
         <ul>
+          <li>光るトビラで選択肢を選ぶと<b>♥ハッピーがもらえる</b></li>
           <li>いい選択には<b>カギ</b>（必要なお金・★まなび）がいる。足りないと🔒</li>
+          <li>家庭によっては、選択肢が<b>「？？？」で見えない</b>ことも</li>
           <li>カギなし（0円）の道は、<b>借金中でもかならず選べる</b></li>
           <li><b>★と♥は選ぶまでわからない</b>——値段はわかっても、価値はわからない</li>
         </ul>
@@ -212,7 +225,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
 
       <div class="box">
         <h2>🎓 奨学金</h2>
-        <div class="loan-row"><span class="loan-tag l-kashiyo">貸与型</span><p>総額48万を借りる。働くたびに<b>−6万、45歳まで返す</b></p></div>
+        <div class="loan-row"><span class="loan-tag l-kashiyo">貸与型</span><p>総額48万を借りる。働くたびに<b>−6万</b>。残りは<b>45歳のゴールで清算</b></p></div>
         <div class="loan-row"><span class="loan-tag l-kyufu">給付型</span><p><b>制度を知っている人</b>だけ出会える。<b>返さなくていい</b></p></div>
       </div>
     </div>
