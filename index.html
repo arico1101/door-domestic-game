@@ -274,7 +274,15 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 .fam-card .f-name{font-weight:900; font-size:18px; margin-bottom:8px;}
 .fam-card .f-story{font-size:14px; line-height:1.9; margin-bottom:12px;}
 .fam-card .f-stats{display:flex; flex-direction:column; gap:4px; font-size:13px; font-weight:700;}
-.fam-card .f-stats span b{font-family:"DotGothic16",monospace;}
+/* ステータス行: カテゴリ名は薄め、値はカテゴリ色で目立たせる */
+.fam-card .f-stats span{color:rgba(74,58,48,.62);}
+.fam-card .f-stats span b{font-family:"DotGothic16",monospace; color:var(--brown);}
+.fam-card .f-stats .fs-money b{color:#5a9114;}
+.fam-card .f-stats .fs-allow b{color:#5a9114;}
+.fam-card .f-stats .fs-region b{color:#007D91;}
+.fam-card .f-stats .fs-hidden b{color:#c77f00;}
+.fam-card .f-stats .fs-perk{color:rgba(74,58,48,.8);}
+.fam-card .f-stats .fs-perk b{color:#8a5fb8; font-family:inherit;}
 
 /* ---------- result ---------- */
 #result{padding:32px 16px 60px;}
@@ -347,7 +355,10 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
   <div class="topbar">
     <div class="logo">🚪 トビラ</div>
     <div class="turn-pill" id="turnPill"></div>
-    <button class="help-btn" id="helpBtnGame" aria-label="あそびかた">？</button>
+    <div style="display:flex; gap:8px">
+      <button class="help-btn" id="helpBtnGame" aria-label="あそびかた">？</button>
+      <button class="help-btn" id="homeBtn" aria-label="タイトルにもどる">🏠</button>
+    </div>
   </div>
   <div class="players-strip" id="playersStrip"></div>
   <div class="board-wrap"><div class="board" id="board"></div></div>
@@ -650,14 +661,18 @@ function showScreen(id){
 }
 
 /* ---------- 家庭カードの非公開ドラフト ---------- */
+let famRevealIdx = null;
 function revealFamilyCard(i){
-  if(i >= players.length){ closeModal(); beginTurn(); return; }
+  if(i >= players.length){ famRevealIdx = null; closeModal(); beginTurn(); return; }
+  famRevealIdx = i;
   const p = players[i];
   openModal(`
     <span class="m-tag" style="background:${TYPE_META.fam.tag}">🏠 家庭カード</span>
     <h2>${p.name} さんだけ、見てください</h2>
     <p class="m-body">ほかの人には見せずに、そっとめくってね。<br>あなたのスタート地点が書いてあります。</p>
-    <button class="m-btn" id="mFlip">カードをめくる</button>`);
+    <button class="m-btn" id="mFlip">カードをめくる</button>
+    <button class="chip-btn" id="mHome" style="display:block; margin:16px auto 0">🏠 タイトルにもどる（人数を変える）</button>`);
+  $("mHome").onclick = showHomeConfirm;
   $("mFlip").onclick = ()=>{
     const hiddenN = p.hidden.size;
     openModal(`
@@ -666,15 +681,32 @@ function revealFamilyCard(i){
         <div class="f-name">${p.fam.name}</div>
         <div class="f-story">${p.fam.story}</div>
         <div class="f-stats">
-          <span>💰 はじめのおかね：<b>${p.money}万</b></span>
-          <span>📮 仕送り：<b>${p.allow>0 ? "毎回のお給料 +"+p.allow+"万" : "なし"}</b></span>
-          <span>🗾 まち：<b>${p.region}</b></span>
-          <span>👁 まだ見えていない選択肢：<b>${hiddenN}個</b>${hiddenN>0?"（そのマスでは「？？？」と表示されます）":""}</span>
-          <span>✨ とくい：<b>${p.fam.perkText}</b></span>
+          <span class="fs-money">💰 はじめのおかね：<b>${p.money}万</b></span>
+          <span class="fs-allow">📮 仕送り：<b>${p.allow>0 ? "毎回のお給料 +"+p.allow+"万" : "なし"}</b></span>
+          <span class="fs-region">🗾 まち：<b>${p.region}</b></span>
+          <span class="fs-hidden">👁 まだ見えていない選択肢：<b>${hiddenN}個</b>${hiddenN>0?"（そのマスでは「？？？」と表示されます）":""}</span>
+          <span class="fs-perk">✨ とくい：<b>${p.fam.perkText}</b></span>
         </div>
       </div>
-      <button class="m-btn" id="mNext">OK、覚えた${i < players.length-1 ? "（次の人へ）" : "（ゲームスタート！）"}</button>`);
+      <button class="m-btn" id="mNext">OK、覚えた${i < players.length-1 ? "（次の人へ）" : "（ゲームスタート！）"}</button>
+      <button class="chip-btn" id="mHome" style="display:block; margin:16px auto 0">🏠 タイトルにもどる（人数を変える）</button>`);
+    $("mHome").onclick = showHomeConfirm;
     $("mNext").onclick = ()=>revealFamilyCard(i+1);
+  };
+}
+/* タイトルにもどる（確認つき） */
+function showHomeConfirm(){
+  const inFamReveal = famRevealIdx !== null;
+  openModal(`
+    <span class="m-tag" style="background:var(--brown)">🏠 タイトルにもどる</span>
+    <h2>ゲームをやめて、タイトルにもどる？</h2>
+    <p class="m-body">いまのゲームの記録は消えます。<br>人数やメンバーを変えるときも、ここからやりなおせます。</p>
+    <button class="m-btn" id="mQuit">タイトルにもどる</button>
+    <button class="m-btn" id="mStay" style="margin-top:10px; background:var(--paper); color:var(--brown); border:2px solid var(--brown); box-shadow:var(--shadow)">つづける</button>`);
+  $("mQuit").onclick = ()=>{ famRevealIdx = null; closeModal(); showScreen("setup"); initSetup(); };
+  $("mStay").onclick = ()=>{
+    if(inFamReveal) revealFamilyCard(famRevealIdx);
+    else closeModal();
   };
 }
 
@@ -1416,6 +1448,11 @@ function renderRules(page){
 $("helpBtnSetup").onclick = ()=>renderRules(0);
 $("helpBtnGame").onclick = ()=>{
   if(!$("overlay").classList.contains("open")) renderRules(0);
+};
+/* 右上の🏠ボタン（モーダル表示中は無効） */
+$("homeBtn").onclick = ()=>{
+  if($("overlay").classList.contains("open")) return;
+  showHomeConfirm();
 };
 
 initSetup();
