@@ -405,9 +405,9 @@ const CHAPTERS = [
 /* 盤面 36マス */
 const SQUARES = [
   {t:"start", name:"スタート"},
-  {t:"income", name:"初バイト", fixed:15},
-  {t:"event"},
-  {t:"learn"},
+  {t:"income", name:"初バイト", fixed:15, stop:true},
+  {t:"event", stop:true},
+  {t:"learn", stop:true},
   {t:"choice", name:"進路", key:"shinro", stop:true},
   {t:"income", name:"おしごと"},
   {t:"event"},
@@ -448,7 +448,7 @@ function choiceDef(key, p){
     case "shinro": return {
       title:"進路のトビラ", body:"高校を卒業。ここからの道を選ぼう。",
       opts:[
-        {t:"大学・専門に進学（自費）", d:"貯金でまなぶ。世界がひろがる", req:{money:200}, fx:{money:-200, learn:3, happy:1}},
+        {t:"大学・専門に進学（自費）", d:"貯金でまなぶ。世界がひろがる", req:{money:150}, fx:{money:-150, learn:3, happy:1}},
         {t:"奨学金を借りて進学", d:"働きはじめたら、すこしずつ返す。制度を知っていれば、返さなくていい給付型に出会えることも", tag:"seido", req:{}, fx:{money:-30, learn:3, happy:1}, special:"shogakukin"},
         {t:"すぐに働きはじめる", d:"現場で経験を積みながら貯金する", req:{}, fx:{money:100, learn:1}},
       ]};
@@ -667,7 +667,8 @@ function renderBoard(){
     el.id = `sq-${i}`;
     const {row,col} = gridPos(i);
     el.style.gridRow = row*2+2; el.style.gridColumn = col+1;
-    el.innerHTML = `<span class="num">${AGES[i]}歳</span><span class="ic">${m.ic}</span><span>${sq.name || m.label}</span><div class="tokens"></div>`;
+    const ageLabel = (sq.t === "choice" || sq.t === "start" || sq.t === "goal") ? `<span class="num">${AGES[i]}歳</span>` : "";
+    el.innerHTML = `${ageLabel}<span class="ic">${m.ic}</span><span>${sq.name || m.label}</span><div class="tokens"></div>`;
     b.appendChild(el);
   });
 }
@@ -1201,6 +1202,7 @@ function showRevealModal(pIdx){
 const RULE_PAGES = [
   {tag:"🏁 めざすもの", title:"順位を決めるのは ♥ハッピー", items:[
     ["🎲","これは<b>16歳から45歳までの29年間</b>をたどる人生すごろく。サイコロを回して、みんなでゴールをめざそう。"],
+    ["🏫","<b>高校時代（16〜18歳）だけは1マスずつ</b>止まりながら進む。進路を選ぶ前の、準備の時間だ。"],
     ["♥","最後の順位は、おかねの多さじゃなく <b>♥ハッピーの数</b>で決まる！"],
     ["🚪","♥は、人生の選択「<b>トビラ</b>」を開けるともらえる。<b>♥の数＝じぶんの意思で選べた数</b>だ。"],
   ]},
