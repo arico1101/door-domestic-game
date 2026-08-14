@@ -199,6 +199,10 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
   background:var(--paper); border:1.5px solid rgba(74,58,48,.25); border-radius:999px; padding:1px 8px;
 }
 .who .p-dot{width:10px; height:10px; border-width:1.5px;}
+.rv-untrod{
+  font-size:10.5px; font-weight:700; margin-left:8px; vertical-align:2px;
+  background:#E7E0D6; border-radius:999px; padding:2px 10px;
+}
 
 /* ---------- modal ---------- */
 .overlay{
@@ -378,7 +382,7 @@ const TYPE_META = {
   goal:{label:"ゴール", ic:"🏁", tag:"#4A3A30"},
   income:{label:"おしごと", ic:"💰", tag:"#78BE21"},
   cost:{label:"しゅっぴ", ic:"💸", tag:"#FF6858"},
-  event:{label:"できごと", ic:"🎴", tag:"#FFC04B"},
+  event:{label:"できごと", ic:"⚡", tag:"#FFC04B"},
   learn:{label:"まなび", ic:"📚", tag:"#00A3BD"},
   choice:{label:"トビラ", ic:"🚪", tag:"#4A3A30"},
   heavy:{label:"できごと", ic:"⚠️", tag:"#4A3A30"},
@@ -1255,6 +1259,15 @@ function showAllDoorsModal(){
       });
     });
   });
+  /* だれも通らなかったトビラマスも一覧に載せる */
+  SQUARES.forEach((sq,i)=>{
+    if(sq.t !== "choice") return;
+    const dummy = {region:"地方", perk:null, money:0, learn:0, seidoDiscount:false, name:""};
+    const def = choiceDef(sq.key, dummy);
+    const key = `${AGES[i]}|${def.title}`;
+    if(!map.has(key)) map.set(key, {age:AGES[i], title:def.title, opts:def.opts,
+      perOpt:def.opts.map(()=>({chosen:[], locked:[], unseen:[]})), untrodden:true});
+  });
   const groups = [...map.values()].sort((a,b)=>a.age-b.age);
   const secs = groups.map(g=>{
     const rows = g.opts.map((o,i)=>{
@@ -1274,14 +1287,15 @@ function showAllDoorsModal(){
         </span>
       </div>`;
     }).join("");
-    return `<div class="rv-door"><div class="rv-title">🚪 ${g.age}歳 ── ${g.title}</div>${rows}</div>`;
+    return `<div class="rv-door"${g.untrodden ? ' style="opacity:.75"' : ""}>
+      <div class="rv-title">🚪 ${g.age}歳 ── ${g.title}${g.untrodden ? '<span class="rv-untrod">🚶 だれも通らなかった</span>' : ""}</div>${rows}</div>`;
   }).join("");
   openModal(`
     <div class="rule-page">
       <button class="rule-close" id="adClose" aria-label="とじる">✕</button>
       <span class="m-tag" style="background:var(--brown)">🚪 トビラ一覧</span>
       <h2>29年間に、こんなトビラがあった</h2>
-      <p class="m-body">年齢の順に、みんなが出会ったトビラをぜんぶ並べた。<br>同じトビラでも、見えていた景色は人それぞれ——</p>
+      <p class="m-body">年齢の順に、この人生にあったトビラをぜんぶ並べた。<br>出会えたトビラも、通らなかったトビラも——見えていた景色は人それぞれ。</p>
       <div class="rv-list">${secs || "<p class='m-body'>記録がありません。</p>"}</div>
       <button class="m-btn" id="adOk">とじる</button>
     </div>`);
