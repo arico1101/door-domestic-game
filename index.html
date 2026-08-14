@@ -253,6 +253,10 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
   background:var(--brown); color:var(--cream); border-radius:999px; padding:2px 10px;
 }
 .door:disabled:not(.unseen) .d-key{background:var(--crimson);}
+.d-key.d-cost{background:var(--paper); margin-left:6px;}
+.d-key.d-cost.minus{color:#d24a3c; border:1.5px solid #d24a3c;}
+.d-key.d-cost.plus{color:#5a9114; border:1.5px solid #5a9114;}
+.door:disabled:not(.unseen) .d-key.d-cost{background:var(--paper);}
 .m-btn{
   display:block; margin:8px auto 0; background:var(--brown); color:var(--cream);
   font-size:17px; font-weight:900; padding:13px 42px; border-radius:999px;
@@ -1031,12 +1035,16 @@ function showChoiceModal(idx, def, type, skipCount){
     }
     const key = reqLabel(p, o);
     const ok = st === "open";
+    /* お金の増減だけは選ぶ前に見せる（★とハートは選ぶまでのお楽しみ） */
+    const cost = o.fx.money
+      ? `<span class="d-key d-cost ${o.fx.money<0?"minus":"plus"}">${o.fx.money<0?"💸":"💰"} おかね ${o.fx.money>0?"+":""}${o.fx.money}万${o.special==="shogakukin"?"＋返済":""}</span>`
+      : "";
     return `<button class="door" data-i="${i}" ${ok?"":"disabled"}>
       <span class="d-icon">${ok?"🚪":"🔒"}</span>
       <span class="d-main">
         <span class="d-title">${o.t}</span>
         <span class="d-desc">${o.d}</span>
-        ${key?`<span class="d-key">カギ：${key}${ok?"":"（たりない…）"}</span>`:""}
+        ${key?`<span class="d-key">カギ：${key}${ok?"":"（たりない…）"}</span>`:""}${cost}
       </span>
     </button>`;
   }).join("");
