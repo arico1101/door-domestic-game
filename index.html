@@ -415,7 +415,7 @@ function choiceDef(key, p){
       title:"進路のトビラ", body:"高校を卒業。ここからの道を選ぼう。",
       opts:[
         {t:"大学・専門に進学（自費）", d:"貯金でまなぶ。世界がひろがる", req:{money:200}, fx:{money:-200, learn:3, happy:1}},
-        {t:"奨学金・給付型支援を調べて進学", d:"制度を知っていること自体がチカラになる", tag:"seido", req:{}, fx:{money:-30, learn:3, happy:1}},
+        {t:"奨学金を借りて進学", d:"働きはじめたら、すこしずつ返す。制度を知っていれば、返さなくていい給付型に出会えることも", tag:"seido", req:{}, fx:{money:-30, learn:3, happy:1}, special:"shogakukin"},
         {t:"すぐに働きはじめる", d:"現場で経験を積みながら貯金する", req:{}, fx:{money:100, learn:1}},
       ]};
     case "sumai": return {
@@ -562,7 +562,7 @@ $("startBtn").onclick = ()=>{
       pos:0, money:fam.money, initMoney:fam.money,
       allow:fam.allow, learn:1 + (fam.perk==="dandori"?1:0), happy:0,
       hidden:new Set(fam.hide),
-      open:0, locked:0, unseen:0, doorLog:[],
+      open:0, locked:0, unseen:0, doorLog:[], loanLeft:0,
       seidoDiscount:false, seidoUsed:false,
       hadHeavy:false, disasterTurns:0, letterIn:null,
       done:false, rankAt:null,
@@ -735,6 +735,7 @@ function resolveSquare(idx){
       amt = 20 + p.learn*10 + p.allow;
       note = `お給料は <b>20万 ＋ まなび×10万${p.allow>0 ? " ＋ 仕送り"+p.allow+"万" : ""}</b>`;
       if(p.disasterTurns > 0){ amt -= 10; note += `<br>⚠️ 被災の影響で −10万（あと${p.disasterTurns}ターン）`; }
+      if(p.loanLeft > 0){ p.loanLeft--; amt -= 10; note += `<br>🎓 奨学金の返済 −10万（あと${p.loanLeft}回）`; }
     }
     showInfoModal("income", sq.name || "おしごと", note, {money:amt}, idx);
   }
@@ -971,6 +972,14 @@ function showChoiceModal(idx, def, type, skipCount){
       }
       if(o.special === "letter"){
         p.letterIn = 2;
+      }
+      if(o.special === "shogakukin"){
+        if(p.seidoDiscount || p.perk === "seidoPro"){
+          notes.push("🎗 制度を知っていたおかげで<b>給付型奨学金</b>に出会えた！返済はいらない。");
+        } else {
+          p.loanLeft = 5;
+          notes.push("🎓 これは<b>貸与型</b>。働きはじめたら、お給料から <b>−10万×5回</b> 返済していく。");
+        }
       }
       if(o.tag === "seido" && p.perk === "seidoPro" && !p.seidoUsed){
         p.seidoUsed = true;
