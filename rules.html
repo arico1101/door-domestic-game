@@ -34,7 +34,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
 .door-mark span::after{content:""; position:absolute; right:1.2mm; top:5.5mm; width:1.4mm; height:1.4mm; border-radius:50%; background:var(--orange);}
 .head h1{font-size:22pt; font-weight:900; letter-spacing:.12em; line-height:1;}
 .head .sub{font-size:9pt; font-weight:700; margin-top:1.5mm;}
-.head .meta{margin-left:auto; display:flex; flex-direction:column; gap:1.2mm; align-items:flex-end;}
+.head .meta{margin-left:auto; display:flex; gap:1.5mm; align-items:center;}
 .chip{background:var(--paper); border:.5mm solid var(--brown); border-radius:99mm; padding:.8mm 3.5mm; font-size:8pt; font-weight:900; white-space:nowrap;}
 
 /* goal band */
@@ -130,7 +130,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
 /* result row（けっか発表・ふりかえり） */
 .result-row{display:flex; gap:3mm;}
 .result-row .box{flex:1;}
-.result-row .box.slim{flex:.85;}
+.result-row .box.wide{flex:2;}
 
 /* footer */
 .foot{
@@ -238,21 +238,19 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
     <div class="box">
       <h2>📢 ネタバラシ</h2>
       <ul>
-        <li>家庭カードをみんなに<b>公開</b>。「？？？」の中身も全部見える</li>
-        <li><b>トビラ一覧</b>：29年間の全トビラを年齢順に。<b>通らなかったトビラ</b>も</li>
+        <li>家庭カードを<b>公開</b>。「？？？」の中身も見える</li>
+        <li>29年間の<b>全トビラを一覧</b>で。<b>通らなかったトビラ</b>も</li>
       </ul>
     </div>
-    <div class="box">
+    <div class="box wide">
       <h2>🗣 話してみよう</h2>
       <ul>
-        <li>開けたかったのに届かなかったトビラは？</li>
-        <li>同じマスで、見えていた景色はどう違った？</li>
-        <li>お金のほかに「カギ」になるものは？</li>
+        <li>届かなかったトビラは？それは<b>じぶんの努力だけ</b>の問題だった？</li>
+        <li>スタートのお金のちがいは、<b>選べる進路やまなび</b>にどうつながっていた？</li>
+        <li>給付型奨学金のような「<b>知っていれば使えた支援</b>」、現実にはどんなものがある？</li>
+        <li><b>支援が必要になる日</b>は、だれにでも来るかも。そのとき、何が助けになる？</li>
       </ul>
-    </div>
-    <div class="box slim">
-      <h2>⚠️ 進行する方へ</h2>
-      <p><b>死別・被災のライフイベント</b>は、スタート画面の設定でON/OFFできます。参加者の状況にあわせてください。</p>
+      <p class="note">お金のちがいは、機会やまなびのちがいにつながっていく。だから支援のしくみがあり、<b>知ることがその第一歩</b>——このゲームは、その入り口です。</p>
     </div>
   </div>
 
