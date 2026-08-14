@@ -293,6 +293,11 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 .res-card .r-fam{font-size:13px; font-weight:900; color:var(--teal);}
 .res-card .r-story{font-size:12.5px; line-height:1.7; opacity:.8; margin:6px 0 10px;}
 .r-stats{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;}
+.r-ending{
+  background:#FBF6EA; border:1.5px dashed rgba(74,58,48,.35); border-radius:10px;
+  padding:9px 12px; font-size:12.5px; line-height:1.8; margin-bottom:10px;
+}
+.r-ending b{color:#B8860B;}
 .r-stats .fx{font-size:13px;}
 .doorbar{display:flex; height:16px; border-radius:999px; background:#E4DDD2; overflow:hidden; border:2px solid var(--brown);}
 .doorbar .seg-open{background:var(--teal);}
@@ -1159,6 +1164,37 @@ function endTurn(){
 }
 
 /* ===================== result ===================== */
+/* 45歳のいま: 18歳の進路×♥の量でエンディングが決まる */
+const ENDINGS = {
+  jihi:[  /* 自費で進学できた */
+    "整った道を歩いてきたはずなのに、「じぶんで選んだ」記憶は意外と少ない。扉はいつも開いていた——開けたのは、誰だったんだろう。",
+    "安定した暮らし。進学で得たものは、いまも効いている。ただ、あのとき見えていなかった誰かの坂道を、最近になって知った。",
+    "好きなしごとと、積み上げてきた自信。恵まれたスタートだったと、いまは素直に思える。次は、誰かの扉を開ける番かもしれない。",
+  ],
+  shogaku:[  /* 奨学金で進学した */
+    "進学はできた。でも返済は、思ったより長い坂だった。給料日のたびに引かれていた−6万の重さを、あなたは知っている。",
+    "学んだことがしごとになり、返済もようやく終わった。引き落としが消えた月の、あの身軽さは忘れない。",
+    "奨学金で開けた扉の先に、いまの人生がぜんぶある。返しおえた今、「制度があったから、ここにいる」と語れる大人になった。",
+  ],
+  shushoku:[  /* すぐに働きはじめた */
+    "現場一筋の29年。腕には自信がある。ただ、あのとき見えなかった選択肢のことを、ふと考える夜がある。",
+    "早くから稼ぎ、堅実に暮らしてきた。後輩に教える立場になって、自分の経験が誰かのカギになると知った。",
+    "現場からたたき上げて、気づけば頼られる存在に。学歴より、積んできた経験——あなたの人生は、あなたが選んできた。",
+  ],
+};
+function endingText(p){
+  const shinro = p.doorLog.find(e=>e.title === "進路のトビラ");
+  const sel = (shinro && shinro.chosen != null) ? shinro.opts[shinro.chosen].t : "";
+  const ctx = sel.includes("自費") ? "jihi" : sel.includes("奨学金") ? "shogaku" : "shushoku";
+  const tier = p.happy >= 6 ? 2 : (p.happy >= 3 ? 1 : 0);
+  const job = jobTitle(p);
+  let txt = `${job.ic} <b>${job.t}</b>としてはたらく45歳。${ENDINGS[ctx][tier]}`;
+  const chosen = p.doorLog.filter(e=>e.chosen != null).map(e=>e.opts[e.chosen].t);
+  if(chosen.some(s=>s.includes("留学"))) txt += "<br>✈️ パスポートには、人生観を変えた出国スタンプが残っている。";
+  else if(chosen.some(s=>s.includes("起業"))) txt += "<br>🚀 名刺には、自分の会社の名前がある。";
+  else if(chosen.some(s=>s.includes("世界一周"))) txt += "<br>📷 部屋には、世界一周の写真がかざってある。";
+  return txt;
+}
 function showResult(){
   showScreen("result");
   const sorted = [...players].sort((a,b)=> b.happy - a.happy || b.money - a.money);
@@ -1180,6 +1216,7 @@ function showResult(){
         <span class="fx">残金 ${p.money}万（スタート比 ${diff>=0?"+":""}${diff}万）</span>
         <span class="fx" style="color:#00A3BD">まなび ★${p.learn}</span>
       </div>
+      <div class="r-ending">🌅 <b>45歳のいま</b>：${endingText(p)}</div>
       <div class="doorbar">
         <div class="seg-open" style="width:${pct(p.open)}%"></div>
         <div class="seg-lock" style="width:${pct(p.locked)}%"></div>
