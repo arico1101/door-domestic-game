@@ -490,13 +490,13 @@ function choiceDef(key, p){
       ]};
     case "machi":
       if(p.region === "地方") return {
-        title:"まちのトビラ", body:"進学・しごと・暮らし。どこで生きていく？",
+        title:"まちのトビラ", variant:"地方", body:"進学・しごと・暮らし。どこで生きていく？",
         opts:[
           {t:"思いきって都会に出る", d:"生活費は上がる。でも、見える世界が変わる", req:{money:80}, fx:{money:-80, learn:1, happy:1}, special:"revealAll"},
           {t:"今のまちで暮らしつづける", d:"なじみの人と、なじみの景色。生活費は安い", req:{}, fx:{money:30, happy:1}},
         ]};
       return {
-        title:"まちのトビラ", body:"進学・しごと・暮らし。どこで生きていく？",
+        title:"まちのトビラ", variant:"都心", body:"進学・しごと・暮らし。どこで生きていく？",
         opts:[
           {t:"都心に住みつづける", d:"情報も出会いも多い。そのぶん家賃が高い", req:{}, fx:{money:-30, happy:1}},
           {t:"家賃の安い郊外へ", d:"浮いたお金は貯金にまわす", req:{}, fx:{money:30}},
@@ -1017,7 +1017,7 @@ function showChoiceModal(idx, def, type, skipCount){
     if(o.tag && p.hidden.has(o.tag)) return "unseen";
     return meetsReq(p, o) ? "open" : "locked";
   });
-  const logEntry = {title:def.title, age:AGES[p.pos], opts:def.opts, states, chosen:null};
+  const logEntry = {title:def.title, variant:def.variant, age:AGES[p.pos], opts:def.opts, states, chosen:null};
   if(!skipCount){
     states.forEach(s=>{
       if(s === "unseen") p.unseen++;
@@ -1225,7 +1225,7 @@ function showRevealModal(pIdx){
         <span class="rv-st">${label}</span>
       </div>`;
     }).join("");
-    return `<div class="rv-door"><div class="rv-title">${e.age != null ? e.age+"歳 ── " : ""}${e.title}</div>${rows}</div>`;
+    return `<div class="rv-door"><div class="rv-title">${e.age != null ? e.age+"歳 ── " : ""}${e.title}${e.variant ? `（${e.variant}の家庭）` : ""}</div>${rows}</div>`;
   }).join("");
   openModal(`
     <div class="rule-page">
@@ -1248,8 +1248,8 @@ function showAllDoorsModal(){
   const map = new Map();
   players.forEach(p=>{
     p.doorLog.forEach(e=>{
-      const key = `${e.age}|${e.title}`;
-      if(!map.has(key)) map.set(key, {age:e.age, title:e.title, opts:e.opts,
+      const key = `${e.age}|${e.title}|${e.variant || ""}`;
+      if(!map.has(key)) map.set(key, {age:e.age, title:e.title, variant:e.variant, opts:e.opts,
         perOpt:e.opts.map(()=>({chosen:[], locked:[], unseen:[]}))});
       const g = map.get(key);
       e.opts.forEach((o,i)=>{
@@ -1259,14 +1259,17 @@ function showAllDoorsModal(){
       });
     });
   });
-  /* だれも通らなかったトビラマスも一覧に載せる */
+  /* だれも通らなかったトビラマスも一覧に載せる（まちのトビラは都心・地方の両方） */
   SQUARES.forEach((sq,i)=>{
     if(sq.t !== "choice") return;
-    const dummy = {region:"地方", perk:null, money:0, learn:0, seidoDiscount:false, name:""};
-    const def = choiceDef(sq.key, dummy);
-    const key = `${AGES[i]}|${def.title}`;
-    if(!map.has(key)) map.set(key, {age:AGES[i], title:def.title, opts:def.opts,
-      perOpt:def.opts.map(()=>({chosen:[], locked:[], unseen:[]})), untrodden:true});
+    const regions = sq.key === "machi" ? ["地方","都心"] : ["地方"];
+    regions.forEach(rg=>{
+      const dummy = {region:rg, perk:null, money:0, learn:0, seidoDiscount:false, name:""};
+      const def = choiceDef(sq.key, dummy);
+      const key = `${AGES[i]}|${def.title}|${def.variant || ""}`;
+      if(!map.has(key)) map.set(key, {age:AGES[i], title:def.title, variant:def.variant, opts:def.opts,
+        perOpt:def.opts.map(()=>({chosen:[], locked:[], unseen:[]})), untrodden:true});
+    });
   });
   const groups = [...map.values()].sort((a,b)=>a.age-b.age);
   const secs = groups.map(g=>{
@@ -1288,7 +1291,7 @@ function showAllDoorsModal(){
       </div>`;
     }).join("");
     return `<div class="rv-door"${g.untrodden ? ' style="opacity:.75"' : ""}>
-      <div class="rv-title">🚪 ${g.age}歳 ── ${g.title}${g.untrodden ? '<span class="rv-untrod">🚶 だれも通らなかった</span>' : ""}</div>${rows}</div>`;
+      <div class="rv-title">🚪 ${g.age}歳 ── ${g.title}${g.variant ? `（${g.variant}の家庭）` : ""}${g.untrodden ? '<span class="rv-untrod">🚶 だれも通らなかった</span>' : ""}</div>${rows}</div>`;
   }).join("");
   openModal(`
     <div class="rule-page">
