@@ -127,6 +127,15 @@ h1 .em-t{color:var(--teal);}
 .q-text{font-size:5.4vmin; font-weight:900; line-height:1.6; max-width:80vw;}
 .q-text b{color:var(--teal);}
 
+/* 格差の連鎖 */
+.chain{display:flex; align-items:center; gap:1.6vmin; flex-wrap:wrap; justify-content:center;}
+.chain .c-box{
+  background:var(--paper); border:.5vmin solid var(--brown); border-radius:2vmin;
+  padding:1.8vmin 3.4vmin; font-size:3.6vmin; font-weight:900;
+}
+.chain .c-box small{display:block; font-size:2vmin; font-weight:700; opacity:.65; margin-top:.4vmin;}
+.chain .c-arrow{font-size:4.5vmin; color:var(--crimson); font-weight:900;}
+
 /* タイマー */
 #timer{
   font-size:22vmin; line-height:1;
@@ -303,7 +312,31 @@ h1 .em-t{color:var(--teal);}
   <p class="q-text">現実の世界で<b>「カギ」</b>になるものは、<br>お金のほかに何がある？</p>
 </section>
 
-<!-- 16. まとめ -->
+<!-- 16. ゲームから現実へ: 格差の連鎖 -->
+<section class="slide" data-part="まとめ">
+  <div class="kicker cr">ゲームから現実へ</div>
+  <h1>スタートの差は、<br>つながっていく</h1>
+  <div class="chain">
+    <div class="c-box">💰 経済格差<small>最初のお金・仕送りの差</small></div>
+    <div class="c-arrow">→</div>
+    <div class="c-box">🚪 機会格差<small>選べる進路・挑戦の差</small></div>
+    <div class="c-arrow">→</div>
+    <div class="c-box">📚 教育格差<small>学べること・知れることの差</small></div>
+  </div>
+  <p class="lead">そしてその差は、<b>次の世代の経済格差</b>へ——。<br>ゲームで見た「？？？」や 🔒 は、現実の社会にもあります。</p>
+</section>
+
+<!-- 17. だから支援がある -->
+<section class="slide" data-part="まとめ">
+  <div class="kicker or">だから、「支援」がある</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p>この連鎖は、<b>個人の努力だけでは断ち切れない</b>。だから給付型奨学金のような支援や制度がある</p></div>
+    <div class="step"><span class="no">2</span><p>病気、災害、家族との別れ——<b>いつ自分が「支援が必要になる側」になるか</b>は、誰にもわからない</p></div>
+    <div class="step"><span class="no">3</span><p>だからこそ、<b>知っておくこと</b>が全員に必要。知っていれば、自分も、いつか誰かも助けられる</p></div>
+  </div>
+</section>
+
+<!-- 18. まとめ -->
 <section class="slide" data-part="まとめ">
   <div class="kicker">💡 一番伝えたいこと</div>
   <div class="band" style="font-size:4vmin; line-height:2;">
@@ -311,7 +344,7 @@ h1 .em-t{color:var(--teal);}
     <b>扉があることすら知らない</b>のは、<br>
     全然違う。
   </div>
-  <p class="lead">「見えていなかったトビラ」のこと、<br>今日の帰り道にも、少しだけ考えてみてください。</p>
+  <p class="lead">このゲームは、<b>「知る」ための第一歩</b>。<br>今日見つけた「見えていなかったトビラ」のこと、<br>ぜひ誰かに話してみてください。</p>
 </section>
 
 <!-- 17. おわり -->
