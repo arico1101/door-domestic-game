@@ -86,6 +86,7 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 .pcard.now{opacity:1; outline:3px solid var(--orange);}
 .pcard.done{opacity:.45;}
 .pcard .nm{font-weight:900; font-size:14px; display:flex; align-items:center; gap:6px; margin-bottom:4px;}
+.pcard .age{margin-left:auto; font-size:11px; font-weight:700; opacity:.55;}
 .pcard .nm .p-dot{width:13px;height:13px;}
 .pcard .stat{display:flex; justify-content:space-between; font-weight:700;}
 .pcard .stat b{font-family:"DotGothic16",monospace; font-size:14px;}
@@ -99,6 +100,11 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
   font-size:clamp(9px,1.4vw,12px); font-weight:700; text-align:center; padding:4px;
 }
 .sq .num{position:absolute; top:4px; left:7px; font-family:"DotGothic16",monospace; font-size:11px; opacity:.5;}
+.chapter{
+  display:flex; align-items:center; gap:8px; padding:6px 4px 0;
+  font-size:11px; font-weight:900; letter-spacing:.06em; opacity:.65; white-space:nowrap;
+}
+.chapter::after{content:""; flex:1; height:2px; background:rgba(74,58,48,.15); border-radius:2px;}
 .sq .ic{font-size:clamp(14px,2.4vw,22px); line-height:1;}
 .sq.t-income{background:#EDF7DC; border-color:var(--green);}
 .sq.t-cost{background:#FFE9E7; border-color:var(--crimson);}
@@ -284,7 +290,7 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
   <div class="setup-card">
     <div class="title-door" aria-hidden="true"><div class="leaf"></div><div class="knob"></div></div>
     <h1 class="game-title">トビラ</h1>
-    <p class="game-sub">おかねと選択肢の人生すごろく（2〜6人・約25分）</p>
+    <p class="game-sub">16歳から45歳を生きる、おかねと選択肢の人生すごろく（2〜6人・約25分）</p>
     <div class="player-inputs" id="playerInputs"></div>
     <div class="row-btns">
       <button class="chip-btn" id="addPlayer">＋ プレイヤーを追加</button>
@@ -325,7 +331,7 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 <section id="result" class="screen">
   <div class="res-inner">
     <h1>🎉 けっか はっぴょう</h1>
-    <p class="res-sub">順位は「ハッピー」の数で決まります — そして、家庭カードの公開</p>
+    <p class="res-sub">16歳から45歳、29年間のけっか。順位は「ハッピー」の数で決まります — そして、家庭カードの公開</p>
     <div id="resultList"></div>
     <div class="insight" id="insightBox"></div>
     <div class="res-btns"><button class="big-btn" id="againBtn">もういちど遊ぶ</button></div>
@@ -373,6 +379,27 @@ const FAMILIES = [
   {id:"f6", name:"地方の自営業の家庭", region:"地方", money:80, allow:0, hide:["seido","career"], perk:"akinai",
    story:"家の店を手伝って育った。お金が「入ってきて、出ていくもの」だと肌で知っている。ただし、いい月と悪い月がある。",
    perkText:"商いの感覚：臨時収入のできごとが +10万"},
+];
+
+/* 各マスの年齢（16歳→45歳の29年間） */
+const AGES = [
+  16,16,17,17,18,
+  18,19,19,20,20,
+  21,22,24,25,26,
+  26,27,28,28,29,
+  29,30,31,32,33,
+  35,36,37,38,40,
+  41,42,43,44,44,
+  45,
+];
+/* 盤面の行＝人生の章 */
+const CHAPTERS = [
+  "🌱 10代 ── 旅立ちの前",
+  "🏠 20代前半 ── はじめての自立",
+  "💼 20代なかば ── 道を選ぶ",
+  "🚀 30歳前後 ── キャリアの分かれ道",
+  "📚 30代 ── 学びなおしと挑戦",
+  "🌅 40代 ── 積み重ねの先に",
 ];
 
 /* 盤面 36マス */
@@ -569,7 +596,7 @@ $("startBtn").onclick = ()=>{
       pos:0, money:fam.money, initMoney:fam.money,
       allow:fam.allow, learn:1 + (fam.perk==="dandori"?1:0), happy:0,
       hidden:new Set(fam.hide),
-      open:0, locked:0, unseen:0, doorLog:[], loanLeft:0,
+      open:0, locked:0, unseen:0, doorLog:[], loan:0,
       seidoDiscount:false, seidoUsed:false,
       hadHeavy:false, disasterTurns:0, letterIn:null,
       done:false, rankAt:null,
@@ -625,14 +652,22 @@ function gridPos(i){
 function renderBoard(){
   const b = $("board");
   b.innerHTML = "";
+  CHAPTERS.forEach((c,r)=>{
+    const lab = document.createElement("div");
+    lab.className = "chapter";
+    lab.style.gridRow = r*2+1;
+    lab.style.gridColumn = "1 / -1";
+    lab.textContent = c;
+    b.appendChild(lab);
+  });
   SQUARES.forEach((sq,i)=>{
     const m = TYPE_META[sq.t];
     const el = document.createElement("div");
     el.className = `sq t-${sq.t}`;
     el.id = `sq-${i}`;
     const {row,col} = gridPos(i);
-    el.style.gridRow = row+1; el.style.gridColumn = col+1;
-    el.innerHTML = `<span class="num">${i}</span><span class="ic">${m.ic}</span><span>${sq.name || m.label}</span><div class="tokens"></div>`;
+    el.style.gridRow = row*2+2; el.style.gridColumn = col+1;
+    el.innerHTML = `<span class="num">${AGES[i]}歳</span><span class="ic">${m.ic}</span><span>${sq.name || m.label}</span><div class="tokens"></div>`;
     b.appendChild(el);
   });
 }
@@ -658,7 +693,7 @@ function renderStrip(){
     c.className = "pcard" + (i===turn?" now":"") + (p.done?" done":"");
     c.id = `pcard-${i}`;
     c.innerHTML = `
-      <div class="nm"><span class="p-dot" style="background:${p.color}"></span>${p.name}${p.done?" 🏁":""}</div>
+      <div class="nm"><span class="p-dot" style="background:${p.color}"></span>${p.name}${p.done?" 🏁":""}<span class="age">${AGES[p.pos]}歳</span></div>
       <div class="stat"><span>おかね</span><b class="${p.money<0?"neg":""}">${p.money}万</b></div>
       <div class="stat"><span>まなび</span><b>${"★".repeat(Math.min(p.learn,8))}${p.learn>8?"+":""}</b></div>
       <div class="stat"><span>ハッピー</span><b>♥${p.happy}</b></div>`;
@@ -667,7 +702,7 @@ function renderStrip(){
 }
 function updateTurnUI(){
   const p = players[turn];
-  $("turnPill").innerHTML = `<span class="p-dot" style="background:${p.color}"></span>${p.name} さんの番`;
+  $("turnPill").innerHTML = `<span class="p-dot" style="background:${p.color}"></span>${p.name} さんの番・${AGES[p.pos]}歳`;
   renderStrip(); renderTokens();
   const card = $(`pcard-${turn}`);
   if(card) card.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
@@ -755,10 +790,14 @@ function resolveSquare(idx){
     } else {
       amt = 20 + p.learn*10 + p.allow;
       const job = jobTitle(p);
-      title = `${job.ic} いまの仕事：${job.t}`;
+      title = `${job.ic} ${AGES[p.pos]}歳・いまの仕事：${job.t}`;
       note = `お給料は <b>20万 ＋ まなび×10万${p.allow>0 ? " ＋ 仕送り"+p.allow+"万" : ""}</b><br>まなびが増えると、仕事もお給料も変わっていく`;
       if(p.disasterTurns > 0){ amt -= 10; note += `<br>⚠️ 被災の影響で −10万（あと${p.disasterTurns}ターン）`; }
-      if(p.loanLeft > 0){ p.loanLeft--; amt -= 10; note += `<br>🎓 奨学金の返済 −10万（あと${p.loanLeft}回）`; }
+      if(p.loan > 0){
+        const pay = Math.min(6, p.loan);
+        p.loan -= pay; amt -= pay;
+        note += `<br>🎓 奨学金の返済 −${pay}万（のこり${p.loan}万）`;
+      }
     }
     showInfoModal("income", title, note, {money:amt}, idx);
   }
@@ -974,7 +1013,7 @@ function showChoiceModal(idx, def, type, skipCount){
   openModal(`
     <span class="m-tag" style="background:${m.tag}">${m.ic} ${def.heavy ? "できごと" : m.label}</span>
     <h2>${def.title}</h2>
-    <p class="m-body">${def.body}<br><b>${p.name}</b> さん：おかね ${p.money}万 ／ まなび ★${p.learn}</p>
+    <p class="m-body">${def.body}<br><b>${p.name}</b> さん（${AGES[p.pos]}歳）：おかね ${p.money}万 ／ まなび ★${p.learn}</p>
     <div class="door-list">${doors}</div>
     ${stuck ? `<div class="m-note" style="margin-top:14px">開けられるトビラが、ひとつもなかった…。</div>
     <button class="m-btn" id="mPass">今回は見送る</button>` : ""}`);
@@ -1007,8 +1046,8 @@ function showChoiceModal(idx, def, type, skipCount){
         if(p.seidoDiscount || p.perk === "seidoPro"){
           notes.push("🎗 制度を知っていたおかげで<b>給付型奨学金</b>に出会えた！返済はいらない。");
         } else {
-          p.loanLeft = 5;
-          notes.push("🎓 これは<b>貸与型</b>。働きはじめたら、お給料から <b>−10万×5回</b> 返済していく。");
+          p.loan = 48;
+          notes.push("🎓 これは<b>貸与型</b>（総額48万）。働きはじめたら、お給料から<b>すこしずつ（−6万）</b>、45歳まで返していく。");
         }
       }
       if(o.tag === "seido" && p.perk === "seidoPro" && !p.seidoUsed){
@@ -1030,14 +1069,18 @@ function showChoiceModal(idx, def, type, skipCount){
 
 function showGoalModal(idx){
   const p = players[idx];
+  const loanNote = p.loan > 0
+    ? `<div class="m-note">🎓 のこっていた奨学金 <b>${p.loan}万</b> をここで清算。<br>45歳——ようやく、返しおえた。</div>` : "";
   openModal(`
     <span class="m-tag" style="background:#4A3A30">🏁 ゴール</span>
-    <h2>${p.name} さん、ゴール！</h2>
-    <p class="m-body">${p.rankAt}番目のゴールです。おつかれさま！<br>全員がゴールしたら、けっか発表へ。</p>
-    ${fxChips({happy: p.rankAt===1?1:0})}
+    <h2>${p.name} さん、45歳でゴール！</h2>
+    <p class="m-body">16歳からの29年間、おつかれさま！ ${p.rankAt}番目のゴールです。<br>全員がゴールしたら、けっか発表へ。</p>
+    ${loanNote}
+    ${fxChips({happy: p.rankAt===1?1:0, money: p.loan>0 ? -p.loan : 0})}
     <button class="m-btn" id="mOk">OK</button>`);
   $("mOk").onclick = ()=>{
     if(p.rankAt === 1) p.happy += 1;
+    if(p.loan > 0){ p.money -= p.loan; p.loan = 0; }
     closeModal(); endTurn();
   };
 }
@@ -1157,7 +1200,7 @@ function showRevealModal(pIdx){
 /* ===================== rules ===================== */
 const RULE_PAGES = [
   {tag:"🏁 めざすもの", title:"順位を決めるのは ♥ハッピー", items:[
-    ["🎲","サイコロを回してすごろくを進み、みんなでゴールをめざそう。"],
+    ["🎲","これは<b>16歳から45歳までの29年間</b>をたどる人生すごろく。サイコロを回して、みんなでゴールをめざそう。"],
     ["♥","最後の順位は、おかねの多さじゃなく <b>♥ハッピーの数</b>で決まる！"],
     ["🚪","♥は、人生の選択「<b>トビラ</b>」を開けるともらえる。<b>♥の数＝じぶんの意思で選べた数</b>だ。"],
   ]},
