@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>トビラ — 全体ゲーム進行スライド（Canvaインポート用）</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color:#4A3A30; font-weight:700; background:#888;}
+.page{
+  width:1920px; height:1080px; background:#FBF8F1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:36px; padding:60px 220px; text-align:center; position:relative; overflow:hidden;
+  margin:0 auto 24px;
+}
+.part{
+  position:absolute; top:28px; left:32px;
+  background:#4A3A30; color:#FBF8F1; border-radius:999px;
+  padding:8px 28px; font-size:22px; font-weight:900; letter-spacing:.08em;
+}
+.kicker{
+  font-size:30px; font-weight:900; letter-spacing:.2em; color:#FFFFFF;
+  background:#00A3BD; border-radius:999px; padding:10px 36px;
+}
+.kicker.or{background:#FFC04B; color:#4A3A30;}
+.kicker.cr{background:#FF6858;}
+.kicker.gr{background:#78BE21;}
+h1{font-size:72px; font-weight:900; line-height:1.4; letter-spacing:.04em;}
+h1 .em{color:#FF6858;}
+h1 .em-t{color:#00A3BD;}
+.lead{font-size:36px; line-height:1.8; font-weight:700; max-width:1400px;}
+.lead b{font-weight:900;}
+.small{font-size:26px; opacity:.7;}
+.band{
+  background:#4A3A30; color:#FBF8F1; border-radius:28px;
+  padding:36px 56px; font-size:40px; font-weight:900; line-height:1.8; max-width:1480px;
+}
+.band b{color:#FFC04B;}
+.steps{display:flex; flex-direction:column; gap:26px; max-width:1440px;}
+.step{display:flex; align-items:center; gap:30px;}
+.step .no{
+  flex:none; width:68px; height:68px; border-radius:50%;
+  background:#FFC04B; color:#4A3A30; border:5px solid #4A3A30;
+  display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:900;
+}
+.step p{font-size:34px; line-height:1.6; font-weight:700; text-align:left;}
+.step p b{font-weight:900; color:#FF6858;}
+.sq-list{display:flex; flex-direction:column; gap:18px; width:1440px;}
+.sq-row{display:flex; align-items:center; gap:28px; background:#FFFFFF;
+  border:5px solid #4A3A30; border-radius:22px; padding:16px 28px;}
+.sq-tag{flex:none; width:250px; text-align:center; border-radius:16px;
+  border:4px solid #4A3A30; font-size:30px; font-weight:900; padding:12px 0;}
+.sq-row p{flex:1; font-size:29px; line-height:1.5; text-align:left; font-weight:700;}
+.sq-row p b{font-weight:900;}
+.t-income{background:#EDF7DC;} .t-cost{background:#FFE9E7;} .t-event{background:#FFF3DC;}
+.t-learn{background:#E0F4F8;} .t-door{background:#4A3A30; color:#FBF8F1; border-color:#FFC04B;}
+.chips{display:flex; gap:20px; flex-wrap:wrap; justify-content:center;}
+.chip{background:#FFFFFF; border:4px solid #4A3A30; border-radius:999px;
+  padding:10px 34px; font-size:27px; font-weight:900; white-space:nowrap;}
+.q-no{font-size:34px; font-weight:900; color:#FFFFFF; background:#FF6858;
+  border-radius:999px; padding:10px 44px; letter-spacing:.15em;}
+.q-text{font-size:62px; font-weight:900; line-height:1.6; max-width:1480px;}
+.q-text b{color:#00A3BD;}
+.timer{font-family:"DotGothic16",monospace; font-weight:400; font-size:240px; line-height:1; color:#4A3A30;}
+.chain{display:flex; align-items:center; gap:18px; justify-content:center;}
+.chain .c-box{background:#FFFFFF; border:5px solid #4A3A30; border-radius:22px;
+  padding:20px 38px; font-size:40px; font-weight:900;}
+.chain .c-box small{display:block; font-size:22px; font-weight:700; opacity:.65; margin-top:5px;}
+.chain .c-arrow{font-size:50px; color:#FF6858; font-weight:900;}
+.door{width:150px; height:188px; background:#4A3A30; border-radius:75px 75px 13px 13px;
+  display:flex; align-items:center; justify-content:center;}
+.door span{display:block; width:113px; height:150px; background:#00A3BD;
+  border-radius:56px 56px 11px 11px; position:relative;}
+.door span i{position:absolute; right:15px; top:69px; width:18px; height:18px; border-radius:50%; background:#FFC04B;}
+</style>
+</head>
+<body>
+
+<div class="page" data-document-role="page" data-label="01 タイトル"
+  data-speaker-notes="開場中はこのスライドを表示。全員着席したら開始。「トビラ」というゲームの名前だけ伝えて次へ。">
+  <div class="door"><span><i></i></span></div>
+  <h1 style="font-size:120px; letter-spacing:.14em;">トビラ</h1>
+  <p class="lead">16歳から45歳を生きる、お金と選択肢の人生すごろく</p>
+  <div class="chips">
+    <span class="chip">👥 1テーブル 2〜6人</span>
+    <span class="chip">⏱ プレイ約25分</span>
+    <span class="chip">📱 1台の画面を囲んで遊ぶ</span>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="02 今日の流れ"
+  data-speaker-notes="全体の所要時間を伝えて安心させる。「秘密の公開」で少し引きを作る。">
+  <div class="part">導入</div>
+  <div class="kicker">今日の流れ</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p>ゲームの説明（10分ほど）</p></div>
+    <div class="step"><span class="no">2</span><p>テーブルごとにプレイ（<b>約25分</b>）</p></div>
+    <div class="step"><span class="no">3</span><p>結果発表 — 順位と、ある秘密の公開</p></div>
+    <div class="step"><span class="no">4</span><p>振り返り — 近くの人と話してみよう</p></div>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="03 どんなゲーム？"
+  data-speaker-notes="「人生は選ぶことの連続」を強調。ゲームの世界観だけ伝え、細かいルールはまだ話さない。">
+  <div class="part">導入</div>
+  <div class="kicker">どんなゲーム？</div>
+  <h1><span class="em-t">16歳</span>から<span class="em-t">45歳</span>まで、<br>29年間の人生を歩くすごろくです</h1>
+  <p class="lead">進学、住まい、仕事、挑戦——<br>人生は<b>「選ぶこと」の連続</b>。<br>あなたなら、どのトビラを開く？</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="04 順位は♥ハッピーの数"
+  data-speaker-notes="ここが最重要ルール。「お金持ちが勝つゲームではない」と明言する。♥＝自分の意思で選べた数、お金と★はカギ、という関係を丁寧に。">
+  <div class="part">導入</div>
+  <div class="kicker cr">一番大事なルール</div>
+  <h1>順位を決めるのは、お金じゃなく<br><span class="em">♥ハッピーの数</span></h1>
+  <div class="band">
+    ♥の数 ＝ <b>人生の選択肢をたくさん持ち、自分の意思で選べた数</b>。<br>
+    💰お金と📚★まなびは、そのための<b>「カギ」</b>です。
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="05 家庭カードを引こう"
+  data-speaker-notes="ここで実際に各テーブルで家庭カードを引かせる。「絶対に見せない」を徹底。？？？の理由は聞かれても「お楽しみ」で流す（種明かしは結果発表まで厳禁）。">
+  <div class="part">家庭カード</div>
+  <div class="kicker or">🏠 家庭カードを引こう</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p>ひとり1枚、<b>こっそり</b>引く（ほかの人に見せない！）</p></div>
+    <div class="step"><span class="no">2</span><p>カードで<b>最初のお金・仕送り・住む町</b>が決まる。スタート地点は人それぞれ</p></div>
+    <div class="step"><span class="no">3</span><p>途中で<b>「？？？」</b>に出会うかも。なぜかは……終わってからのお楽しみ</p></div>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="06 進み方"
+  data-speaker-notes="高校時代がサイコロなしなのは「進路を選ぶ前の準備期間」だから、と理由も添える。">
+  <div class="part">ルール</div>
+  <div class="kicker gr">🎲 進み方</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p><b>高校時代（16〜18歳）</b>はサイコロなし。「一歩すすむ」ボタンで1マスずつ——進路を選ぶ前の<b>準備の時間</b></p></div>
+    <div class="step"><span class="no">2</span><p><b>18歳の進路トビラ</b>からはサイコロ！ 順番に振って、止まったマスの指示に従う</p></div>
+    <div class="step"><span class="no">3</span><p>全員が<b>45歳のゴール</b>に着いたら、結果発表へ</p></div>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="07 マスの種類"
+  data-speaker-notes="5種類をテンポよく。トビラのマスだけ「光るマス＝人生の分岐点」と強調しておく。">
+  <div class="part">ルール</div>
+  <div class="kicker gr">🗺 マスの種類</div>
+  <div class="sq-list">
+    <div class="sq-row"><span class="sq-tag t-income">💰 おしごと</span><p>給料が入る。<b>20万＋★まなび×10万</b>＋仕送り</p></div>
+    <div class="sq-row"><span class="sq-tag t-cost">💸 しゅっぴ</span><p>生きているとお金はかかる。決まった額を支払う</p></div>
+    <div class="sq-row"><span class="sq-tag t-event">⚡ できごと</span><p>カードを1枚引く。ラッキーもアクシデントも</p></div>
+    <div class="sq-row"><span class="sq-tag t-learn">📚 まなび</span><p>自分に投資するチャンス。0円でも学べる</p></div>
+    <div class="sq-row"><span class="sq-tag t-door">🚪 トビラ</span><p><b>光るマス＝人生の分岐点</b>。止まらなくても、通ったら必ず選ぶ</p></div>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="08 トビラとカギ"
+  data-speaker-notes="「0円の道は必ず選べる」＝詰みはないこと、「値段はわかっても価値はわからない」の2点を押さえる。">
+  <div class="part">ルール</div>
+  <div class="kicker gr">🔑 トビラとカギ</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p>いい選択には<b>カギ</b>（必要なお金・★まなび）がいる。足りないと 🔒 開けられない</p></div>
+    <div class="step"><span class="no">2</span><p>カギなし（0円）の道は、<b>いつでも必ず選べる</b></p></div>
+    <div class="step"><span class="no">3</span><p>お金の増減は選ぶ前に見える。でも<b>★と♥は選ぶまでわからない</b>——値段はわかっても、価値はわからない</p></div>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="09 奨学金"
+  data-speaker-notes="貸与型と給付型の違いは後の振り返りにつながる重要ポイント。「知っていること自体が力になる」を一言添える。説明はここまで。質問を受けてからプレイへ。">
+  <div class="part">ルール</div>
+  <div class="kicker gr">🎓 奨学金</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p>「奨学金を借りて進学」は<b>貸与型（総額48万）</b>。働くたびに−6万ずつ、45歳まで返し続ける</p></div>
+    <div class="step"><span class="no">2</span><p><b>制度を知っている人</b>は、返さなくていい<b>給付型</b>に出会えることも。「知っていること」自体が力になる</p></div>
+  </div>
+  <p class="small">⚠️ 困ったこと・わからないことがあれば、いつでも手を挙げてください</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="10 プレイタイム"
+  data-speaker-notes="プレイ中はこのスライドを表示したまま。Canvaのプレゼンタイマー等で25分を計る。机間巡視して詰まっているテーブルをサポート。残り5分と終了を口頭でアナウンス。">
+  <div class="part">プレイ</div>
+  <div class="kicker or">🎮 プレイタイム！</div>
+  <p class="timer">25:00</p>
+  <div class="chips">
+    <span class="chip">🏠 家庭カードは最後まで秘密</span>
+    <span class="chip">🙋 困ったら手を挙げる</span>
+    <span class="chip">🏁 全員45歳ゴールで終了</span>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="11 結果発表"
+  data-speaker-notes="各テーブルの結果画面で順に進める。家庭カード公開のタイミングで会場の空気が変わるので、少し間を取る。">
+  <div class="part">結果発表</div>
+  <div class="kicker cr">🎉 結果発表</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p>順位は<b>♥の数</b>！（同じなら残ったお金）</p></div>
+    <div class="step"><span class="no">2</span><p><b>家庭カードを公開</b>——お互いのスタート地点を初めて知る</p></div>
+    <div class="step"><span class="no">3</span><p><b>ネタバラシ</b>——「？？？」の中身を全部公開</p></div>
+    <div class="step"><span class="no">4</span><p><b>トビラ一覧</b>——29年間のすべてのトビラを、通らなかった道も</p></div>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="12 振り返り"
+  data-speaker-notes="「正解はない」と最初に伝えて話しやすくする。1問ずつ2〜3分、近くの人とペア/グループで。">
+  <div class="part">振り返り</div>
+  <div class="kicker">🗣 振り返り</div>
+  <h1>近くの人と、<br>話してみよう</h1>
+  <p class="lead">これから4つの問いを出します。<br>正解はありません。<b>感じたこと</b>をそのまま話してみてください。</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="13 問い1"
+  data-speaker-notes="体験を言葉にさせる問い。「努力だけの問題だった？」で、家庭カードの差＝本人のせいではない差に気づかせる。">
+  <div class="part">振り返り</div>
+  <div class="q-no">問い 1</div>
+  <p class="q-text"><b>届かなかったトビラ</b>はあった？<br>それは、<b>自分の努力だけ</b>の問題だった？</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="14 問い2"
+  data-speaker-notes="経済格差が機会格差につながる構造を、ゲーム内の体験から引き出す問い。具体的なトビラ名を挙げてもらうとよい。">
+  <div class="part">振り返り</div>
+  <div class="q-no">問い 2</div>
+  <p class="q-text"><b>スタートのお金の違い</b>は、<br>選べる<b>進路や学び</b>に<br>どうつながっていた？</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="15 問い3"
+  data-speaker-notes="ゲームから現実の制度へ橋をかける問い。給付型奨学金のほか、児童扶養手当・授業料減免・あしなが育英会の支援などが出たら拾う。">
+  <div class="part">振り返り</div>
+  <div class="q-no">問い 3</div>
+  <p class="q-text">給付型奨学金のような<br><b>「知っていれば使えた支援」</b>、<br>現実にはどんなものがある？</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="16 問い4"
+  data-speaker-notes="支援を「他人ごと」から「自分ごと」へ引き寄せる問い。死別・被災イベントをONにした場合はその体験にも触れられる。">
+  <div class="part">振り返り</div>
+  <div class="q-no">問い 4</div>
+  <p class="q-text"><b>支援が必要になる日</b>は、<br>誰にでも来るかもしれない。<br>そのとき、<b>何が助けになる</b>？</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="17 ゲームから現実へ"
+  data-speaker-notes="ここから全体へのメッセージ。経済格差→機会格差→教育格差→次の世代の経済格差、という連鎖をゲームの体験と結びつけて説明する。">
+  <div class="part">まとめ</div>
+  <div class="kicker cr">ゲームから現実へ</div>
+  <h1>スタートの差は、<br>つながっていく</h1>
+  <div class="chain">
+    <div class="c-box">💰 経済格差<small>最初のお金・仕送りの差</small></div>
+    <div class="c-arrow">→</div>
+    <div class="c-box">🚪 機会格差<small>選べる進路・挑戦の差</small></div>
+    <div class="c-arrow">→</div>
+    <div class="c-box">📚 教育格差<small>学べること・知れることの差</small></div>
+  </div>
+  <p class="lead">そしてその差は、<b>次の世代の経済格差</b>へ——。<br>ゲームで見た「？？？」や 🔒 は、現実の社会にもあります。</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="18 だから支援がある"
+  data-speaker-notes="「個人の努力だけでは断ち切れない→だから支援がある→いつ自分が必要になる側になるかわからない→だから全員が知っておく」の順で語る。">
+  <div class="part">まとめ</div>
+  <div class="kicker or">だから、「支援」がある</div>
+  <div class="steps">
+    <div class="step"><span class="no">1</span><p>この連鎖は、<b>個人の努力だけでは断ち切れない</b>。だから給付型奨学金のような支援や制度がある</p></div>
+    <div class="step"><span class="no">2</span><p>病気、災害、家族との別れ——<b>いつ自分が「支援が必要になる側」になるか</b>は、誰にもわからない</p></div>
+    <div class="step"><span class="no">3</span><p>だからこそ、<b>知っておくこと</b>が全員に必要。知っていれば、自分も、いつか誰かも助けられる</p></div>
+  </div>
+</div>
+
+<div class="page" data-document-role="page" data-label="19 一番伝えたいこと"
+  data-speaker-notes="核心メッセージ。ゆっくり読み上げる。「このゲームは知るための第一歩」で締める。">
+  <div class="part">まとめ</div>
+  <div class="kicker">💡 一番伝えたいこと</div>
+  <div class="band" style="font-size:46px; line-height:2;">
+    カギが足りずに開けられないのと、<br>
+    <b>扉があることすら知らない</b>のは、<br>
+    全然違う。
+  </div>
+  <p class="lead">このゲームは、<b>「知る」ための第一歩</b>。<br>今日見つけた「見えていなかったトビラ」のこと、<br>ぜひ誰かに話してみてください。</p>
+</div>
+
+<div class="page" data-document-role="page" data-label="20 おわり"
+  data-speaker-notes="お礼とアンケート等の事務連絡。退場までこのスライドを表示。">
+  <div class="part">おわり</div>
+  <div class="door"><span><i></i></span></div>
+  <h1 style="font-size:84px;">ありがとうございました</h1>
+  <p class="lead">あなたの前にも、まだ見ぬトビラがたくさんある。</p>
+</div>
+
+</body>
+</html>
