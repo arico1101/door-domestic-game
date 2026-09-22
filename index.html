@@ -6,365 +6,432 @@
 <title>トビラ — おかねと選択肢の人生すごろく</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=DotGothic16&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --green:#78BE21; --crimson:#FF6858; --orange:#FFC04B; --teal:#00A3BD;
-  --brown:#4A3A30; --cream:#FBF8F1; --paper:#FFFFFF;
-  --fuji:#B58BD9; --momo:#F291B5; --stone:#B9AFA5;
-  --shadow:0 4px 0 rgba(74,58,48,.18);
+  --page:#F2F9FD; --card:#FFFFFF; --ink:#3F5266; --sub:#8A97A5; --line:#E3EDF4;
+  --pink:#F4879F; --gold:#FBD96B; --btn:#5B7FA8; --btn-d:#43617F;
+  --money:#D9A32B; --learn:#4E8FC0; --happy:#E4708F;
+  --ok:#86D9A5; --lock:#FFC98C; --unseen:#B7A6EA;
+  --wrap:1180px;
+  --sh:0 4px 16px rgba(63,82,102,.10);
+  --sh-s:0 2px 8px rgba(63,82,102,.10);
 }
 *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
+/* 数字はそろえて読ませる（以前は数値だけ別の書体にしていたが、書体はZen Maruに一本化した） */
 body{
-  font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif;
-  background:var(--cream); color:var(--brown);
-  background-image:radial-gradient(rgba(74,58,48,.05) 1.2px, transparent 1.2px);
-  background-size:26px 26px;
+  font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;
+  background:var(--page); color:var(--ink); line-height:1.8;
+  font-variant-numeric:tabular-nums;
 }
 button{font-family:inherit; cursor:pointer; border:none;}
 .screen{display:none; min-height:100vh;}
 .screen.active{display:block;}
+.ic{width:1.05em; height:1.05em; vertical-align:-.16em; flex:none;}
+.ic.s{width:.92em; height:.92em;}
 
-/* ---------- setup ---------- */
-#setup{display:none; place-items:center; padding:24px;}
+/* ---------- セットアップ ---------- */
+#setup{display:none; place-items:center; padding:26px 18px;}
 #setup.active{display:grid;}
-.setup-card{width:min(560px,100%); text-align:center;}
-.title-door{
-  width:120px; height:150px; margin:0 auto 14px; position:relative;
-  background:var(--brown); border-radius:60px 60px 8px 8px;
-  display:grid; place-items:center; box-shadow:var(--shadow);
-}
-.title-door .leaf{
-  width:96px; height:126px; border-radius:48px 48px 6px 6px;
-  background:var(--teal); position:relative; transition:transform .6s cubic-bezier(.2,.8,.3,1.2);
-  transform-origin:left center;
-}
-.title-door:hover .leaf{transform:perspective(400px) rotateY(-38deg);}
-.title-door .knob{position:absolute; right:12px; top:64px; width:12px; height:12px; border-radius:50%; background:var(--orange);}
-h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.12em;}
-.game-sub{font-size:15px; font-weight:700; margin:6px 0 26px; opacity:.75;}
+.setup-card{width:min(520px,100%); margin:0 auto; text-align:center;}
+.title-door{width:104px; height:128px; margin:0 auto 14px; position:relative;
+  background:var(--pink); border-radius:52px 52px 10px 10px; display:grid; place-items:center;
+  box-shadow:0 6px 0 rgba(214,104,130,.4);}
+.title-door .leaf{width:82px; height:106px; border-radius:41px 41px 7px 7px; background:#FBD96B;
+  position:relative; transition:transform .6s cubic-bezier(.2,.8,.3,1.2); transform-origin:left center;}
+.title-door:hover .leaf{transform:perspective(400px) rotateY(-36deg);}
+.title-door .knob{position:absolute; right:12px; top:56px; width:11px; height:11px;
+  border-radius:50%; background:var(--btn);}
+h1.game-title{font-size:clamp(32px,8vw,48px); font-weight:900; letter-spacing:.1em;}
+.game-sub{font-size:14px; font-weight:700; color:var(--sub); margin:6px 0 24px;}
 .player-inputs{display:flex; flex-direction:column; gap:10px; margin-bottom:14px;}
-.p-row{display:flex; align-items:center; gap:10px; background:var(--paper); border:2px solid var(--brown); border-radius:14px; padding:8px 12px; box-shadow:var(--shadow);}
-.p-dot{width:22px; height:22px; border-radius:50%; flex:none; border:2px solid var(--brown);}
-.p-row input{flex:1; border:none; outline:none; font-family:inherit; font-size:17px; font-weight:700; color:var(--brown); background:transparent; min-width:0;}
-.p-row .rm{background:transparent; font-size:18px; color:var(--crimson); font-weight:900; padding:2px 6px;}
-.row-btns{display:flex; gap:10px; justify-content:center; margin-bottom:18px;}
-.chip-btn{background:var(--paper); border:2px solid var(--brown); border-radius:999px; padding:8px 18px; font-weight:700; font-size:14px; color:var(--brown); box-shadow:var(--shadow);}
-.fac-toggle{
-  display:flex; align-items:flex-start; gap:8px; text-align:left;
-  background:var(--paper); border:2px dashed var(--brown); border-radius:14px;
-  padding:12px 14px; font-size:13px; font-weight:700; line-height:1.7;
-  margin:0 auto 22px; width:min(460px,100%); cursor:pointer;
-}
-.fac-toggle input{width:18px; height:18px; margin-top:3px; accent-color:var(--crimson); flex:none;}
-.big-btn{
-  display:inline-block; background:var(--green); color:#fff; font-size:20px; font-weight:900;
-  padding:16px 44px; border-radius:999px; letter-spacing:.1em;
-  box-shadow:0 6px 0 #5a9114; transition:transform .08s;
-}
-.big-btn:active{transform:translateY(4px); box-shadow:0 2px 0 #5a9114;}
-.setup-note{margin-top:18px; font-size:13px; line-height:1.8; opacity:.75;}
+.p-row{display:flex; align-items:center; gap:10px; background:var(--card); border-radius:16px;
+  padding:9px 14px; box-shadow:var(--sh-s);}
+.p-dot{width:20px; height:20px; border-radius:50%; flex:none;}
+/* セットアップの行にも、その人のキャラ絵を出す（盤面のコマと同じ顔） */
+.p-av{width:34px; height:34px; border-radius:50%; flex:none; border:2.5px solid var(--line);
+  background-color:#F7FBFD; background-size:cover; background-position:center 16%;}
+.p-row input{flex:1; border:none; outline:none; font-family:inherit; font-size:16px;
+  font-weight:700; color:var(--ink); background:transparent; min-width:0;}
+.p-row .rm{background:transparent; font-size:17px; color:var(--happy); font-weight:900; padding:2px 6px;}
+.row-btns{display:flex; gap:10px; justify-content:center; margin-bottom:18px; flex-wrap:wrap;}
+.chip-btn{background:var(--card); border-radius:999px; padding:8px 18px; font-weight:700;
+  font-size:13.5px; color:var(--ink); box-shadow:var(--sh-s);
+  display:inline-flex; align-items:center; gap:6px;}
+.chip-btn.on{background:var(--gold); color:#7A6320;}
+.fac-toggle{display:flex; align-items:flex-start; gap:9px; text-align:left; background:var(--card);
+  border-radius:16px; padding:12px 15px; font-size:12.5px; font-weight:700; line-height:1.7;
+  margin:0 auto 20px; width:min(440px,100%); cursor:pointer; box-shadow:var(--sh-s);}
+.fac-toggle input{width:18px; height:18px; margin-top:3px; accent-color:var(--pink); flex:none;}
+.fac-toggle small{color:var(--sub);}
+.big-btn{display:inline-block; background:var(--pink); color:#fff; font-size:18px; font-weight:900;
+  padding:15px 42px; border-radius:999px; letter-spacing:.08em; box-shadow:0 5px 0 #D66882;
+  transition:transform .08s;}
+.big-btn:active{transform:translateY(3px); box-shadow:0 2px 0 #D66882;}
+.setup-note{margin-top:16px; font-size:12.5px; line-height:1.85; color:var(--sub); font-weight:700;}
 
-/* ---------- game ---------- */
-#game{padding:12px 12px 120px;}
-/* 手番と持ち情報は、盤面のどこにいても見えるように画面上部へ固定 */
-.sticky-head{
-  position:sticky; top:0; z-index:40; background:var(--cream);
-  margin:-12px -12px 8px; padding:12px 12px 6px;
-  box-shadow:0 8px 10px -8px rgba(74,58,48,.35);
+/* ---------- ゲーム画面 ---------- */
+#game{padding:0 0 96px;}
+/* PCは1画面におさめる。盤面は横:縦の比が決まっているので、残りの高さから横幅を決める。
+   ヘッダー・サイコロ・余白でおよそ 244px ぶんを引いている */
+@media (min-width:701px){
+  /* --board-aspect は盤面の縦横比。描くたびに JS が入れかえる（36マス=1.386） */
+  :root{--wrap:min(1700px, calc((100vh - 244px) * var(--board-aspect, 1.386) + 24px));}
 }
-.sticky-head .players-strip{margin-bottom:0;}
-.topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; max-width:1100px; margin:0 auto 10px;}
-.topbar .logo{font-weight:900; font-size:18px; letter-spacing:.1em;}
-.turn-pill{
-  background:var(--paper); border:2px solid var(--brown); border-radius:999px;
-  padding:8px 18px; font-weight:900; font-size:clamp(15px,2.6vw,20px); box-shadow:var(--shadow);
-  display:flex; align-items:center; gap:8px;
-}
-.turn-pill .p-dot{width:16px;height:16px;}
-.players-strip{
-  display:flex; gap:8px; overflow-x:auto; max-width:1100px; margin:0 auto 12px;
-  padding:4px 4px 10px;  /* 両端のカードの枠と影が切れないよう余白を確保 */
-}
-.pcard{
-  flex:1 0 156px; background:var(--paper); border:2px solid var(--brown); border-radius:14px;
-  padding:8px 10px; box-shadow:var(--shadow); font-size:12px; position:relative; opacity:.6; transition:opacity .2s;
-}
-/* オレンジ枠は outline ではなく box-shadow で描く（outline だと影とズレるため） */
-.pcard.now{opacity:1; box-shadow:0 0 0 3px var(--orange), 0 4px 0 3px rgba(74,58,48,.18);}
+.sticky-head{position:sticky; top:0; z-index:40; background:var(--page);
+  padding:10px 12px 8px; box-shadow:0 8px 12px -10px rgba(63,82,102,.3);}
+.topbar{display:flex; align-items:center; gap:9px; max-width:var(--wrap); margin:0 auto 9px;}
+.topbar .logo{font-weight:900; font-size:17px; letter-spacing:.08em; color:var(--pink); flex:none;}
+.turn-pill{flex:1; min-width:0; display:flex; align-items:center; gap:9px;
+  background:color-mix(in srgb, var(--ring, var(--pink)) 17%, #fff);
+  box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--ring, var(--pink)) 45%, #fff);
+  border-radius:999px; padding:6px 14px; font-weight:900; font-size:clamp(13px,2.4vw,15px);
+  overflow:hidden;}
+.turn-pill .av{width:28px; height:28px; border-radius:50%; flex:none;
+  border:2px solid var(--ring, var(--pink));
+  background-color:#fff; background-size:cover; background-position:center 16%;}
+.turn-pill .tp-txt{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.help-btn{height:40px; border-radius:999px; background:var(--card); display:inline-flex;
+  align-items:center; justify-content:center; gap:6px; padding:0 15px; color:var(--btn);
+  box-shadow:var(--sh-s); flex:none;}
+.help-btn .ic{width:21px; height:21px;}
+.help-btn .lbl{font-size:12.5px; font-weight:900; color:var(--ink); white-space:nowrap;}
+.help-btn:active{transform:translateY(1px);}
+.players-strip{display:flex; gap:8px; overflow-x:auto; max-width:var(--wrap); margin:0 auto;
+  padding:2px 2px 6px;}
+.pcard{flex:1 0 156px; background:var(--card); border-radius:15px; padding:8px 11px;
+  box-shadow:var(--sh-s); display:flex; gap:9px; align-items:center; opacity:.72; transition:opacity .2s;}
+.pcard.now{opacity:1; box-shadow:0 0 0 2.5px var(--ring, var(--pink)), var(--sh-s);}
 .pcard.done{opacity:.45;}
-.pcard .nm{font-weight:900; font-size:14px; display:flex; align-items:center; gap:6px; margin-bottom:4px;}
-.pcard .age{margin-left:auto; font-size:11px; font-weight:700; opacity:.55;}
-.pcard .nm .p-dot{width:13px;height:13px;}
-.pcard .stat{display:flex; justify-content:space-between; font-weight:700;}
-.pcard .stat b{font-family:"DotGothic16",monospace; font-size:14px;}
-.neg{color:var(--crimson);}
-.board-wrap{max-width:1100px; margin:0 auto; overflow-x:auto;}
-.board{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; min-width:560px; padding:6px;}
-.sq{
-  position:relative; aspect-ratio:1/1; border-radius:14px; border:2px solid var(--brown);
-  background:var(--paper); box-shadow:var(--shadow);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-  font-size:clamp(9px,1.4vw,12px); font-weight:700; text-align:center; padding:4px;
-}
-.sq .num{position:absolute; top:4px; left:7px; font-family:"DotGothic16",monospace; font-size:11px; opacity:.5;}
-.chapter{
-  display:flex; align-items:center; gap:8px; padding:6px 4px 0;
-  font-size:11px; font-weight:900; letter-spacing:.06em; opacity:.65; white-space:nowrap;
-}
-.chapter::after{content:""; flex:1; height:2px; background:rgba(74,58,48,.15); border-radius:2px;}
-.ch-note{font-size:10.5px; font-weight:700; opacity:.8; background:var(--paper); border:1.5px solid rgba(74,58,48,.3); border-radius:999px; padding:2px 10px;}
-/* 蛇行して進むので、行ごとの進行方向を示す */
-.ch-dir{font-size:10.5px; font-weight:900; color:var(--green); letter-spacing:.1em;}
-.sq .ic{font-size:clamp(14px,2.4vw,22px); line-height:1;}
-.sq.t-income{background:#EDF7DC; border-color:var(--green);}
-.sq.t-cost{background:#FFE9E7; border-color:var(--crimson);}
-.sq.t-event{background:#FFF3DC; border-color:var(--orange);}
-.sq.t-learn{background:#E0F4F8; border-color:var(--teal);}
-.sq.t-choice{
-  background:radial-gradient(circle at 50% 32%, #6B5540, var(--brown) 78%);
-  color:var(--cream); border-color:var(--orange); border-width:3px;
-  box-shadow:var(--shadow), 0 0 0 3px rgba(255,192,75,.28);
-  animation:doorGlow 2.6s ease-in-out infinite;
-}
-@keyframes doorGlow{
-  0%,100%{box-shadow:var(--shadow), 0 0 0 3px rgba(255,192,75,.22);}
-  50%{box-shadow:var(--shadow), 0 0 0 5px rgba(255,192,75,.5);}
-}
-.sq.t-choice::after{content:"✦"; position:absolute; top:4px; right:7px; font-size:11px; color:var(--orange);}
-.sq.t-choice .ic{font-size:clamp(18px,3vw,26px); filter:drop-shadow(0 0 5px rgba(255,192,75,.7));}
-.sq.t-choice .num{color:var(--orange); opacity:1;}
-.sq.t-start,.sq.t-goal{background:var(--cream); border-width:3px;}
-.sq .tokens{position:absolute; bottom:3px; left:0; right:0; display:flex; justify-content:center; gap:2px; flex-wrap:wrap; padding:0 3px;}
-.tok{
-  width:clamp(20px,3vw,28px); height:clamp(20px,3vw,28px);
-  filter:drop-shadow(0 2px 0 rgba(74,58,48,.35));
-  transition:transform .15s;
-}
-.tok svg{width:100%; height:100%; display:block;}
-.tok + .tok{margin-left:-8px;}
-.tok.now{transform:scale(1.25); z-index:2;}
-.tok.hop{transform:translateY(-6px) scale(1.35);}
-.controls{
-  position:fixed; left:0; right:0; bottom:0; padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+.pcard .av{width:38px; height:38px; border-radius:50%; flex:none; border:2.5px solid var(--line);
+  background-color:#F7FBFD; background-size:cover; background-position:center 16%;}
+.pcard .nm{font-size:12.5px; font-weight:900; line-height:1.35; display:flex; align-items:center; gap:5px;}
+.pcard .age{font-size:10.5px; font-weight:700; color:var(--sub); white-space:nowrap;}
+.pcard .row{display:flex; gap:8px; font-size:11px; font-weight:900; margin-top:1px;}
+/* 「195万」がスマホで折り返さないように、1項目は必ず1行で出す */
+.pcard .row span{display:inline-flex; align-items:center; gap:2px; white-space:nowrap;}
+.m1{color:var(--money);} .m2{color:var(--learn);} .m3{color:var(--happy);}
+.m1.neg{color:#C25B5B;}
+.board-wrap{max-width:var(--wrap); margin:10px auto 0; padding:0 12px;}
+#board{display:block; width:100%; height:auto; border-radius:18px;}
+.controls{position:fixed; left:0; right:0; bottom:0; padding:12px 16px calc(12px + env(safe-area-inset-bottom));
   display:flex; justify-content:center; z-index:50; pointer-events:none;
-}
-.dice-btn{
-  pointer-events:auto;
-  background:var(--crimson); color:#fff; font-size:22px; font-weight:900; letter-spacing:.08em;
-  padding:16px 52px; border-radius:999px; box-shadow:0 6px 0 #d24a3c;
-  display:flex; align-items:center; gap:12px; transition:transform .08s;
-}
-.dice-btn:active{transform:translateY(4px); box-shadow:0 2px 0 #d24a3c;}
+  background:linear-gradient(transparent,rgba(242,249,253,.9) 40%);}
+.dice-btn{pointer-events:auto; background:var(--btn); color:#fff; font-size:17px; font-weight:900;
+  letter-spacing:.06em; padding:14px 40px; border-radius:999px; box-shadow:0 5px 0 var(--btn-d);
+  display:flex; align-items:center; gap:11px; transition:transform .08s;}
+.dice-btn:active{transform:translateY(3px); box-shadow:0 2px 0 var(--btn-d);}
 .dice-btn:disabled{opacity:.5; cursor:default;}
-.dice-face{
-  background:#fff; color:var(--brown); border-radius:10px; width:40px; height:40px;
-  display:grid; place-items:center; font-family:"DotGothic16",monospace; font-size:24px;
-}
+.dice-face{background:#fff; border-radius:11px; width:38px; height:38px; display:grid;
+  grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); padding:6px; gap:1px;}
+.dice-face span{display:grid; place-items:center;}
+.dice-face i{width:6px; height:6px; border-radius:50%; background:var(--pink);}
 
-/* ---------- rules ---------- */
-.help-btn{
-  background:var(--paper); border:2px solid var(--brown); border-radius:999px;
-  width:38px; height:38px; font-weight:900; font-size:18px; color:var(--brown);
-  box-shadow:var(--shadow); flex:none;
-}
-.rule-page{position:relative; text-align:left;}
-.rule-close{
-  position:absolute; top:-8px; right:-4px; background:transparent;
-  font-size:20px; font-weight:900; color:var(--brown); padding:4px 8px; opacity:.6;
-}
+/* ---------- サイコロの演出 ---------- */
+.dice-stage{position:fixed; inset:0; z-index:90; display:none; flex-direction:column;
+  align-items:center; justify-content:center; gap:18px; background:rgba(242,249,253,.72);
+  backdrop-filter:blur(2px); pointer-events:none;}
+.dice-stage.on{display:flex;}
+/* 立体のサイコロ。6面ぶんの面を組んで、本体ごと転がす。
+   出目は「その面が正面を向く向き」に本体を回して見せる（JS の FACE_ROT） */
+.die-scene{--die:min(160px,38vw); width:var(--die); aspect-ratio:1; perspective:760px;}
+.die-scene.land{animation:bigLand .5s cubic-bezier(.2,1.4,.4,1);}
+.big-die{width:100%; height:100%; position:relative; transform-style:preserve-3d;}
+.big-die .face{position:absolute; inset:0; background:#fff; border-radius:24px;
+  border:2px solid #E8F0F6; box-shadow:inset 0 -6px 0 rgba(63,82,102,.07);
+  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+  padding:15px; gap:4px; backface-visibility:hidden;}
+.big-die .f1{transform:                translateZ(calc(var(--die) / 2));}
+.big-die .f2{transform:rotateY(90deg)  translateZ(calc(var(--die) / 2));}
+.big-die .f3{transform:rotateX(90deg)  translateZ(calc(var(--die) / 2));}
+.big-die .f4{transform:rotateX(-90deg) translateZ(calc(var(--die) / 2));}
+.big-die .f5{transform:rotateY(-90deg) translateZ(calc(var(--die) / 2));}
+.big-die .f6{transform:rotateY(180deg) translateZ(calc(var(--die) / 2));}
+.big-die span{display:grid; place-items:center;}
+.big-die i{width:22%; aspect-ratio:1; min-width:12px; border-radius:50%; background:var(--pink);}
+.big-die.roll{animation:bigTumble 1.5s linear infinite;}
+.big-die.land{transition:transform .6s cubic-bezier(.2,.85,.3,1.15);}
+@keyframes bigTumble{from{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg)}
+  to{transform:rotateX(720deg) rotateY(1080deg) rotateZ(360deg)}}
+@keyframes bigLand{0%{transform:scale(1.22)}60%{transform:scale(.95)}100%{transform:scale(1)}}
+.die-msg{font-size:clamp(19px,4.6vw,26px); font-weight:900; color:var(--ink); letter-spacing:.06em;
+  min-height:1.6em;}
+
+/* ---------- モーダル ---------- */
+.overlay{position:fixed; inset:0; background:rgba(63,82,102,.42); z-index:100;
+  display:none; place-items:center; padding:16px;}
+.overlay.open{display:grid;}
+.modal{width:min(420px,100%); max-height:88vh; overflow-y:auto; background:var(--card);
+  border-radius:24px; box-shadow:0 12px 36px rgba(63,82,102,.28);
+  animation:pop .26s cubic-bezier(.2,.8,.3,1.2);}
+.modal.wide{width:min(620px,100%);}
+@keyframes pop{from{transform:scale(.88); opacity:0} to{transform:scale(1); opacity:1}}
+.m-head{padding:18px 20px 15px; text-align:center;}
+.m-tag{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:900;
+  letter-spacing:.1em; padding:4px 13px; border-radius:999px; color:#fff;}
+.modal h2{font-size:clamp(19px,4.4vw,23px); font-weight:900; margin-top:9px; line-height:1.45;}
+.m-sub{font-size:12px; font-weight:700; color:var(--sub);}
+.m-body{padding:4px 20px 20px;}
+.m-lead{font-size:13px; font-weight:700; color:#54677A; text-align:center; line-height:1.85;
+  margin-bottom:14px;}
+.m-note{background:#F7FBFD; border-radius:14px; padding:11px 14px; font-size:12.5px;
+  font-weight:700; line-height:1.8; margin-bottom:13px;}
+.m-note.priv{background:#FBF4FB;}
+.m-btn{display:block; width:100%; background:var(--btn); color:#fff; font-size:15px; font-weight:900;
+  padding:13px; border-radius:999px; margin-top:6px; box-shadow:0 4px 0 var(--btn-d); transition:transform .08s;}
+.m-btn:active{transform:translateY(2px); box-shadow:0 2px 0 var(--btn-d);}
+.m-btn.ghost{background:var(--card); color:var(--ink); box-shadow:var(--sh-s);}
+.fx-line{display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin:12px 0 14px;}
+.fx{background:#F7FBFD; border-radius:999px; padding:4px 14px; font-weight:900; font-size:14px;
+  display:inline-flex; align-items:center; gap:4px;}
+.big-amount{text-align:center; font-size:28px; font-weight:900; margin:10px 0 14px;}
+
+/* 選択肢（トビラ）。どれも同じ青のボタン。開くかどうかは押すまで分からない */
+.door-list{display:flex; flex-direction:column; gap:9px;}
+.door{display:flex; align-items:center; gap:13px; width:100%; text-align:left;
+  border-radius:16px; padding:13px 16px;
+  transition:background .14s, transform .08s; background:#E8F0F8; color:var(--ink);
+  box-shadow:inset 0 0 0 2px #DAE7F3; --leaf-fill:#E8F0F8;}
+/* トビラの目じるし。文字は置かず、アイコンだけを大きく左に。
+   わく（奥）と扉（手前）を重ねて置き、ホバーすると扉だけが手前にひらく。
+   タイトルのトビラと同じ動き。閉じているあいだ扉はボタンと同じ色で、
+   ひらくと奥のくらがりが見える */
+.d-mark{flex:none; display:grid; place-items:center; width:30px; height:30px; color:#4B6E93;}
+.d-mark .ic{grid-area:1 / 1; width:30px; height:30px;}
+.d-mark .leaf{transform-origin:25% 50%; transition:transform .42s cubic-bezier(.2,.8,.3,1.2);}
+.door.pick:hover .d-mark .leaf,
+.door.pick:focus-visible .d-mark .leaf{transform:perspective(140px) rotateY(-58deg);}
+.d-mark.unseen{color:#6E5BA8;}
+.d-main{flex:1; min-width:0;}
+.door.pick{cursor:pointer;}
+.door.pick:hover{background:#DBE9F7; box-shadow:inset 0 0 0 2px #BED4EA; --leaf-fill:#DBE9F7;}
+.door:not(:disabled):active{transform:translateY(2px);}
+@media (prefers-reduced-motion:reduce){ .d-mark .leaf{transition:none;} }
+/* 押したあとの確認 */
+.c-card{border-radius:18px; padding:14px 16px; margin-bottom:15px;}
+.c-card.ok{background:#EAF6EF; box-shadow:inset 0 0 0 2px #C9E7D6;}
+.c-card.ng{background:#FAEEE9; box-shadow:inset 0 0 0 2px #EFD7CB;}
+.c-title{font-size:17px; font-weight:900; line-height:1.5; margin-bottom:3px;}
+.c-key{margin-top:9px; font-size:12.5px; font-weight:900; color:#7A5E2E; line-height:1.7;}
+.c-key .c-now{display:block; font-size:11.5px; font-weight:700; color:var(--sub);}
+.c-key .m1, .c-key .m2{display:inline-flex; align-items:center; gap:2px; font-weight:900;}
+.c-ask{text-align:center; font-size:14.5px; font-weight:900; margin:4px 0 12px; line-height:1.7;}
+.c-ask.ng{color:#B4643C; font-size:13.5px; display:flex; align-items:center;
+  justify-content:center; gap:6px; flex-wrap:wrap;}
+.d-badge{display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:900;
+  letter-spacing:.04em; border-radius:999px; padding:2px 10px; margin-bottom:6px;}
+.d-badge.plain{background:#D6E5F4; color:#4B6E93;}
+.d-badge.open{background:#CFEBDC; color:#3B7E58;}
+.d-badge.lock{background:#F6DFD2; color:#B4682F;}
+.d-badge.unseen{background:#E8E2F7; color:#6E5BA8;}
+/* トビラの画面に置く、画面上部とおなじプレイヤーカード。
+   ここは手もとを確かめる場所なので、上のバーより文字を大きくする。
+   枠は外に出る影ではなく内側の線にして、下のトビラのボタンと横幅をそろえる */
+.pcard.m-pcard{opacity:1; margin-bottom:13px; padding:12px 16px; border-radius:16px; gap:11px;
+  box-shadow:inset 0 0 0 2.5px var(--ring, var(--pink)), var(--sh-s);}
+.pcard.m-pcard .av{width:46px; height:46px;}
+.pcard.m-pcard .nm{font-size:15px; gap:6px;}
+.pcard.m-pcard .age{font-size:12.5px;}
+.pcard.m-pcard .row{font-size:15px; gap:13px; margin-top:3px;}
+.door .d-title{display:block; font-size:15px; font-weight:900; line-height:1.45;}
+.door .d-desc{display:block; font-size:11.5px; font-weight:700; color:#6E7E8C; margin-top:3px; line-height:1.65;}
+.door .d-key{display:flex; font-size:11.5px; font-weight:900; margin-top:7px;
+  align-items:center; gap:4px; flex-wrap:wrap;}
+.door.unseen{background:repeating-linear-gradient(45deg,#F1F3F5,#F1F3F5 9px,#EAEEF1 9px,#EAEEF1 18px);
+  cursor:not-allowed; box-shadow:none;}
+.door.unseen .d-title{color:#9AA7B2; letter-spacing:.16em;}
+.door.unseen .d-desc{color:#AEB9C2;}
+.d-cost{font-size:13px; font-weight:900; margin-top:8px; display:flex; align-items:center; gap:5px;}
+.d-cost.minus{color:#C25B5B;} .d-cost.plus{color:#4FA85E;}
+.d-cost s{opacity:.55; margin-right:3px; font-weight:700;}
+
+/* ステータス変化 */
+.chg-body{display:flex; gap:13px; align-items:center; padding:2px 0 6px;}
+.chg-char{width:74px; height:98px; flex:none; background-size:contain;
+  background-repeat:no-repeat; background-position:center bottom;}
+.chg-rows{flex:1; min-width:0; display:flex; flex-direction:column; gap:7px;}
+.chg-r{display:grid; grid-template-columns:58px 1fr auto; align-items:center; gap:8px;
+  border-radius:12px; padding:8px 12px;}
+.chg-r.money{background:#FFF4DC;} .chg-r.money .k{color:#B98A2A;}
+.chg-r.learn{background:#E7F2FC;} .chg-r.learn .k{color:#3F7EAC;}
+.chg-r.happy{background:#FDECF2;} .chg-r.happy .k{color:#CE6288;}
+.chg-r .k{font-size:11px; font-weight:900;}
+.chg-r .v{font-size:14.5px; font-weight:900; display:flex; align-items:center; gap:3px;}
+.chg-r .v s{color:#B4C1CB; font-weight:700; margin-right:3px; display:inline-flex; align-items:center; gap:2px;}
+.chg-r .d{font-size:13.5px; font-weight:900;}
+.up{color:#4FA85E;} .dn{color:#D9737B;}
+
+/* 家庭カード */
+/* 上の帯は、そのカードを見ている本人の色。盤面のコマ・上部の手番表示とそろえる */
+.fam-top{padding:16px 18px 14px; display:flex; gap:13px; align-items:center;
+  background:linear-gradient(120deg,
+    color-mix(in srgb, var(--fam, var(--pink)) 92%, var(--ink)),
+    color-mix(in srgb, var(--fam, var(--pink)) 74%, var(--ink)));}
+.fam-top .av{width:60px; height:60px; border-radius:50%; flex:none; border:3px solid #fff;
+  background-color:#fff; background-size:cover; background-position:center 16%;
+  box-shadow:0 2px 8px rgba(63,82,102,.22);}
+.fam-top .pill{display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:900;
+  letter-spacing:.08em; background:rgba(255,255,255,.92); border-radius:999px; padding:2px 10px; margin-bottom:5px;}
+.fam-top .nm{font-size:16.5px; font-weight:900; line-height:1.45; color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.15);}
+.fam-story{font-size:12.5px; font-weight:700; line-height:1.9; color:#54677A;
+  background:#F7FBFD; border-radius:14px; padding:12px 14px;}
+.fam-line{font-size:11.5px; font-weight:700; color:#7C8B99; margin-top:9px; line-height:1.75;
+  display:flex; align-items:flex-start; gap:5px;}
+.fam-line b{color:#4A3A30; font-size:12.5px;}
+.fam-line .note{color:#C4788A;}
+/* カードの中の「いまのステータス」と「トビラの記録」 */
+.now-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:11px;}
+.ns{border-radius:13px; padding:8px 10px 9px;}
+.ns.money{background:#FFF4DC;} .ns.learn{background:#E7F2FC;} .ns.happy{background:#FDECF2;}
+.ns .k{display:flex; align-items:center; gap:4px; font-size:10.5px; font-weight:900;}
+.ns.money .k{color:#B98A2A;} .ns.learn .k{color:#3F7EAC;} .ns.happy .k{color:#CE6288;}
+.ns .v{font-size:17px; font-weight:900; line-height:1.4;}
+.now-doors{margin-top:9px; background:#F7FBFD; border-radius:13px; padding:9px 12px;}
+.now-doors .k{display:flex; align-items:center; gap:5px; font-size:10.5px; font-weight:900; color:var(--sub);}
+.now-doors .dl{display:flex; flex-wrap:wrap; gap:4px 12px; font-size:11.5px; font-weight:700; margin-top:4px;}
+.now-doors .lo{color:#4CA872;} .now-doors .ll{color:#C98A3C;} .now-doors .lu{color:#7E6BC4;}
+.fam-perk{margin-top:11px; background:linear-gradient(100deg,#FFF0F6,#F3F0FF); border-radius:14px;
+  padding:11px 14px;}
+.fam-perk .k{font-size:10.5px; font-weight:900; color:#A9629B; letter-spacing:.08em;
+  display:flex; align-items:center; gap:5px;}
+.fam-perk .v{font-size:13px; font-weight:900; line-height:1.6; color:#5B4A6B;}
+.fam-secret{margin-top:11px; font-size:11px; font-weight:700; color:var(--sub); text-align:center;
+  display:flex; align-items:center; justify-content:center; gap:5px;}
+
+/* ---------- 結果発表 ---------- */
+#result{padding:30px 16px 60px;}
+.res-inner{max-width:760px; margin:0 auto;}
+#result h1{font-size:clamp(25px,6vw,36px); font-weight:900; text-align:center; margin-bottom:6px;
+  letter-spacing:.06em;}
+.res-sub{text-align:center; font-weight:700; color:var(--sub); margin-bottom:24px; font-size:13.5px;}
+.res-card{background:var(--card); border-radius:20px; padding:16px 18px 18px; margin-bottom:14px;
+  box-shadow:var(--sh);}
+.res-head{display:flex; gap:12px; align-items:center;}
+.res-head .av{width:50px; height:50px; border-radius:50%; flex:none; border:3px solid var(--pink);
+  background-color:#F7FBFD; background-size:cover; background-position:center 16%;}
+.rank{display:inline-block; font-size:12px; font-weight:900; background:var(--gold); color:#7A6320;
+  border-radius:999px; padding:2px 12px;}
+.r-name{font-size:17px; font-weight:900; margin-top:2px;}
+.r-fam{font-size:12px; font-weight:900; display:flex; align-items:center; gap:5px; margin-top:1px;
+  color:#D98E63;}
+.r-story{font-size:12px; line-height:1.8; color:var(--sub); font-weight:700; margin-top:9px;
+  background:#F7FBFD; border-radius:13px; padding:9px 12px;}
+.r-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:12px;}
+.rs{border-radius:15px; padding:10px 12px 11px;}
+.rs.money{background:#FFF4DC;} .rs.learn{background:#E7F2FC;} .rs.happy{background:#FDECF2;}
+.rs .k{display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:900; line-height:1.4;}
+.rs .k .ic{width:18px; height:18px;}
+.rs.money .k{color:#B98A2A;} .rs.learn .k{color:#3F7EAC;} .rs.happy .k{color:#CE6288;}
+.rs .v{font-size:20px; font-weight:900; line-height:1.4; margin-top:3px;
+  display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;}
+.rs .v s{font-size:12.5px; font-weight:700; color:#AEBBC5;}
+.rs .d{font-size:12.5px; font-weight:900; color:var(--sub); margin-top:1px;}
+.rs .d.up{color:#3F9E5F;} .rs .d.dn{color:#CE5A62;}
+.r-ending{margin-top:10px; background:#FFFBF0; border-radius:14px; padding:11px 14px;
+  font-size:12.5px; font-weight:700; line-height:1.9; color:#6B5C3E;}
+.r-ending b{color:#B07F28;}
+.doorbar{display:flex; height:14px; border-radius:999px; overflow:hidden; margin-top:12px; background:#EDF3F7;}
+.seg-open{background:var(--ok);} .seg-lock{background:var(--lock);} .seg-unseen{background:var(--unseen);}
+.doorbar-label{font-size:11.5px; font-weight:900; color:var(--sub); margin-top:7px; line-height:1.7;}
+.doorbar-label .lo{color:#4CA872;} .doorbar-label .ll{color:#C98A3C;} .doorbar-label .lu{color:#7E6BC4;}
+.rv-btn{margin-top:11px; font-size:13px;}
+.res-btns{text-align:center; margin-top:24px;}
+/* ふりかえりのまとめ箱。文字を反転させるが、角も色もやわらかく */
+.insight{background:#47596B; color:#EDF4F9; border-radius:22px; padding:22px; margin-top:24px;
+  line-height:2; font-size:13.5px; font-weight:700; box-shadow:var(--sh);}
+.insight b{color:var(--gold);}
+
+/* あそびかた・ネタバラシ・トビラ一覧（どれも .rule-page を使う）
+   あそびかたは、ページごとに中身の量がちがっても高さを変えない（「つぎへ」が動かないように）。
+   いちばん高いページの高さは JS が測って min-height に入れる。ここでは点と次へを下にそろえる */
+.rule-page{position:relative; text-align:left; padding:20px; display:flex; flex-direction:column;}
+/* あまった高さは、項目の上下に分ける（下だけがぽっかり空かないように） */
+.rule-page .rule-list{flex:1 1 auto; justify-content:center;}
+.rule-page .rule-dots{margin-top:auto;}
 .rule-list{display:flex; flex-direction:column; gap:10px;}
-.rule-item{
-  display:flex; gap:12px; align-items:flex-start;
-  background:var(--paper); border:2px solid var(--brown); border-radius:14px;
-  padding:12px 14px; font-size:14px; line-height:1.8; font-weight:700;
-}
-.rule-item .r-ic{font-size:22px; flex:none; line-height:1.5;}
-.rule-dots{display:flex; gap:8px; justify-content:center; margin:16px 0 4px;}
-.rule-dots span{width:10px; height:10px; border-radius:50%; background:#D8CFC2; border:2px solid var(--brown);}
-.rule-dots span.on{background:var(--orange);}
+.rule-item{display:flex; gap:12px; align-items:flex-start; background:#F7FBFD; border-radius:15px;
+  padding:12px 14px; font-size:13.5px; line-height:1.85; font-weight:700;}
+.rule-item .r-ic{flex:none; color:var(--btn); width:22px; height:22px; margin-top:3px;}
+.rule-item .r-ic .ic{width:22px; height:22px;}
+.rv-ic .ic{width:20px; height:20px;}
+.rule-dots{display:flex; gap:7px; justify-content:center; margin:16px 0 4px;}
+.rule-dots span{width:9px; height:9px; border-radius:50%; background:var(--line);}
+.rule-dots span.on{background:var(--pink);}
 .rule-nav{display:flex; gap:10px; justify-content:center; margin-top:10px;}
 .rule-nav .m-btn{margin:0;}
-.rule-nav .m-btn.ghost{background:var(--paper); color:var(--brown); border:2px solid var(--brown); box-shadow:var(--shadow);}
-
-/* ---------- reveal（ネタバラシ） ---------- */
-.rv-btn{margin-top:10px; font-size:13px;}
-.rv-list{display:flex; flex-direction:column; gap:14px; margin-bottom:14px;}
-.rv-door{background:var(--paper); border:2px solid var(--brown); border-radius:14px; padding:12px 14px;}
-.rv-title{font-weight:900; font-size:15px; margin-bottom:8px;}
-.rv-opt{display:flex; gap:10px; align-items:flex-start; padding:8px 10px; border-radius:10px; border:2px solid transparent; text-align:left;}
+.rv-list{display:flex; flex-direction:column; gap:13px; margin-bottom:14px;}
+.rv-door{background:#F7FBFD; border-radius:16px; padding:12px 14px;}
+.rv-title{font-weight:900; font-size:14.5px; margin-bottom:8px;}
+.rv-opt{display:flex; gap:10px; align-items:flex-start; padding:8px 11px; border-radius:12px;
+  text-align:left; background:#fff;}
 .rv-opt + .rv-opt{margin-top:6px;}
-.rv-opt.chosen{background:#EDF7DC; border-color:var(--green);}
-.rv-opt.locked{background:#F3EFE8;}
-.rv-opt.unseen{background:#FFF3DC; border-color:var(--orange); border-style:dashed;}
-.rv-ic{font-size:18px; flex:none;}
+.rv-opt.chosen{background:#E8F7EE;} .rv-opt.locked{background:#FBF1EA;}
+.rv-opt.unseen{background:#F2EEFC;}
+.rv-ic{flex:none; width:20px; height:20px; margin-top:2px;}
 .rv-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
-.rv-t{font-weight:900; font-size:13.5px;}
-.rv-d{font-size:12px; opacity:.8; line-height:1.6;}
-.rv-meta{font-size:12px; font-weight:700;}
-.rv-st{flex:none; font-size:11px; font-weight:900; opacity:.75; padding-top:3px;}
-.rv-who{display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; margin-top:5px; font-size:11px; font-weight:900;}
-.who{
-  display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700;
-  background:var(--paper); border:1.5px solid rgba(74,58,48,.25); border-radius:999px; padding:1px 8px;
-}
-.who .p-dot{width:10px; height:10px; border-width:1.5px;}
-.rv-untrod{
-  font-size:10.5px; font-weight:700; margin-left:8px; vertical-align:2px;
-  background:#E7E0D6; border-radius:999px; padding:2px 10px;
-}
+.rv-t{font-weight:900; font-size:13px;} .rv-d{font-size:11.5px; color:var(--sub); line-height:1.6;}
+.rv-meta{font-size:11.5px; font-weight:900; color:#7C8B99;}
+.rv-st{flex:none; font-size:10.5px; font-weight:900; color:var(--sub); padding-top:3px;}
+.rv-who{display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; margin-top:5px;
+  font-size:11px; font-weight:900;}
+.who{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700;
+  background:#fff; border-radius:999px; padding:1px 9px; box-shadow:var(--sh-s);}
+.who .p-dot{width:10px; height:10px;}
+.rv-untrod{font-size:10.5px; font-weight:700; margin-left:8px; background:var(--line);
+  border-radius:999px; padding:2px 10px;}
 
-/* ---------- modal ---------- */
-.overlay{
-  position:fixed; inset:0; background:rgba(74,58,48,.5); z-index:100;
-  display:none; place-items:center; padding:16px;
-}
-.overlay.open{display:grid;}
-.modal{
-  width:min(620px,100%); max-height:88vh; overflow-y:auto;
-  background:var(--cream); border:3px solid var(--brown); border-radius:22px;
-  padding:26px 22px; box-shadow:0 8px 0 rgba(74,58,48,.25);
-  animation:pop .25s cubic-bezier(.2,.8,.3,1.2);
-}
-@keyframes pop{from{transform:scale(.85); opacity:0;} to{transform:scale(1); opacity:1;}}
-.modal .m-tag{
-  display:inline-block; font-size:12px; font-weight:900; letter-spacing:.15em;
-  padding:4px 14px; border-radius:999px; color:#fff; margin-bottom:12px;
-}
-.modal h2{font-size:clamp(20px,4.5vw,26px); font-weight:900; margin-bottom:10px; line-height:1.4;}
-.modal .m-body{font-size:15px; line-height:1.9; margin-bottom:18px;}
-.m-note{
-  background:var(--paper); border:2px solid var(--teal); border-radius:12px;
-  padding:10px 14px; font-size:13.5px; font-weight:700; line-height:1.8; margin-bottom:14px;
-}
-.fx-line{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 18px;}
-/* フォントのルール: DotGothic16は数値データ（サイコロ・ステータス値・年齢）のみ。文章はすべてZen Maru */
-.fx{
-  background:var(--paper); border:2px solid var(--brown); border-radius:999px;
-  padding:5px 14px; font-weight:900; font-size:14px;
-}
-.door-list{display:flex; flex-direction:column; gap:12px; margin-bottom:8px;}
-.door{
-  display:flex; align-items:center; gap:14px; text-align:left; width:100%;
-  background:var(--paper); border:2px solid var(--brown); border-radius:16px;
-  padding:14px; box-shadow:var(--shadow); transition:transform .08s; color:var(--brown);
-}
-.door:not(:disabled):active{transform:translateY(3px); box-shadow:0 1px 0 rgba(74,58,48,.18);}
-.door:disabled{background:#EEE8DE; opacity:.8; cursor:not-allowed;}
-.door.unseen{background:#E7E0D6; border-style:dashed; opacity:.75;}
-.door .d-icon{
-  flex:none; width:44px; height:54px; border-radius:22px 22px 4px 4px;
-  background:var(--teal); border:2px solid var(--brown);
-  display:grid; place-items:center; font-size:20px;
-}
-.door:disabled .d-icon{background:var(--stone);}
-.door.unseen .d-icon{background:#CFC6B9; border-style:dashed;}
-.door .d-main{flex:1; min-width:0;}
-.door .d-title{font-weight:900; font-size:16px; margin-bottom:3px;}
-.door .d-desc{font-size:12.5px; line-height:1.6; opacity:.85;}
-.door .d-key{
-  margin-top:5px; display:inline-block; font-size:11.5px; font-weight:900;
-  background:var(--brown); color:var(--cream); border-radius:999px; padding:2px 10px;
-}
-.door:disabled:not(.unseen) .d-key{background:var(--crimson);}
-.d-key.d-cost{background:var(--paper); margin-left:6px;}
-.d-key.d-cost.minus{color:#d24a3c; border:1.5px solid #d24a3c;}
-.d-key.d-cost.plus{color:#5a9114; border:1.5px solid #5a9114;}
-.d-key.d-cost s{opacity:.55; margin-right:2px; font-weight:700;}
-.door:disabled:not(.unseen) .d-key.d-cost{background:var(--paper);}
-.m-btn{
-  display:block; margin:8px auto 0; background:var(--brown); color:var(--cream);
-  font-size:17px; font-weight:900; padding:13px 42px; border-radius:999px;
-  box-shadow:0 5px 0 rgba(0,0,0,.25); letter-spacing:.08em; transition:transform .08s;
-}
-.m-btn:active{transform:translateY(3px);}
-.fam-card{
-  background:var(--paper); border:2px solid var(--brown); border-radius:16px;
-  padding:16px; text-align:left; margin-bottom:14px; box-shadow:var(--shadow);
-}
-.fam-card .f-name{font-weight:900; font-size:18px; margin-bottom:8px;}
-.fam-card .f-story{font-size:14px; line-height:1.9; margin-bottom:12px;}
-.fam-card .f-stats{display:flex; flex-direction:column; gap:4px; font-size:13px; font-weight:700;}
-/* ステータス行: カテゴリ名は薄め、値はカテゴリ色で目立たせる */
-.fam-card .f-stats span{color:rgba(74,58,48,.62);}
-.fam-card .f-stats span b{font-family:"DotGothic16",monospace; color:var(--brown);}
-.fam-card .f-stats .fs-money b{color:#5a9114;}
-.fam-card .f-stats .fs-allow b{color:#5a9114;}
-.fam-card .f-stats .fs-region b{color:#007D91;}
-.fam-card .f-stats .fs-hidden b{color:#c77f00;}
-.fam-card .f-stats .fs-perk{color:rgba(74,58,48,.8);}
-.fam-card .f-stats .fs-perk b{color:#8a5fb8; font-family:inherit;}
-
-/* ---------- result ---------- */
-#result{padding:32px 16px 60px;}
-.res-inner{max-width:720px; margin:0 auto;}
-#result h1{font-size:clamp(26px,6vw,38px); font-weight:900; text-align:center; margin-bottom:6px; letter-spacing:.08em;}
-.res-sub{text-align:center; font-weight:700; margin-bottom:26px; opacity:.75;}
-.res-card{
-  background:var(--paper); border:2px solid var(--brown); border-radius:18px;
-  padding:16px 18px 18px; margin-bottom:16px; box-shadow:var(--shadow); position:relative;
-}
-.res-card .rank{
-  position:absolute; top:-12px; left:-8px; background:var(--orange); border:2px solid var(--brown);
-  border-radius:999px; padding:3px 14px; font-weight:900; font-size:14px;
-}
-.res-card .r-name{font-weight:900; font-size:19px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-.res-card .r-fam{font-size:13px; font-weight:900; color:var(--teal);}
-.res-card .r-story{font-size:12.5px; line-height:1.7; opacity:.8; margin:6px 0 10px;}
-.r-stats{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;}
-.r-ending{
-  background:#FBF6EA; border:1.5px dashed rgba(74,58,48,.35); border-radius:10px;
-  padding:9px 12px; font-size:12.5px; line-height:1.8; margin-bottom:10px;
-}
-.r-ending b{color:#B8860B;}
-.r-stats .fx{font-size:13px;}
-.doorbar{display:flex; height:16px; border-radius:999px; background:#E4DDD2; overflow:hidden; border:2px solid var(--brown);}
-.doorbar .seg-open{background:var(--teal);}
-.doorbar .seg-lock{background:var(--stone);}
-.doorbar .seg-unseen{background:var(--brown);}
-.doorbar-label{font-size:12px; font-weight:700; margin-top:6px; line-height:1.7; opacity:.9;}
-.insight{
-  background:var(--brown); color:var(--cream); border-radius:20px; padding:22px;
-  margin-top:26px; line-height:2; font-size:15px; font-weight:700;
-}
-.insight b{color:var(--orange);}
-.res-btns{text-align:center; margin-top:26px;}
 /* ---------- スマホ対応 ----------
    ここから下はベース定義のあとに置くこと。詳細度が同じなので、前に書くと効かない */
-@media (max-width:520px){
-  .sticky-head .pcard{padding:6px 8px; font-size:11px;}
-  .sticky-head .pcard .nm{font-size:12.5px; margin-bottom:2px;}
-  .topbar{gap:6px; margin-bottom:8px;}
-  .topbar .logo{font-size:14px; white-space:nowrap;}
-  .turn-pill{padding:6px 12px; font-size:13px; white-space:nowrap;}
-  .help-btn{width:32px; height:32px; font-size:15px;}
-}
-@media (max-width:430px){ .topbar .logo{display:none;} }
-
-/* 盤面3列＋トップバー調整。マスの文字は世界版・オンライン版と同じ大きさ */
 @media (max-width:640px){
-  .board{min-width:0;}
-  .sq{font-size:12.5px;}
-  .sq .ic{font-size:26px;}
-  .sq.t-choice .ic{font-size:30px;}
-  .sq .num{font-size:12.5px;}
-  .topbar{gap:6px;}
-  .topbar .logo{font-size:15px; white-space:nowrap; flex:none;}
-  .turn-pill{
-    flex:1; min-width:0; justify-content:center;
-    font-size:13px; padding:7px 10px; white-space:nowrap;
-  }
-  .help-btn{width:32px; height:32px; font-size:14px;}
-  .chapter{white-space:normal;}
+  .topbar .logo{display:none;}
+  .pcard{flex:1 0 138px; padding:7px 9px;}
+  .pcard .av{width:32px; height:32px;}
+  #game{padding-bottom:96px;}
+  .r-stats{grid-template-columns:1fr;}
+  .rs .v{font-size:18px;}
 }
-
-@media (prefers-reduced-motion:reduce){
-  *{animation:none!important; transition:none!important;}
+@media (max-width:860px){
+  .help-btn .lbl{display:none;}
+  .help-btn{width:40px; padding:0;}
 }
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important;}}
 </style>
 </head>
 <body>
+
+<!-- 描いたアイコン（絵文字は使わない） -->
+<svg style="position:absolute;width:0;height:0" aria-hidden="true"><defs>
+<symbol id="ic-coin" viewBox="0 0 24 24"><ellipse cx="12" cy="8.6" rx="8" ry="3.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4 8.6v6.8c0 1.9 3.6 3.4 8 3.4s8-1.5 8-3.4V8.6" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+<symbol id="ic-cost" viewBox="0 0 24 24"><circle cx="9.5" cy="9.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M18 12v7M18 20.5l-3.2-3.2M18 20.5l3.2-3.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z" fill="currentColor"/></symbol>
+<symbol id="ic-book" viewBox="0 0 24 24"><path d="M3 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H3z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M21 5h-7a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-door" viewBox="0 0 24 24"><path d="M6 21V7a6 6 0 0 1 12 0v14z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="14.6" cy="13.5" r="1.4" fill="currentColor"/></symbol>
+<symbol id="ic-doorway" viewBox="0 0 24 24"><path d="M6 21V7a6 6 0 0 1 12 0v14z" fill="currentColor" opacity=".22"/></symbol>
+<symbol id="ic-door-leaf" viewBox="0 0 24 24"><path d="M6 21V7a6 6 0 0 1 12 0v14z" fill="var(--leaf-fill,#E8F0F8)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="14.6" cy="13.5" r="1.4" fill="currentColor"/></symbol>
+<symbol id="ic-start" viewBox="0 0 24 24"><path d="M4 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-goal" viewBox="0 0 24 24"><path d="M6 21V4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M6 4h13v9H6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M6 4h6.5v4.5H6zM12.5 8.5H19V13h-6.5z" fill="currentColor"/></symbol>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10.5V20h13V10.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-sun" viewBox="0 0 24 24"><path d="M2 18h20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M6 18a6 6 0 0 1 12 0" fill="currentColor" opacity=".25"/><path d="M6 18a6 6 0 0 1 12 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 5v2.4M5 8l1.7 1.7M19 8l-1.7 1.7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></symbol>
+<symbol id="ic-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.8 6.3.8-4.7 4.4 1.2 6.2L12 17.3 6.5 20.2l1.2-6.2L3 9.6l6.3-.8z" fill="currentColor"/></symbol>
+<symbol id="ic-heart" viewBox="0 0 24 24"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0 1 12 6.6a4.7 4.7 0 0 1 8.5 2.6c0 5.8-8.5 11.3-8.5 11.3z" fill="currentColor"/></symbol>
+<symbol id="ic-spark" viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/><path d="M19 15l.9 2.6L22.5 18l-2.6.9L19 21.5l-.9-2.6L15.5 18l2.6-.9z" fill="currentColor" opacity=".7"/></symbol>
+<symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3C9.4 5.6 9.4 18.4 12 21" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+<symbol id="ic-die" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="8.4" cy="8.4" r="1.7" fill="currentColor"/><circle cx="15.6" cy="15.6" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/></symbol>
+<symbol id="ic-card" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="8.5" cy="11" r="2.2" fill="currentColor"/><path d="M5 16.5c.7-1.6 5-1.6 5.8 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14.5 10h4.5M14.5 13.6h4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-help" viewBox="0 0 24 24"><path d="M9 9a3 3 0 1 1 3.6 2.9c-.8.2-1.1.8-1.1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="11.6" cy="17.6" r="1.5" fill="currentColor"/></symbol>
+<symbol id="ic-tools" viewBox="0 0 24 24"><path d="M10.1 2.8h3.8l.4 2.4 2 1.2 2.3-.9 1.9 3.3-1.9 1.5v2.4l1.9 1.5-1.9 3.3-2.3-.9-2 1.2-.4 2.4h-3.8l-.4-2.4-2-1.2-2.3.9-1.9-3.3 1.9-1.5v-2.4L3.5 8.8l1.9-3.3 2.3.9 2-1.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="ic-cap" viewBox="0 0 24 24"><path d="M12 4 22 9l-10 5L2 9z" fill="currentColor"/><path d="M6 11.4V16c0 1.6 2.7 2.8 6 2.8s6-1.2 6-2.8v-4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="M4 12.5 9.5 18 20 6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 6.8V12l3.6 2.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-walk" viewBox="0 0 24 24"><circle cx="13" cy="4.2" r="2.2" fill="currentColor"/><path d="M13.5 8 10 11l1 4 3 5M10 11 7 15M11 15l-2 6M13.5 9.5 17 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M2.8 20c0-3.4 2.8-5.4 6.2-5.4s6.2 2 6.2 5.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16.4 5.2a3.4 3.4 0 0 1 0 6.6M18 14.9c2.2.6 3.6 2.4 3.6 5.1" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="currentColor"/><path d="M15.8 9.2a4 4 0 0 1 0 5.6M18.4 6.6a7.6 7.6 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+</defs></svg>
 
 <!-- ========== SETUP ========== -->
 <section id="setup" class="screen active">
@@ -375,7 +442,8 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
     <div class="player-inputs" id="playerInputs"></div>
     <div class="row-btns">
       <button class="chip-btn" id="addPlayer">＋ プレイヤーを追加</button>
-      <button class="chip-btn" id="helpBtnSetup">❓ あそびかた</button>
+      <button class="chip-btn" id="helpBtnSetup"><svg class="ic s"><use href="#ic-help"/></svg>あそびかた</button>
+      <button class="chip-btn" id="seBtnSetup" data-se="off">音</button>
     </div>
     <label class="fac-toggle">
       <input type="checkbox" id="heavyToggle">
@@ -395,19 +463,18 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 <section id="game" class="screen">
   <div class="sticky-head">
     <div class="topbar">
-      <div class="logo">🚪 トビラ</div>
+      <div class="logo">トビラ</div>
       <div class="turn-pill" id="turnPill"></div>
-      <div style="display:flex; gap:8px">
-        <button class="help-btn" id="helpBtnGame" aria-label="あそびかた">？</button>
-        <button class="help-btn" id="homeBtn" aria-label="タイトルにもどる">🏠</button>
-      </div>
+      <button class="help-btn" id="seBtn" data-se="off"><svg class="ic"><use href="#ic-sound"/></svg><span class="lbl" id="seBtnLabel">音</span></button>
+      <button class="help-btn" id="helpBtnGame"><svg class="ic"><use href="#ic-help"/></svg><span class="lbl">あそびかた</span></button>
+      <button class="help-btn" id="homeBtn" aria-label="タイトルにもどる"><svg class="ic"><use href="#ic-home"/></svg><span class="lbl">タイトル</span></button>
     </div>
     <div class="players-strip" id="playersStrip"></div>
   </div>
-  <div class="board-wrap"><div class="board" id="board"></div></div>
+  <div class="board-wrap"><svg id="board" viewBox="0 0 1780 1284"></svg></div>
   <div class="controls">
-    <button class="dice-btn" id="diceBtn">
-      <span class="dice-face" id="diceFace">?</span>
+    <button class="dice-btn" id="diceBtn" data-se="off">
+      <span class="dice-face" id="diceFace"></span>
       <span id="diceLabel">サイコロを回す</span>
     </button>
   </div>
@@ -420,12 +487,18 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
     <p class="res-sub">16歳から45歳、29年間のけっか。順位は「ハッピー」の数で決まります — そして、家庭カードの公開</p>
     <div id="resultList"></div>
     <div style="text-align:center; margin-bottom:10px">
-      <button class="chip-btn" id="allDoorsBtn">🚪 29年間のトビラ一覧を見る</button>
+      <button class="chip-btn" id="allDoorsBtn"><svg class="ic s"><use href="#ic-door"/></svg>29年間のトビラ一覧を見る</button>
     </div>
     <div class="insight" id="insightBox"></div>
     <div class="res-btns"><button class="big-btn" id="againBtn">もういちど遊ぶ</button></div>
   </div>
 </section>
+
+<!-- サイコロの演出（画面中央） -->
+<div class="dice-stage" id="diceStage" aria-hidden="true">
+  <div class="die-scene" id="dieScene"><div class="big-die" id="bigDie"></div></div>
+  <div class="die-msg" id="dieMsg"></div>
+</div>
 
 <!-- ========== MODAL ========== -->
 <div class="overlay" id="overlay">
@@ -434,19 +507,121 @@ h1.game-title{font-size:clamp(34px,8vw,52px); font-weight:900; letter-spacing:.1
 
 <script>
 "use strict";
+/* ===================== 効果音 =====================
+   音のファイルは持たない。鳴らすたびに WebAudio で組み立てる。
+   せかい版はESモジュールだが、国内版は file:// でそのまま開けることを優先して
+   index.html の中に素のスクリプトとして取りこんでいる。 */
+const SE = (()=>{
+  const KEY = "tobira-se";
+  let on = true;
+  try{ on = localStorage.getItem(KEY) !== "off"; }catch{}
+  let ctx = null;
+  const isOn = ()=>on;
+  function setOn(v){
+    on = !!v;
+    try{ localStorage.setItem(KEY, on ? "on" : "off"); }catch{}
+    if(on) resume();
+  }
+  function toggle(){ setOn(!on); return on; }
+  /* 音が出せる状態の AudioContext を返す。出せないときは null（無音のまま進む） */
+  function ac(){
+    if(!on) return null;
+    try{
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      if(!ctx) ctx = new AC();
+      if(ctx.state === "suspended") ctx.resume();
+      return ctx;
+    }catch{ return null; }
+  }
+  function resume(){ ac(); }
+  /* ひとつの音。山なりの音量にして、ブツッと切れないようにする */
+  function tone(c, {f, to, at=0, dur=.12, type="sine", vol=.16}){
+    const t0 = c.currentTime + at;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t0);
+    if(to) o.frequency.exponentialRampToValueAtTime(to, t0 + dur);
+    g.gain.setValueAtTime(.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + Math.min(.02, dur/3));
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    o.connect(g).connect(c.destination);
+    o.start(t0);
+    o.stop(t0 + dur + .03);
+  }
+  /* ざらっとした音（サイコロのころがり、紙をめくる感じ） */
+  function noise(c, {at=0, dur=.12, vol=.1, f=1400, q=.7}){
+    const t0 = c.currentTime + at;
+    const n = Math.max(1, Math.floor(c.sampleRate * dur));
+    const buf = c.createBuffer(1, n, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i] = (Math.random()*2 - 1) * (1 - i/n);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = q;
+    const g = c.createGain(); g.gain.value = vol;
+    src.connect(bp).connect(g).connect(c.destination);
+    src.start(t0);
+    src.stop(t0 + dur + .02);
+  }
+  /* 音階を順に鳴らす（ファンファーレなど） */
+  function seq(c, notes, {dur=.13, type="triangle", vol=.16, gap=.09}={}){
+    notes.forEach((f,i)=>tone(c, {f, at:i*gap, dur, type, vol}));
+  }
+  /* ドレミ。数字のままだと読めないので名前で置く */
+  const N = {C4:261.6, E4:329.6, G4:392, A4:440, C5:523.3, D5:587.3, E5:659.3,
+             G5:784, A5:880, C6:1046.5, E6:1318.5, G6:1568};
+  const SOUNDS = {
+    tap:   c=>tone(c, {f:N.A5, dur:.06, type:"triangle", vol:.1}),
+    pop:   c=>{ tone(c, {f:N.D5, dur:.1, type:"triangle", vol:.13});
+                tone(c, {f:N.A5, at:.06, dur:.12, type:"triangle", vol:.12}); },
+    roll:  c=>[0,.12,.24,.36].forEach(at=>noise(c, {at, dur:.1, vol:.09, f:1800})),
+    land:  c=>{ tone(c, {f:180, to:90, dur:.16, type:"square", vol:.12});
+                tone(c, {f:N.G5, at:.1, dur:.14, type:"triangle", vol:.14}); },
+    step:  c=>tone(c, {f:N.E5, dur:.05, type:"sine", vol:.07}),
+    door:  c=>{ tone(c, {f:320, dur:.08, type:"sine", vol:.13});
+                tone(c, {f:260, at:.11, dur:.1, type:"sine", vol:.13}); },
+    unlock:c=>{ noise(c, {dur:.07, vol:.07, f:2600});
+                seq(c, [N.E5,N.A5], {dur:.12, gap:.07, vol:.15}); },
+    locked:c=>{ tone(c, {f:210, to:130, dur:.22, type:"sawtooth", vol:.1});
+                tone(c, {f:150, at:.05, dur:.16, type:"square", vol:.07}); },
+    open:  c=>seq(c, [N.C5,N.E5,N.G5,N.C6], {dur:.14, gap:.07, vol:.15}),
+    good:  c=>seq(c, [N.E5,N.G5,N.C6], {dur:.14, gap:.08, vol:.15}),
+    bad:   c=>{ tone(c, {f:N.A4, to:N.E4, dur:.26, type:"triangle", vol:.13});
+                tone(c, {f:220, at:.12, dur:.22, type:"sine", vol:.1}); },
+    card:  c=>{ noise(c, {dur:.16, vol:.08, f:900, q:.5});
+                tone(c, {f:N.G4, to:N.D5, dur:.18, type:"sine", vol:.1}); },
+    goal:  c=>seq(c, [N.C5,N.E5,N.G5,N.C6], {dur:.18, gap:.1, vol:.16}),
+    result:c=>{ seq(c, [N.C5,N.E5,N.G5,N.C6,N.G5,N.C6], {dur:.2, gap:.12, vol:.16});
+                [N.E6,N.G6].forEach((f,i)=>tone(c, {f, at:.72 + i*.1, dur:.3, type:"sine", vol:.1})); },
+  };
+  /* 場面の名前で鳴らす。名前がなければ何も鳴らさない（音で進行を止めない） */
+  function play(name){
+    const c = ac();
+    const make = SOUNDS[name];
+    if(!c || !make) return;
+    try{ make(c); }catch{}
+  }
+  return {isOn, setOn, toggle, resume, play};
+})();
+
 /* ===================== data ===================== */
-const PCOLORS = ["#78BE21","#FF6858","#FFC04B","#00A3BD","#B58BD9","#F291B5"];
+/* プレイヤーの色。キャラ(CHARS)と同じ順番で対応させる */
+const PCOLORS = ["#F4879F","#6FA9DD","#A98BD9","#6FC49B","#E89A5C","#57BCC9"];
+const CHARS = ["p1","p2","p3","p4","p5","p6"];
+/* マスの見た目。icon は描いたSVGのid、fill=面、ink=文字、chip=見出しの帯 */
 const TYPE_META = {
-  start:{label:"スタート", ic:"🌱", tag:"#78BE21"},
-  goal:{label:"ゴール", ic:"🏁", tag:"#4A3A30"},
-  income:{label:"おしごと", ic:"💰", tag:"#78BE21"},
-  cost:{label:"しゅっぴ", ic:"💸", tag:"#FF6858"},
-  event:{label:"できごと", ic:"⚡", tag:"#FFC04B"},
-  learn:{label:"まなび", ic:"📚", tag:"#00A3BD"},
-  choice:{label:"トビラ", ic:"🚪", tag:"#4A3A30"},
-  heavy:{label:"できごと", ic:"⚠️", tag:"#4A3A30"},
-  fam:{label:"家庭カード", ic:"🏠", tag:"#00A3BD"},
+  start:{label:"スタート", icon:"start", fill:"#F4879F", ink:"#FFFFFF", chip:"#F4879F"},
+  goal:{label:"ゴール", icon:"goal", fill:"#FBD96B", ink:"#7A6320", chip:"#E0AE28"},
+  income:{label:"おしごと", icon:"coin", fill:"#FCE7A6", ink:"#6B5720", chip:"#D9A32B"},
+  cost:{label:"しゅっぴ", icon:"cost", fill:"#F9C9C9", ink:"#8E4A4A", chip:"#D9737B"},
+  event:{label:"できごと", icon:"bolt", fill:"#DCD3F5", ink:"#54487A", chip:"#8878C4"},
+  learn:{label:"まなび", icon:"book", fill:"#C6E3F7", ink:"#2F5E80", chip:"#4E8FC0"},
+  choice:{label:"トビラ", icon:"door", fill:"#F7A9C4", ink:"#FFFFFF", chip:"#E4708F"},
+  heavy:{label:"できごと", icon:"bolt", fill:"#E7D6C6", ink:"#6B5442", chip:"#B08968"},
+  fam:{label:"家庭カード", icon:"home", fill:"#E9A87C", ink:"#FFFFFF", chip:"#D98E63"},
 };
+/* 家庭カードの色帯。まちごとに色を変える */
+const FAM_TONE = {"都心":["#8FB8E0","#6E9BCC"], "地方":["#E9A87C","#D98E63"]};
 
 /* 家庭カード(6種) hide: seido=制度 / career=しごと / global=海外 */
 const FAMILIES = [
@@ -481,7 +656,7 @@ const AGES = [
   41,42,43,44,44,
   45,
 ];
-/* 盤面の行＝人生の章 */
+/* 盤面の段＝人生の章。1章＝6マス（せかい版と同じ決めごと） */
 const CHAPTERS = [
   {t:"🌱 10代 ── 旅立ちの前", note:"高校時代だけは1マスずつ。準備の時間だ"},
   {t:"🏠 20代前半 ── はじめての自立"},
@@ -644,12 +819,48 @@ function shuffle(a){
   }
   return a;
 }
+/* 描いたアイコン（上の <symbol> を参照する。絵文字は使わない） */
+const ic = (name, cls)=>`<svg class="ic${cls ? " "+cls : ""}" aria-hidden="true"><use href="#ic-${name}"/></svg>`;
+/* プレイヤーの色から、わりあてられたキャラを引く */
+const charOf = p => CHARS[Math.max(0, PCOLORS.indexOf(p.color))] || CHARS[0];
+const faceBg = p => `background-image:url(./chars/${charOf(p)}-face.png)`;
+const fm = n => `${n}万`;
+/* おかね・まなび・ハッピーは文字で書かず、プレイヤーカードと同じ色のアイコンで示す */
+const money = n => `<span class="m1${n<0?" neg":""}">${ic("coin","s")}${fm(n)}</span>`;
+const learn = n => `<span class="m2">${ic("star","s")}${n}</span>`;
+const happy = n => `<span class="m3">${ic("heart","s")}${n}</span>`;
+
+/* ---------- 効果音の出しいれ ---------- */
+const se = name => SE.play(name);
+/* ボタンは data-se で音を指定する。指定がなければタップ音、"off" なら押した先で鳴らす。
+   最初のタップで AudioContext もつないでおく（ブラウザは操作前に音を出せない） */
+document.addEventListener("pointerdown", e=>{
+  const b = e.target.closest && e.target.closest("button");
+  if(!b || b.disabled) return;
+  SE.resume();
+  const name = b.dataset.se || "tap";
+  if(name !== "off") SE.play(name);
+}, true);
+function syncSe(){
+  const on = SE.isOn();
+  const label = on ? "音 ON" : "音 OFF";
+  $("seBtnLabel").textContent = on ? "音" : "消音";
+  $("seBtn").querySelector("use").setAttribute("href", on ? "#ic-sound" : "#ic-mute");
+  $("seBtn").setAttribute("aria-pressed", String(on));
+  $("seBtn").setAttribute("aria-label", label);
+  $("seBtnSetup").textContent = label;
+  $("seBtnSetup").classList.toggle("on", on);
+  $("seBtnSetup").setAttribute("aria-pressed", String(on));
+}
+const flipSe = ()=>{ const on = SE.toggle(); syncSe(); if(on) SE.play("pop"); };
+$("seBtn").onclick = flipSe;
+$("seBtnSetup").onclick = flipSe;
 
 /* ===================== setup ===================== */
 function makeInputRow(i, name){
   const row = document.createElement("div");
   row.className = "p-row";
-  row.innerHTML = `<span class="p-dot" style="background:${PCOLORS[i]}"></span>
+  row.innerHTML = `<span class="p-av" style="${faceBg({color:PCOLORS[i]})}; border-color:${PCOLORS[i]}"></span>
     <input maxlength="8" placeholder="プレイヤー${i+1}" value="${name||""}">
     <button class="rm" aria-label="削除">✕</button>`;
   row.querySelector(".rm").onclick = ()=>{
@@ -659,7 +870,8 @@ function makeInputRow(i, name){
 }
 function refreshDots(){
   [...$("playerInputs").children].forEach((r,i)=>{
-    r.querySelector(".p-dot").style.background = PCOLORS[i];
+    const av = r.querySelector(".p-av");
+    av.style.cssText = `${faceBg({color:PCOLORS[i]})}; border-color:${PCOLORS[i]}`;
     r.querySelector("input").placeholder = `プレイヤー${i+1}`;
   });
 }
@@ -679,11 +891,12 @@ $("startBtn").onclick = ()=>{
   players = rows.map((r,i)=>{
     const nm = r.querySelector("input").value.trim() || `プレイヤー${i+1}`;
     const fam = famDeck[i % famDeck.length];
+    const lv = 1 + (fam.perk==="dandori"?1:0);
     return {
       name:nm, color:PCOLORS[i], fam,
       region:fam.region, perk:fam.perk,
       pos:0, money:fam.money, initMoney:fam.money,
-      allow:fam.allow, learn:1 + (fam.perk==="dandori"?1:0), happy:0,
+      allow:fam.allow, learn:lv, initLearn:lv, happy:0,
       hidden:new Set(fam.hide),
       open:0, locked:0, unseen:0, doorLog:[], loan:0,
       seidoDiscount:false, seidoUsed:false,
@@ -703,132 +916,459 @@ function showScreen(id){
   $(id).classList.add("active");
 }
 
-/* ---------- 家庭カードの非公開ドラフト ---------- */
-let famRevealIdx = null;
-function revealFamilyCard(i){
-  if(i >= players.length){ famRevealIdx = null; closeModal(); beginTurn(); return; }
-  famRevealIdx = i;
-  const p = players[i];
-  openModal(`
-    <span class="m-tag" style="background:${TYPE_META.fam.tag}">🏠 家庭カード</span>
-    <h2>${p.name} さんだけ、見てください</h2>
-    <p class="m-body">ほかの人には見せずに、そっとめくってね。<br>あなたのスタート地点が書いてあります。</p>
-    <button class="m-btn" id="mFlip">カードをめくる</button>
-    <button class="chip-btn" id="mHome" style="display:block; margin:16px auto 0">🏠 タイトルにもどる（人数を変える）</button>`);
-  $("mHome").onclick = showHomeConfirm;
-  $("mFlip").onclick = ()=>{
-    const hiddenN = p.hidden.size;
-    openModal(`
-      <span class="m-tag" style="background:${TYPE_META.fam.tag}">🏠 ${p.name} さんの家庭カード</span>
-      <div class="fam-card">
-        <div class="f-name">${p.fam.name}</div>
-        <div class="f-story">${p.fam.story}</div>
-        <div class="f-stats">
-          <span class="fs-money">💰 はじめのおかね：<b>${p.money}万</b></span>
-          <span class="fs-allow">📮 仕送り：<b>${p.allow>0 ? "毎回のお給料 +"+p.allow+"万" : "なし"}</b></span>
-          <span class="fs-region">🗾 まち：<b>${p.region}</b></span>
-          <span class="fs-hidden">👁 まだ見えていない選択肢：<b>${hiddenN}個</b>${hiddenN>0?"（そのマスでは「？？？」と表示されます）":""}</span>
-          <span class="fs-perk">✨ とくい：<b>${p.fam.perkText}</b></span>
-        </div>
-      </div>
-      <button class="m-btn" id="mNext">OK、覚えた${i < players.length-1 ? "（次の人へ）" : "（ゲームスタート！）"}</button>
-      <button class="chip-btn" id="mHome" style="display:block; margin:16px auto 0">🏠 タイトルにもどる（人数を変える）</button>`);
-    $("mHome").onclick = showHomeConfirm;
-    $("mNext").onclick = ()=>revealFamilyCard(i+1);
-  };
+/* ================= 盤面 =================
+   マスをマス目に並べるのではなく、1本の道を36等分してタイルに切る。
+   タイルが曲がることで「つぎにどっちへ進むか」が形そのものでわかる。 */
+const NS = "http://www.w3.org/2000/svg";
+const el = (t,a)=>{ const e = document.createElementNS(NS,t); for(const k in a) e.setAttribute(k, a[k]); return e; };
+const mqMobile = window.matchMedia("(max-width:700px)");
+
+/* 盤面の道。マスの数だけ等分して切るので、段の数ぶんだけ折れ線を用意する。
+   36マス・6章なので PC 6段・スマホ 12段（1章＝6マス／PCは1段＝1章）。
+   道の折れ線は「Uターンがちょうど半分で切れて、切り口が水平になる」ように
+   1段目と最終段だけ左へ66のばしてある。 */
+const LAY_WIDE = {
+  vb:[1780,1284], corner:100, skyH:84, artH:250, aspect:1.386,
+  pts:[[106,150],[1672,150],[1672,360],[172,360],[172,570],[1672,570],
+       [1672,780],[172,780],[172,990],[1672,990],[1672,1200],[106,1200]],
+  sub:true, tokenW:52, tokenH:66, fsBig:21, fsSmall:17,
+};
+/* スマホは上の余白を広めにとって、風景が見えるようにしてある */
+const LAY_TALL = {
+  vb:[560,2925], corner:112, skyH:108, artH:235,
+  pts:[[92,200],[468,200],[468,440],[92,440],[92,680],[468,680],[468,920],[92,920],
+       [92,1160],[468,1160],[468,1400],[92,1400],[92,1640],[468,1640],[468,1880],[92,1880],
+       [92,2120],[468,2120],[468,2360],[92,2360],[92,2600],[468,2600],[468,2840],[92,2840]],
+  sub:false, tokenW:46, tokenH:58, fsBig:21, fsSmall:18,
+};
+const layFor = wide => wide ? LAY_WIDE : LAY_TALL;
+const HALFW = {choice:66, start:62, goal:62};
+const halfW = t => HALFW[t] || 52;
+
+let geo = null;   /* {lay, at(s), seg} — コマの位置計算でも使う */
+
+/* 折れ線を、角だけ丸めた細かい点列に変える */
+function densePath(lay){
+  const P = lay.pts, Rr = lay.corner, out = [];
+  const unit = (a,b)=>{ const d = [b[0]-a[0], b[1]-a[1]]; const n = Math.hypot(d[0],d[1]); return [d[0]/n, d[1]/n, n]; };
+  let cur = P[0].slice();
+  for(let i=1;i<P.length;i++){
+    const v = P[i], [ux,uy,len] = unit(cur,v), hasCorner = i < P.length-1;
+    const stop = hasCorner ? Math.max(0, len - Rr) : len;
+    const n = Math.max(2, Math.round(stop/6));
+    for(let k=0;k<=n;k++) out.push([cur[0] + ux*stop*k/n, cur[1] + uy*stop*k/n]);
+    if(hasCorner){
+      const [wx,wy] = unit(v, P[i+1]);
+      const s = [cur[0] + ux*stop, cur[1] + uy*stop], e = [v[0] + wx*Rr, v[1] + wy*Rr], m = 40;
+      for(let k=1;k<=m;k++){
+        const t = k/m, it = 1-t;
+        out.push([it*it*s[0] + 2*it*t*v[0] + t*t*e[0], it*it*s[1] + 2*it*t*v[1] + t*t*e[1]]);
+      }
+      cur = e;
+    }
+  }
+  return out;
 }
-/* タイトルにもどる（確認つき） */
-function showHomeConfirm(){
-  const inFamReveal = famRevealIdx !== null;
-  openModal(`
-    <span class="m-tag" style="background:var(--brown)">🏠 タイトルにもどる</span>
-    <h2>ゲームをやめて、タイトルにもどる？</h2>
-    <p class="m-body">いまのゲームの記録は消えます。<br>人数やメンバーを変えるときも、ここからやりなおせます。</p>
-    <button class="m-btn" id="mQuit">タイトルにもどる</button>
-    <button class="m-btn" id="mStay" style="margin-top:10px; background:var(--paper); color:var(--brown); border:2px solid var(--brown); box-shadow:var(--shadow)">つづける</button>`);
-  $("mQuit").onclick = ()=>{ famRevealIdx = null; closeModal(); showScreen("setup"); initSetup(); };
-  $("mStay").onclick = ()=>{
-    if(inFamReveal) revealFamilyCard(famRevealIdx);
-    else closeModal();
+function buildGeo(lay){
+  const D = densePath(lay), cum = [0];
+  for(let i=1;i<D.length;i++) cum.push(cum[i-1] + Math.hypot(D[i][0]-D[i-1][0], D[i][1]-D[i-1][1]));
+  const total = cum[cum.length-1];
+  const at = s=>{
+    let lo = 0, hi = cum.length-1;
+    while(lo < hi-1){ const m = (lo+hi) >> 1; if(cum[m] < s) lo = m; else hi = m; }
+    const t = (s - cum[lo]) / Math.max(1e-6, cum[hi] - cum[lo]);
+    const p = [D[lo][0] + (D[hi][0]-D[lo][0])*t, D[lo][1] + (D[hi][1]-D[lo][1])*t];
+    const a = D[Math.max(0,lo-2)], b = D[Math.min(D.length-1, hi+2)];
+    const dx = b[0]-a[0], dy = b[1]-a[1], n = Math.hypot(dx,dy) || 1;
+    return {p, n:[-dy/n, dx/n]};
   };
+  return {lay, at, seg: total / SQUARES.length};
 }
 
-/* ===================== board ===================== */
-/* スマホ(〜640px)は3列×12行、それ以外は6列×6行。1章=6マスはどちらでも整数行になる */
-const mqMobile = window.matchMedia("(max-width:640px)");
-function boardCols(){ return mqMobile.matches ? 3 : 6; }
-function gridPos(i){
-  const cols = boardCols();
-  const row = Math.floor(i/cols);
-  const col = (row % 2 === 0) ? (i % cols) : (cols-1 - (i % cols));
-  return {row, col};
+/* 背景：日本の風景を一枚に。せかい版は日本・欧米・ウガンダを並べていたが、
+   国内版は舞台が日本なので「富士山と桜・都心のビル街・地方の里山」にしてある
+   （家庭カードの「都心」「地方」と同じ景色が盤面にも出る）。
+   3つの風景はそれぞれ「地平線を y=0」とした座標で描き、
+   同じ倍率で拡大して空の帯におさめる（縦だけ縮めるとつぶれて見えるため） */
+const SCENES = [
+  {cx:0.15, w:180, draw:a=>{          /* 富士山・鳥居・桜 */
+    a("path", {d:"M-169 0 L-83 -112 L3 0 Z", fill:"#BBD6E8"});
+    a("path", {d:"M-113 -76 L-83 -112 L-53 -76 q-30 14 -60 0 z", fill:"#FFFFFF"});
+    a("path", {d:"M17 0 v-56 M83 0 v-56", stroke:"#D95F45", "stroke-width":10, "stroke-linecap":"round"});
+    a("path", {d:"M3 -56 h94 M11 -40 h78", stroke:"#D95F45", "stroke-width":10, "stroke-linecap":"round"});
+    a("path", {d:"M145 -20 v22", stroke:"#B08968", "stroke-width":7, "stroke-linecap":"round"});
+    a("circle", {cx:139, cy:-38, r:30, fill:"#F8CBDA"});
+    a("circle", {cx:169, cy:-20, r:21, fill:"#FBDCE6"});
+    a("circle", {cx:117, cy:-16, r:17, fill:"#FBDCE6"});
+  }},
+  {cx:0.5, w:126, draw:a=>{           /* 都心：ビルの街なみ */
+    [[-126,-70],[-84,-46],[-40,-92],[4,-56],[48,-76],[92,-44]].forEach(([bx,by],i)=>{
+      a("rect", {x:bx, y:by, width:34, height:-by, rx:4, fill:i%2 ? "#CBDAE9" : "#D9E5F0"});
+      for(let r=0;r<3;r++) for(let c=0;c<2;c++)
+        if(by + 12 + r*20 < -10) a("rect", {x:bx + 7 + c*14, y:by + 12 + r*20, width:8, height:10, rx:2, fill:"#EEF5FA"});
+    });
+  }},
+  {cx:0.85, w:175, draw:a=>{          /* 地方：里山・田んぼ・民家 */
+    a("path", {d:"M-141 0 q120 -54 250 -14 q50 16 80 14 z", fill:"#DCEEC6"});
+    a("path", {d:"M-13 0 v-48", stroke:"#A98363", "stroke-width":9, "stroke-linecap":"round"});
+    a("circle", {cx:-13, cy:-58, r:30, fill:"#8CC28A"});
+    a("circle", {cx:-40, cy:-44, r:20, fill:"#A2D19E"});
+    a("circle", {cx:12, cy:-42, r:18, fill:"#A2D19E"});
+    a("path", {d:"M81 0 h60 v-24 h-60 z", fill:"#EFE2CE"});
+    a("path", {d:"M73 -22 l38 -28 l38 28 z", fill:"#9FB3C4"});
+    a("path", {d:"M-149 0 h44 v-18 h-44 z", fill:"#EFE2CE"});
+    a("path", {d:"M-155 -16 l28 -22 l28 22 z", fill:"#9FB3C4"});
+  }},
+];
+function drawScenery(svg, lay){
+  const [W,H] = lay.vb, artH = lay.artH, cloudH = lay.skyH;
+  const defs = el("defs");
+  /* 地平線(artH)のあたりで、空の色から地面の色へゆっくり変わるようにする */
+  const grad = el("linearGradient", {id:"sky", x1:0, y1:0, x2:0, y2:1});
+  [["0%","#DAEDFA"], [`${Math.round(artH/H*62)}%`,"#E2F1F6"],
+   [`${Math.round(artH/H*108)}%`,"#EAF5EE"], ["100%","#E3F2D8"]].forEach(([o,c])=>
+    grad.appendChild(el("stop", {offset:o, "stop-color":c})));
+  defs.appendChild(grad); svg.appendChild(defs);
+  svg.appendChild(el("rect", {width:W, height:H, fill:"url(#sky)"}));
+
+  const g = el("g", {}), add = (t,a)=>g.appendChild(el(t,a));
+  /* 太陽と雲は、マスに隠れない上のほうに置く */
+  add("circle", {cx:W*0.93, cy:cloudH*0.34, r:cloudH*0.22, fill:"#FFE49A"});
+  [0.1,0.34,0.6,0.78].forEach(f=>{
+    const cx = W*f, cy = cloudH*0.26, rx = cloudH*0.34, ry = cloudH*0.13;
+    add("ellipse", {cx, cy, rx, ry, fill:"#fff", opacity:.9});
+    add("ellipse", {cx:cx - rx*0.6, cy:cy + ry*0.5, rx:rx*0.62, ry:ry*0.8, fill:"#fff", opacity:.9});
+  });
+  /* 3つの風景。倍率は縦横おなじ＝形がつぶれない。
+     マスの下にもぐりこむ大きさで描く（タイルはこのあとに重ねる） */
+  const k = artH / 124;
+  SCENES.forEach(sc=>{
+    const cx = Math.min(W - sc.w*k*0.55, Math.max(sc.w*k*0.55, W*sc.cx));
+    const sg = el("g", {transform:`translate(${cx.toFixed(1)} ${artH}) scale(${k.toFixed(3)})`, opacity:.92});
+    sc.draw((t,a)=>sg.appendChild(el(t,a)));
+    g.appendChild(sg);
+  });
+  /* 道ぞいの木 */
+  const tree = (tx,ty,sz)=>{
+    add("path", {d:`M${tx} ${ty} v${16*sz}`, stroke:"#A98363", "stroke-width":4.5*sz, "stroke-linecap":"round"});
+    add("circle", {cx:tx, cy:ty - 5*sz, r:13*sz, fill:"#93C58F"});
+    add("circle", {cx:tx - 9*sz, cy:ty + 2*sz, r:10*sz, fill:"#7FB87F"});
+    add("circle", {cx:tx + 9*sz, cy:ty + 1*sz, r:9*sz, fill:"#7FB87F"});
+  };
+  const inset = lay.sub ? 46 : 28, n = lay.sub ? 6 : 8;
+  for(let i=0;i<n;i++){
+    const ty = artH + 30 + (H - artH - 70)*(i + .5)/n;
+    tree(inset, ty, lay.sub ? 1 : .8);
+    tree(W - inset, ty + 34, lay.sub ? .9 : .75);
+  }
+  svg.appendChild(g);
 }
+
+/* 高さ y のところで、その形の中にとれる「いちばん長い横の線」。無ければ null */
+function widestSpan(poly, y){
+  const xs = [];
+  for(let k=0;k<poly.length;k++){
+    const [x0,y0] = poly[k], [x1,y1] = poly[(k+1)%poly.length];
+    if((y0 <= y && y1 > y) || (y1 <= y && y0 > y)) xs.push(x0 + (x1-x0)*(y-y0)/(y1-y0));
+  }
+  if(xs.length < 2) return null;
+  xs.sort((a,b)=>a-b);
+  let best = null;
+  for(let k=0;k+1<xs.length;k+=2)
+    if(!best || xs[k+1]-xs[k] > best[1]-best[0]) best = [xs[k], xs[k+1]];
+  return best;
+}
+/* 横位置 x のところで、yRef をふくむ「ひとつづきの縦のひろがり」。無ければ null。
+   Uターンのマスは同じ x で上の腕と下の腕をまたぐので、つながった区間だけを返す */
+function vSpanAt(poly, x, yRef){
+  const ys = [];
+  for(let k=0;k<poly.length;k++){
+    const [x0,y0] = poly[k], [x1,y1] = poly[(k+1)%poly.length];
+    if((x0 <= x && x1 > x) || (x1 <= x && x0 > x)) ys.push(y0 + (y1-y0)*(x-x0)/(x1-x0));
+  }
+  if(ys.length < 2) return null;
+  ys.sort((a,b)=>a-b);
+  for(let k=0;k+1<ys.length;k+=2)
+    if(yRef >= ys[k]-1 && yRef <= ys[k+1]+1) return [ys[k], ys[k+1]];
+  return null;
+}
+/* マスの中で、文字のかたまりがいちばん広く入る場所をさがす。
+   まっすぐなマスならまん中、Uターンのマスなら曲がりの外がわの太いところが選ばれる。
+   offs は「かたまりの中心から見た、各行の位置」 */
+function bestLabelSpot(poly, offs){
+  const ys = poly.map(q=>q[1]);
+  const top = Math.min(...ys), bot = Math.max(...ys), N = 30;
+  const probes = [];
+  offs.forEach(o=>{ probes.push(o-12, o+4); });
+  const cand = [];
+  for(let i=0;i<=N;i++){
+    const ay = top + (bot-top)*i/N;
+    let lo = -Infinity, hi = Infinity;
+    for(const o of probes){
+      const sp = widestSpan(poly, ay + o);
+      if(!sp){ lo = 0; hi = -1; break; }
+      lo = Math.max(lo, sp[0]); hi = Math.min(hi, sp[1]);
+    }
+    if(hi - lo > 0) cand.push({x:(lo+hi)/2, y:ay, w:hi-lo});
+  }
+  if(!cand.length) return null;
+  const max = Math.max(...cand.map(c=>c.w));
+  const tie = cand.filter(c=>c.w >= max-1);        /* 同じ広さなら、そのまん中に置く */
+  return tie[Math.floor(tie.length/2)];
+}
+/* 横位置 x のところで、その形が上下どこからどこまであるか。無ければ null */
+function spanAtX(poly, x){
+  const ys = [];
+  for(let k=0;k<poly.length;k++){
+    const [x0,y0] = poly[k], [x1,y1] = poly[(k+1)%poly.length];
+    if((x0 <= x && x1 > x) || (x1 <= x && x0 > x)) ys.push(y0 + (y1-y0)*(x-x0)/(x1-x0));
+  }
+  return ys.length ? [Math.min(...ys), Math.max(...ys)] : null;
+}
+
+/* アイコンの上下のひろがり（線の太さこみ）。種類ごとに高さがちがうので、
+   文字のかたまりを上下まんなかに置くにはこれを見込む必要がある */
+const ICON_Y = {
+  income:[-12,12], cost:[-15,16], event:[-16,18], heavy:[-16,18], learn:[-10,11],
+  choice:[-21,17], start:[-9,9], goal:[-12,16], fam:[-12,12],
+};
+/* マスのアイコン（盤面用・線で描く） */
+function tileIcon(type, cx, cy, c){
+  const g = el("g", {transform:`translate(${cx} ${cy})`});
+  const a = (t,at)=>g.appendChild(el(t,at));
+  const S = {fill:"none", stroke:c, "stroke-width":3, "stroke-linecap":"round", "stroke-linejoin":"round"};
+  if(type === "income"){
+    a("ellipse", {cx:0, cy:6, rx:13, ry:5, fill:"#F6C445", stroke:c, "stroke-width":2.6});
+    a("ellipse", {cx:0, cy:0, rx:13, ry:5, fill:"#FFD86B", stroke:c, "stroke-width":2.6});
+    a("ellipse", {cx:0, cy:-6, rx:13, ry:5, fill:"#FFE49A", stroke:c, "stroke-width":2.6});
+  } else if(type === "cost"){
+    a("circle", {cx:-4, cy:-2, r:11, fill:"#fff", stroke:c, "stroke-width":2.8});
+    a("path", {...S, d:"M-8 -6 L-4 -2 L0 -6 M-8 -1 h8 M-4 -2 v6", "stroke-width":2.6});
+    a("path", {...S, d:"M10 2 v10 M10 14 l-5 -5 M10 14 l5 -5", "stroke-width":3.2});
+  } else if(type === "event" || type === "heavy"){
+    a("path", {d:"M4 -14 L-9 3 h7 l-4 13 L11 -2 h-7 z", fill:type === "heavy" ? "#C9A98C" : "#B59BE8", stroke:c, "stroke-width":2.6, "stroke-linejoin":"round"});
+  } else if(type === "learn"){
+    a("path", {d:"M-13 -8 h11 a2 2 0 0 1 2 2 v15 a2 2 0 0 0 -2 -2 h-11 z", fill:"#fff", stroke:c, "stroke-width":2.8, "stroke-linejoin":"round"});
+    a("path", {d:"M13 -8 h-11 a2 2 0 0 0 -2 2 v15 a2 2 0 0 1 2 -2 h11 z", fill:"#DCEEF9", stroke:c, "stroke-width":2.8, "stroke-linejoin":"round"});
+  } else if(type === "choice"){
+    a("path", {d:"M-12 15 v-22 a12 12 0 0 1 24 0 v22 z", fill:"#fff", stroke:"#D4547A", "stroke-width":3, "stroke-linejoin":"round"});
+    a("circle", {cx:6, cy:5, r:2.6, fill:"#D4547A"});
+  } else if(type === "start"){
+    a("path", {...S, d:"M-12 0 h20 M2 -7 l8 7 l-8 7", stroke:"#fff", "stroke-width":4});
+  } else if(type === "goal"){
+    a("path", {...S, d:"M-9 14 v-24", stroke:"#7A6320", "stroke-width":3.4});
+    a("path", {d:"M-9 -10 h20 v12 h-20 z", fill:"#fff", stroke:"#7A6320", "stroke-width":2.6});
+    a("path", {d:"M-9 -10 h10 v6 h-10 z M1 -4 h10 v6 h-10 z", fill:"#7A6320"});
+  }
+  return g;
+}
+
 function renderBoard(){
-  const b = $("board");
-  b.innerHTML = "";
-  const cols = boardCols();
-  const rpc = 6 / cols;  /* 1章あたりのマス行数 */
-  b.style.gridTemplateColumns = `repeat(${cols},1fr)`;
-  CHAPTERS.forEach((c,r)=>{
-    const lab = document.createElement("div");
-    lab.className = "chapter";
-    lab.style.gridRow = r*(rpc+1)+1;
-    lab.style.gridColumn = "1 / -1";
-    lab.innerHTML = c.t + (c.note ? `<span class="ch-note">${c.note}</span>` : "")
-      + `<span class="ch-dir">${r % 2 === 0 ? "みぎへ ▶" : "◀ ひだりへ"}</span>`;
-    b.appendChild(lab);
-  });
+  const lay = layFor(!mqMobile.matches);
+  /* PCは盤面を1画面におさめるので、横幅の上限を盤面の縦横比から決める（CSSのvar） */
+  document.documentElement.style.setProperty("--board-aspect", String(lay.aspect || 1.386));
+  geo = buildGeo(lay);
+  const svg = $("board");
+  svg.setAttribute("viewBox", `0 0 ${lay.vb[0]} ${lay.vb[1]}`);
+  svg.innerHTML = "";
+  drawScenery(svg, lay);
+
+  const gTiles = el("g", {}), gLabels = el("g", {});
+  svg.appendChild(gTiles); svg.appendChild(gLabels);
+  const {at, seg} = geo;
+  const band = [];                                      /* 各マスの上下端。章ラベルの位置決めに使う */
+
   SQUARES.forEach((sq,i)=>{
-    const m = TYPE_META[sq.t];
-    const el = document.createElement("div");
-    el.className = `sq t-${sq.t}`;
-    el.id = `sq-${i}`;
-    const {row,col} = gridPos(i);
-    const chap = Math.floor(i/6);
-    el.style.gridRow = chap*(rpc+1) + (row - chap*rpc) + 2;
-    el.style.gridColumn = col+1;
-    const ageLabel = (sq.t === "choice" || sq.t === "start" || sq.t === "goal") ? `<span class="num">${AGES[i]}歳</span>` : "";
-    el.innerHTML = `${ageLabel}<span class="ic">${m.ic}</span><span>${sq.name || m.label}</span><div class="tokens"></div>`;
-    b.appendChild(el);
+    const m = TYPE_META[sq.t], hw = halfW(sq.t);
+    /* STEPS：1マスの輪郭を何点で折るか。多いほど曲線がなめらかになる */
+    const s0 = i*seg + 3.5, s1 = (i+1)*seg - 3.5, STEPS = 22, left = [], right = [], mid = [];
+    for(let k=0;k<=STEPS;k++){
+      const {p,n} = at(s0 + (s1-s0)*k/STEPS);
+      left.push([p[0] + n[0]*hw, p[1] + n[1]*hw]);
+      right.push([p[0] - n[0]*hw, p[1] - n[1]*hw]);
+      mid.push(p);
+    }
+    const d = "M" + left.map(p=>p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L ")
+      + " L " + right.reverse().map(p=>p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L ") + " Z";
+    gTiles.appendChild(el("path", {d, id:`sq-${i}`, fill:m.fill, stroke:"#FFFFFF", "stroke-width":9, "stroke-linejoin":"round"}));
+
+    const poly = left.concat(right);
+    const big = sq.t === "choice" || sq.t === "start" || sq.t === "goal";
+    const tTxt = sq.name || m.label;
+    /* 年齢はトビラ・スタート・ゴールだけ。ほかのマスはPCでだけ年齢を小さく添える */
+    const ageTxt = `${AGES[i]}歳`;
+    let sTxt = big ? ageTxt : (lay.sub ? ageTxt : "");
+    /* アイコン・見出し・説明の位置（かたまりの中心から見た相対位置）。
+       アイコンの高さはマスの種類でちがうので、それを見込んで上下おなじ余白にそろえる */
+    const iy = ICON_Y[sq.t] || [-12,12];
+    const oIcon = -(big ? 30 : 26), oTitle = (big ? 12 : 10), oSub = (big ? 32 : 28);
+    const blockTop = oIcon + iy[0], blockBot = sTxt ? oSub + 3 : oTitle + 4;
+    const dy = -(blockTop + blockBot)/2;
+    const offs = [oIcon + dy, oTitle + dy];
+    if(sTxt) offs.push(oSub + dy);
+    const spot = bestLabelSpot(poly, offs)
+      || {x:mid[Math.floor(mid.length/2)][0], y:mid[Math.floor(mid.length/2)][1], w:2*hw};
+    /* 上と下の余白をそろえる。いちばん広い場所は、曲がったマスだと上下どちらかに
+       よることがあるので、その位置での「マスの縦のまん中」に置きなおす */
+    const vSpan = vSpanAt(poly, spot.x, spot.y);
+    if(vSpan) spot.y = (vSpan[0] + vSpan[1])/2;
+    /* 1行ごとに、その高さで使える幅を測る。曲がったマスでも白いフチをまたがない。
+       まとめて一番せまいところに合わせると、曲がりのマスだけ字が潰れてしまう */
+    const roomAt = ys=>{
+      let room = Infinity;
+      for(const y of ys){
+        const sp = widestSpan(poly, y);
+        room = Math.min(room, sp ? 2*Math.min(spot.x - sp[0], sp[1] - spot.x) : 0);
+      }
+      return Math.max(46, room - 24);
+    };
+    const fit = (txt, base, ys)=>{
+      const w = [...txt].reduce((s2,ch)=>s2 + (ch.charCodeAt(0) > 0x2E80 ? 1 : 0.55), 0);
+      return Math.min(base, roomAt(ys)/Math.max(1,w));
+    };
+    gLabels.appendChild(tileIcon(sq.t, spot.x, spot.y + offs[0], m.chip));
+    const yT = spot.y + offs[1];
+    const title = el("text", {x:spot.x, y:yT, "text-anchor":"middle",
+      "font-size":Math.max(10, fit(tTxt, big ? lay.fsBig : lay.fsSmall, [yT, yT-14])),
+      "font-weight":900, fill:m.ink});
+    title.textContent = tTxt;
+    gLabels.appendChild(title);
+    if(sTxt){
+      const yS = spot.y + offs[2], probes = [yS, yS-9];
+      const fs = fit(sTxt, big ? 12 : 11, probes);
+      if(fs >= 9.8){
+        const sub = el("text", {x:spot.x, y:yS, "text-anchor":"middle",
+          "font-size":fs, "font-weight":700,
+          fill:big ? m.ink : "#6E7E8C", opacity:big ? .92 : 1});
+        sub.textContent = sTxt;
+        gLabels.appendChild(sub);
+      }
+    }
+    band[i] = poly;      /* 章のラベルを置くときに、どこが空いているかを測るのに使う */
   });
+
+  /* 章のラベルは、段と段のあいだの「ほんとうに空いているところ」のまん中に置く。
+     角のタイルはとなりの段までふくらむので、盤面のまん中(cx)での空きだけを見る */
+  const cx = lay.vb[0]/2, perRow = lay.sub ? 6 : 3;
+  const spans = band.map(poly=>spanAtX(poly, cx));
+  CHAPTERS.forEach((ch,r)=>{
+    const first = r*6;
+    const tops = spans.slice(first, first + perRow).filter(Boolean).map(v=>v[0] - 4.5);
+    const bots = spans.slice(0, first).filter(Boolean).map(v=>v[1] + 4.5);
+    const top = tops.length ? Math.min(...tops) : 40;
+    const y = bots.length
+      ? (Math.max(...bots) + top)/2
+      : Math.max(16, top - 30);                         /* 1章目だけは、段の上に同じだけ空けて置く */
+    /* 章の注記は横にゆとりのあるPCだけ。スマホは章の名前だけにする */
+    const t = ch.t + (lay.sub && ch.note ? ` ── ${ch.note}` : "");
+    const w = Math.min(lay.vb[0] - 24, t.length*(lay.sub ? 14 : 15) + 24);
+    gLabels.appendChild(el("rect", {x:cx - w/2, y:y - 13, width:w, height:26, rx:13,
+      fill:"#fff", opacity:.95, stroke:"#DCE7EE", "stroke-width":2}));
+    const e = el("text", {x:cx, y:y + 5, "font-size":lay.sub ? 13.5 : 13, "font-weight":900,
+      fill:"#3F5266", "text-anchor":"middle"});
+    e.textContent = t;
+    gLabels.appendChild(e);
+  });
+
+  svg.appendChild(el("g", {id:"tokLayer"}));
 }
 /* 画面幅が切り替わったら盤面を組み直す */
 mqMobile.addEventListener("change", ()=>{
   renderBoard();
   if(players.length) renderTokens();
 });
+
+/* コマの表情。数字の変化ではなく「いまの状態」をあらわす。
+   せかい版の「退出中＝angry」は1画面版にないので、被災のあいだを angry にしている */
+function emotionOf(p, isTurn){
+  if(p.disasterTurns > 0) return "angry";
+  if(p.money < 0) return "sad";
+  if(p.done) return "joy";
+  return isTurn ? "fun" : "joy";
+}
 function renderTokens(){
-  document.querySelectorAll(".sq .tokens").forEach(t=>t.innerHTML="");
-  players.forEach((p,idx)=>{
-    const holder = document.querySelector(`#sq-${p.pos} .tokens`);
-    if(!holder) return;
-    const tk = document.createElement("span");
-    tk.className = "tok" + (idx === turn && !p.done ? " now" : ""); tk.id = `tok-${idx}`;
-    tk.innerHTML = `<svg viewBox="0 0 24 26">
-      <circle cx="12" cy="7" r="5.5" fill="${p.color}" stroke="#4A3A30" stroke-width="2"/>
-      <path d="M12 13.5c-5.2 0-8.5 3.6-8.5 8.5V24h17v-2c0-4.9-3.3-8.5-8.5-8.5z" fill="${p.color}" stroke="#4A3A30" stroke-width="2" stroke-linejoin="round"/>
-    </svg>`;
-    holder.appendChild(tk);
+  const layer = $("tokLayer");
+  if(!layer || !players.length || !geo) return;
+  layer.innerHTML = "";
+  const {at, seg, lay} = geo;
+  /* 同じマスに重なったときは、少しずつ横にずらす */
+  const bucket = {};
+  players.forEach((p,idx)=>{ (bucket[p.pos] = bucket[p.pos] || []).push({p, idx}); });
+  Object.entries(bucket).forEach(([posStr,list])=>{
+    const pos = +posStr;
+    const sq = SQUARES[pos]; if(!sq) return;
+    const {p:c, n} = at(pos*seg + seg/2);
+    const hw = halfW(sq.t);
+    /* どの段でも「タイルの上ふち」に立つよう、法線の向きをそろえる */
+    const sg = n[1] < 0 ? 1 : -1;
+    const base = [c[0] + n[0]*sg*(hw - 6), c[1] + n[1]*sg*(hw - 6)];
+    const W = lay.tokenW, H = lay.tokenH;
+    list.forEach(({p,idx},k)=>{
+      const off = (k - (list.length-1)/2)*(W*0.52);
+      const foot = [base[0] + off, base[1] - Math.abs(off)*0.12];
+      const g = el("g", {id:`tok-${idx}`});
+      g.appendChild(el("ellipse", {cx:foot[0], cy:foot[1]-1, rx:15, ry:5, fill:"rgba(63,82,102,.18)"}));
+      const isTurn = idx === turn && !p.done;
+      if(isTurn){
+        g.appendChild(el("rect", {x:foot[0]-34, y:foot[1]-H-23, width:68, height:22, rx:11, fill:p.color}));
+        const t = el("text", {x:foot[0], y:foot[1]-H-8, "text-anchor":"middle",
+          "font-size":12.5, "font-weight":900, fill:"#fff"});
+        t.textContent = p.name;
+        g.appendChild(t);
+      }
+      /* キャラは SVG の <image> で描く。HTMLを埋めこむ foreignObject だと
+         描き直しのタイミングが影や名前とそろわず、歩いている最中にずれて見える */
+      const img = el("image", {
+        href:`./chars/${charOf(p)}-${emotionOf(p, isTurn)}.png`,
+        x:foot[0] - W/2, y:foot[1] - H, width:W, height:H,
+        preserveAspectRatio:"xMidYMax meet",
+        opacity:isTurn ? 1 : .82,
+      });
+      img.style.filter = "drop-shadow(0 1px 2px rgba(63,82,102,.3))";
+      g.appendChild(img);
+      layer.appendChild(g);
+    });
   });
+}
+/* 手番プレイヤーのマスが見えるように画面を追従させる */
+function focusSquare(pos){
+  const t = $(`sq-${pos}`);
+  if(!t || !t.getBoundingClientRect) return;
+  const r = t.getBoundingClientRect();
+  if(r.height === 0) return;
+  window.scrollTo({top:Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height)/2), behavior:"smooth"});
+}
+
+/* ---------- プレイヤー一覧（画面上） ---------- */
+/* 画面上のプレイヤーカードの中身。トビラの画面でも同じ見た目を使う */
+function playerCardBody(p){
+  return `
+      <div class="av" style="${faceBg(p)}; border-color:${p.color}"></div>
+      <div style="min-width:0; flex:1">
+        <div class="nm">${p.name}${p.done ? ic("goal","s") : ""}
+          <span class="age">${AGES[p.pos]}歳</span></div>
+        <div class="row">
+          ${money(p.money)}${learn(p.learn)}${happy(p.happy)}
+        </div>
+      </div>`;
 }
 function renderStrip(){
   const s = $("playersStrip");
   s.innerHTML = "";
   players.forEach((p,i)=>{
     const c = document.createElement("div");
-    c.className = "pcard" + (i===turn?" now":"") + (p.done?" done":"");
+    c.className = "pcard" + (i===turn ? " now" : "") + (p.done ? " done" : "");
     c.id = `pcard-${i}`;
-    c.innerHTML = `
-      <div class="nm"><span class="p-dot" style="background:${p.color}"></span>${p.name}${p.done?" 🏁":""}<span class="age">${AGES[p.pos]}歳</span></div>
-      <div class="stat"><span>おかね</span><b class="${p.money<0?"neg":""}">${p.money}万</b></div>
-      <div class="stat"><span>まなび</span><b>${"★".repeat(Math.min(p.learn,8))}${p.learn>8?"+":""}</b></div>
-      <div class="stat"><span>ハッピー</span><b>♥${p.happy}</b></div>`;
+    c.style.setProperty("--ring", p.color);
+    c.innerHTML = playerCardBody(p);
     s.appendChild(c);
   });
 }
 function updateTurnUI(){
   const p = players[turn];
-  $("turnPill").innerHTML = `<span class="p-dot" style="background:${p.color}"></span>${p.name} さんの番・${AGES[p.pos]}歳`;
+  $("turnPill").style.setProperty("--ring", p.color);
+  $("turnPill").innerHTML = `<span class="av" style="${faceBg(p)}"></span>`
+    + `<span class="tp-txt">${p.name} さんの番・${AGES[p.pos]}歳</span>`;
   renderStrip(); renderTokens();
   /* 縦スクロールを起こさないよう、プレイヤー一覧だけ横に動かす */
   const card = $(`pcard-${turn}`);
@@ -839,21 +1379,83 @@ function updateTurnUI(){
   }
 }
 
-/* ===================== turn flow ===================== */
-/* 手番プレイヤーのマスが見えるように画面を追従させる */
-function focusSquare(pos){
-  const el = $(`sq-${pos}`);
-  if(!el) return;
-  const r = el.getBoundingClientRect();
-  const wrap = document.querySelector(".board-wrap");
-  if(wrap){
-    const wr = wrap.getBoundingClientRect();
-    const x = wrap.scrollLeft + (r.left - wr.left) - (wrap.clientWidth - r.width) / 2;
-    wrap.scrollTo({left: Math.max(0, x), behavior:"auto"});
-  }
-  const y = el.getBoundingClientRect().top + window.scrollY - (window.innerHeight - r.height) / 2;
-  window.scrollTo({top: Math.max(0, y), behavior:"smooth"});
+/* ===================== サイコロ ===================== */
+const PIPS = {1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8]};
+let spinTimer = null;
+function diceFace(n, box){
+  const on = new Set(PIPS[n] || []);
+  (box || $("diceFace")).innerHTML = Array.from({length:9}, (_,i)=> on.has(i) ? "<span><i></i></span>" : "<span></span>").join("");
 }
+/* 画面中央の大きなサイコロ。立体の6面を組んで、本体ごと転がす。
+   ひととおり転がしてから、出た目の面が正面を向くように着地させる */
+let diceBusy = false, rollStart = 0;
+const MIN_ROLL = 900, HOLD = 820;                /* 着地の回りこみ(.6s)を見せてから閉じる */
+/* その目の面が正面を向くように、本体を回す向き。CSSの .f1〜.f6 の置き方と対になっている */
+const FACE_ROT = {
+  1:"rotateX(0deg) rotateY(0deg)", 2:"rotateX(0deg) rotateY(-90deg)",
+  3:"rotateX(-90deg) rotateY(0deg)", 4:"rotateX(90deg) rotateY(0deg)",
+  5:"rotateX(0deg) rotateY(90deg)", 6:"rotateX(0deg) rotateY(180deg)",
+};
+/* 6面ぶんの目を一度だけ組み立てる */
+function buildBigDie(die){
+  if(die.childElementCount) return;
+  for(let n=1;n<=6;n++){
+    const face = document.createElement("div");
+    face.className = "face f" + n;
+    diceFace(n, face);
+    die.appendChild(face);
+  }
+}
+function startBigDice(){
+  if(diceBusy) return;
+  diceBusy = true; rollStart = Date.now();
+  const stage = $("diceStage"), scene = $("dieScene"), die = $("bigDie");
+  buildBigDie(die);
+  stage.classList.add("on");
+  scene.classList.remove("land");
+  die.classList.remove("land"); die.style.transform = ""; die.classList.add("roll");
+  $("dieMsg").textContent = "";                 /* 回っているあいだは文字を出さない。前回の「N マスすすむ！」も消す */
+  se("roll");
+  spinTimer = setInterval(()=>diceFace(1 + Math.floor(Math.random()*6)), 80);
+}
+function landBigDice(n, done){
+  if(!diceBusy || !spinTimer) return;
+  const delay = Math.max(0, MIN_ROLL - (Date.now() - rollStart));
+  setTimeout(()=>{
+    if(!spinTimer) return;
+    clearInterval(spinTimer); spinTimer = null;
+    const die = $("bigDie");
+    /* 回っている途中の向きをいったん固定してから着地の向きへ動かす。
+       そうしないと、アニメを外した瞬間に正面向きへ飛んでしまう */
+    const mid = getComputedStyle(die).transform;
+    die.classList.remove("roll");
+    die.style.transition = "none";
+    die.style.transform = mid;
+    void die.offsetWidth;                         /* ここで一度レイアウトさせる */
+    die.style.transition = "";
+    die.classList.add("land");
+    die.style.transform = FACE_ROT[n] || FACE_ROT[1];
+    $("dieScene").classList.add("land");
+    diceFace(n);
+    se("land");
+    $("dieMsg").textContent = `${n} マスすすむ！`;
+    setTimeout(()=>{
+      $("diceStage").classList.remove("on");
+      diceBusy = false;
+      if(done) done();                            /* ここからコマが歩きだす */
+    }, HOLD);
+  }, delay);
+}
+/* 出目の決め方（乱数）はそのまま。見せ方だけ立体のサイコロにした */
+function spinDice(){
+  return new Promise(res=>{
+    startBigDice();
+    const n = 1 + Math.floor(Math.random()*6);
+    landBigDice(n, ()=>res(n));
+  });
+}
+
+/* ===================== turn flow ===================== */
 function beginTurn(){
   updateTurnUI();
   focusSquare(players[turn].pos);
@@ -869,11 +1471,10 @@ function beginTurn(){
   }
   busy = false;
   $("diceBtn").disabled = false;
-  $("diceFace").textContent = "?";
   /* 高校時代(進路の手前まで)はサイコロを使わず1マスずつ */
   const hs = p.pos < 4;
   $("diceFace").style.display = hs ? "none" : "grid";
-  $("diceLabel").textContent = hs ? "🏫 一歩すすむ" : "サイコロを回す";
+  $("diceLabel").textContent = hs ? "一歩すすむ" : "サイコロを回す";
 }
 
 $("diceBtn").onclick = async ()=>{
@@ -881,28 +1482,14 @@ $("diceBtn").onclick = async ()=>{
   busy = true;
   $("diceBtn").disabled = true;
   if(players[turn].pos < 4){
+    /* 子ども時代は1マスずつなので、サイコロの音ではなく足音にする */
+    se("step");
     await movePlayer(turn, 1);
   } else {
     const n = await spinDice();
     await movePlayer(turn, n);
   }
 };
-
-function spinDice(){
-  return new Promise(res=>{
-    const face = $("diceFace");
-    let count = 0;
-    const iv = setInterval(()=>{
-      face.textContent = 1 + Math.floor(Math.random()*6);
-      if(++count > 9){
-        clearInterval(iv);
-        const n = 1 + Math.floor(Math.random()*6);
-        face.textContent = n;
-        setTimeout(()=>res(n), 350);
-      }
-    }, 80);
-  });
-}
 
 async function movePlayer(idx, steps){
   const p = players[idx];
@@ -912,11 +1499,10 @@ async function movePlayer(idx, steps){
   }
   while(p.pos < target){
     p.pos++;
+    se("step");
     renderTokens();
     focusSquare(p.pos);
-    const tk = $(`tok-${idx}`);
-    if(tk) tk.classList.add("hop");
-    await wait(230);
+    await wait(210);
   }
   await wait(150);
   resolveSquare(idx);
@@ -947,11 +1533,11 @@ function resolveSquare(idx){
       const job = jobTitle(p);
       title = `${job.ic} ${AGES[p.pos]}歳・いまの仕事：${job.t}`;
       note = `お給料は <b>20万 ＋ まなび×10万${p.allow>0 ? " ＋ 仕送り"+p.allow+"万" : ""}</b><br>まなびが増えると、仕事もお給料も変わっていく`;
-      if(p.disasterTurns > 0){ amt -= 10; note += `<br>⚠️ 被災の影響で −10万（あと${p.disasterTurns}ターン）`; }
+      if(p.disasterTurns > 0){ amt -= 10; note += `<br>${ic("bolt","s")} 被災の影響で −10万（あと${p.disasterTurns}ターン）`; }
       if(p.loan > 0){
         const pay = Math.min(6, p.loan);
         p.loan -= pay; amt -= pay;
-        note += `<br>🎓 奨学金の返済 −${pay}万（のこり${p.loan}万）`;
+        note += `<br>${ic("cap","s")} 奨学金の返済 −${pay}万（のこり${p.loan}万）`;
       }
     }
     showInfoModal("income", title, note, {money:amt}, idx);
@@ -995,7 +1581,7 @@ function drawEvent(idx){
     const n = p.perk === "tsunagari" ? 2 : 1;
     const revealed = revealTags(p, ev.reveal, n);
     showInfoModal("event", ev.t, ev.d, {}, idx,
-      revealed > 0 ? `👁 見えていなかった選択肢が <b>${revealed}個</b>、見えるようになった！` : null);
+      revealed > 0 ? `${ic("eye","s")} 見えていなかった選択肢が <b>${revealed}個</b>、見えるようになった！` : null);
   }
   else if(ev.kind === "fair"){
     showChoiceModal(idx, {
@@ -1069,38 +1655,68 @@ function showLetterModal(idx){
   }, "heavy", true);
 }
 
-/* ---------- modals ---------- */
-function fxChips(fx){
-  const parts = [];
-  if(fx.money) parts.push(`<span class="fx" style="color:${fx.money>0?"#5a9114":"#d24a3c"}">${fx.money>0?"+":""}${fx.money}万</span>`);
-  if(fx.learn) parts.push(`<span class="fx" style="color:#00A3BD">まなび +${fx.learn}</span>`);
-  if(fx.happy) parts.push(`<span class="fx" style="color:#F291B5">♥ +${fx.happy}</span>`);
-  if(!parts.length) parts.push(`<span class="fx">変化なし</span>`);
-  return `<div class="fx-line">${parts.join("")}</div>`;
+/* ===================== modals ===================== */
+/* パネルの外を押したときにすること。null のあいだは外を押しても閉じない。
+   トビラやできごとは選ばずに閉じられると進行が止まるので、既定は閉じない側にしておく */
+let modalDismiss = null;
+function openModal(html, onDismiss){
+  $("modalBox").innerHTML = html;
+  $("overlay").classList.add("open");
+  $("modalBox").scrollTop = 0;
+  modalDismiss = onDismiss || null;
+}
+function closeModal(){
+  $("overlay").classList.remove("open"); $("modalBox").innerHTML = ""; modalDismiss = null;
+}
+const isOpen = ()=>$("overlay").classList.contains("open");
+/* 外側は、下の閉じるボタンとまったく同じことをする */
+$("overlay").onclick = e=>{ if(e.target === $("overlay") && modalDismiss) modalDismiss(); };
+
+const tagChip = (type, label)=>{
+  const m = TYPE_META[type] || TYPE_META.event;
+  return `<span class="m-tag" style="background:${m.chip}">${ic(m.icon,"s")} ${label != null ? label : m.label}</span>`;
+};
+/* ステータスがどう変わったかを、前後の数字で見せる */
+function chgPanel(before, fx){
+  const rows = [
+    ["money","おかね", before.money, fx.money||0, v=>fm(v)],
+    ["learn","まなび", before.learn, fx.learn||0, v=>"★"+v],
+    ["happy","ハッピー", before.happy, fx.happy||0, v=>"♥"+v],
+  ].filter(r=>r[3] !== 0);
+  if(!rows.length) return `<div class="fx-line"><span class="fx">数字は変わらなかった</span></div>`;
+  const emo = (fx.happy||0) > 0 ? "joy" : (((fx.money||0) > 0 || (fx.learn||0) > 0) ? "fun" : "sad");
+  return `<div class="chg-body">
+    <div class="chg-char" style="background-image:url(./chars/${charOf(before)}-${emo}.png)"></div>
+    <div class="chg-rows">${rows.map(([k,label,base,d,f])=>`
+      <div class="chg-r ${k}"><span class="k">${label}</span>
+        <span class="v"><s>${f(base)}</s>${f(base+d)}</span>
+        <span class="d ${d > 0 ? "up" : "dn"}">${d > 0 ? "+" : ""}${k === "money" ? fm(d) : d}</span></div>`).join("")}
+    </div></div>`;
 }
 function applyFx(p, fx){
   p.money += fx.money||0;
   p.learn += fx.learn||0;
   p.happy += fx.happy||0;
 }
-function openModal(html){
-  $("modalBox").innerHTML = html;
-  $("overlay").classList.add("open");
-  $("modalBox").scrollTop = 0;
+/* 出てきた画面にあわせて鳴らす音を選ぶ。数字が増えるか減るかで、うれしい／つらいを分ける */
+function fxSound(fx, type){
+  if((fx.money||0) < 0 || (fx.happy||0) < 0) return "bad";
+  if((fx.money||0) > 0 || (fx.learn||0) > 0 || (fx.happy||0) > 0) return "good";
+  return type === "heavy" ? "bad" : "pop";
 }
-function closeModal(){ $("overlay").classList.remove("open"); }
 
 function showInfoModal(type, title, body, fx, idx, note){
-  const m = TYPE_META[type];
-  openModal(`
-    <span class="m-tag" style="background:${m.tag}">${m.ic} ${m.label}</span>
-    <h2>${title}</h2>
-    <p class="m-body">${body}</p>
-    ${note ? `<div class="m-note">${note}</div>` : ""}
-    ${fxChips(fx)}
-    <button class="m-btn" id="mOk">OK</button>`);
+  const p = players[idx];
+  se(fxSound(fx, type));
+  openModal(`<div class="m-head">${tagChip(type)}<h2>${title}</h2></div>
+    <div class="m-body">
+      <p class="m-lead">${body}</p>
+      ${note ? `<div class="m-note">${note}</div>` : ""}
+      ${chgPanel(p, fx)}
+      <button class="m-btn" id="mOk">OK</button>
+    </div>`);
   $("mOk").onclick = ()=>{
-    applyFx(players[idx], fx);
+    applyFx(p, fx);
     closeModal(); endTurn();
   };
 }
@@ -1110,7 +1726,7 @@ function effectiveMoneyReq(p, o){
   if(p.seidoDiscount && (o.tag === "seido" || o.tag === "manabi")) m = Math.max(0, m - 50);
   return m;
 }
-/* 🎗制度サポートは、カギ（必要額）だけでなく、はらうお金も最大50万ぶん軽くする */
+/* 制度サポートは、カギ（必要額）だけでなく、はらうお金も最大50万ぶん軽くする */
 function effectiveMoneyFx(p, o){
   const m = o.fx.money || 0;
   if(m < 0 && p.seidoDiscount && (o.tag === "seido" || o.tag === "manabi")) return Math.min(0, m + 50);
@@ -1119,11 +1735,9 @@ function effectiveMoneyFx(p, o){
 function reqLabel(p, o){
   const parts = [];
   const em = effectiveMoneyReq(p, o);
-  if(o.req.money){
-    parts.push(`おかね ${em}万` + (em < o.req.money ? "（🎗制度サポートで−50万）" : ""));
-  }
-  if(o.req.learn) parts.push(`まなび ★${o.req.learn}`);
-  if(o.req.maxMoney != null) parts.push(`所得制限 おかね${o.req.maxMoney}万未満`);
+  if(o.req.money) parts.push(money(em) + (em < o.req.money ? "（制度サポートで−50万）" : ""));
+  if(o.req.learn) parts.push(learn(o.req.learn));
+  if(o.req.maxMoney != null) parts.push(`所得制限 ${money(o.req.maxMoney)}未満`);
   return parts.join(" ＋ ");
 }
 function meetsReq(p, o){
@@ -1133,10 +1747,15 @@ function meetsReq(p, o){
   if(o.req.maxMoney != null && p.money >= o.req.maxMoney) return false;  // 所得制限
   return true;
 }
+/* 一覧に置くトビラの目じるし。奥のわくと手前の扉をかさねて、扉だけがひらくようにする */
+const doorMark = ()=>`<span class="d-mark">
+      <svg class="ic way" aria-hidden="true"><use href="#ic-doorway"/></svg>
+      <svg class="ic leaf" aria-hidden="true"><use href="#ic-door-leaf"/></svg></span>`;
 
 function showChoiceModal(idx, def, type, skipCount){
   const p = players[idx];
-  const m = TYPE_META[type === "learn" ? "learn" : (type === "heavy" ? "heavy" : (type === "event" ? "event" : "choice"))];
+  const isHeavy = type === "heavy" || !!def.heavy;
+  const chipType = isHeavy ? "heavy" : (type === "learn" ? "learn" : (type === "event" ? "event" : "choice"));
   const states = def.opts.map(o=>{
     if(o.tag && p.hidden.has(o.tag)) return "unseen";
     return meetsReq(p, o) ? "open" : "locked";
@@ -1152,120 +1771,241 @@ function showChoiceModal(idx, def, type, skipCount){
   }
   /* 表示順はシャッフルする（いつも一番上＝高額、で無思考に選ばれるのを防ぐ）。
      data-i は元の並びのままなので、記録や一覧の集計はずれない */
-  const doors = shuffle(def.opts.map((_,i)=>i)).map(i=>{
-    const o = def.opts[i];
-    const st = states[i];
-    if(st === "unseen"){
-      return `<button class="door unseen" disabled>
-        <span class="d-icon">❓</span>
-        <span class="d-main">
-          <span class="d-title">？？？</span>
-          <span class="d-desc">この選択肢は、見えない。</span>
-        </span>
-      </button>`;
-    }
+  const order = shuffle(def.opts.map((_,i)=>i));
+  const stuck = !states.includes("open");
+  /* 死別・被災などのライフイベントは「トビラ」ではないので、言い方も目じるしも変える */
+  const isDoor = !isHeavy;
+  const W = isDoor ? {
+    ask:"このトビラを開けますか？", yes:"はい、このトビラを開ける",
+    backAgain:"やっぱり、ほかのトビラを見る", back:"ほかのトビラを見る",
+    ng:"……このトビラは開かなかった。", pass:"どれも開かない。今回は見送る",
+  } : {
+    ask:"これをえらびますか？", yes:"はい、これにする",
+    backAgain:"やっぱり、ほかの選択肢を見る", back:"ほかの選択肢を見る",
+    ng:"……これは選べなかった。", pass:"どれも選べない。今回は見送る",
+  };
+  se(isDoor ? "door" : "bad");
+
+  const head = `<div class="m-head">${tagChip(chipType)}<h2>${def.title}</h2></div>`;
+
+  /* --- 一覧：どれも同じ見た目。開くかどうかは押すまで分からない --- */
+  /* まず「どんなトビラの前にいるか」を読んでから、自分の手もと（ステータス）を見てもらう */
+  const listHtml = ()=>`<div class="m-body">
+      <p class="m-lead">${def.body}</p>
+      <div class="pcard now m-pcard" style="--ring:${p.color}">${playerCardBody(p)}</div>
+      <div class="door-list">${order.map(i=>{
+        if(states[i] === "unseen") return `<button class="door unseen" disabled>
+            ${isDoor ? `<span class="d-mark unseen">${ic("eye")}</span>` : ""}
+            <span class="d-main"><span class="d-title">？？？</span>
+              <span class="d-desc">この選択肢は、見えない。</span></span></button>`;
+        /* 中身（どう伸びるか・なにを失うか）は押したあとの確認画面で見せる。
+           ここでは名前だけを見て、開けにいくかどうかを決める。
+           「押せる」ことは文字で説明せず、目じるしのトビラがひらいて答える */
+        return `<button class="door pick" data-i="${i}" data-se="off">
+            ${isDoor ? doorMark() : ""}
+            <span class="d-main"><span class="d-title">${def.opts[i].t}</span></span></button>`;
+      }).join("")}</div>
+    </div>`;
+
+  /* --- 押したあと：カギと金額を開いて、最後にもう一度たずねる --- */
+  const confirmHtml = i=>{
+    const o = def.opts[i], ok = states[i] === "open";
     const key = reqLabel(p, o);
-    const ok = st === "open";
     /* お金の増減だけは選ぶ前に見せる（★とハートは選ぶまでのお楽しみ）
        カギの金額と支払い額が同じときはカギ表示だけにする（冗長回避） */
     const em = effectiveMoneyReq(p, o);
     const raw = o.fx.money || 0;
     const efx = effectiveMoneyFx(p, o);
-    const cut = efx !== raw;                        // 🎗制度サポートで安くなった
+    const cut = efx !== raw;                        // 制度サポートで安くなった
     const redundant = o.req.money && efx === -em;   // カギ表示と同じ額なら出さない
     const loan = o.special === "shogakukin" && !(p.seidoDiscount || p.perk === "seidoPro");
     const cost = ((efx || cut) && !redundant)
-      ? `<span class="d-key d-cost ${efx<0?"minus":"plus"}">${cut?"🎗":(efx<0?"💸":"💰")} おかね ${cut?`<s>${raw}万</s>→`:""}${efx>0?"+":""}${efx}万${loan?"＋返済":""}</span>`
+      ? `<div class="d-cost ${efx<0 ? "minus" : "plus"}">${ic("coin","s")} おかね ${cut ? `<s>${fm(raw)}</s>→` : ""}${efx>0 ? "+" : ""}${fm(efx)}${loan ? "＋これから返済" : ""}</div>`
       : "";
-    return `<button class="door" data-i="${i}" ${ok?"":"disabled"}>
-      <span class="d-icon">${ok?"🚪":"🔒"}</span>
-      <span class="d-main">
-        <span class="d-title">${o.t}</span>
-        <span class="d-desc">${o.d}</span>
-        ${key?`<span class="d-key">カギ：${key}${ok?"":(o.req.maxMoney != null && p.money >= o.req.maxMoney ? "（対象外…）" : "（たりない…）")}</span>`:""}${cost}
-      </span>
-    </button>`;
-  }).join("");
-  const stuck = !states.includes("open");
-  openModal(`
-    <span class="m-tag" style="background:${m.tag}">${m.ic} ${def.heavy ? "できごと" : m.label}</span>
-    <h2>${def.title}</h2>
-    <p class="m-body">${def.body}<br><b>${p.name}</b> さん（${AGES[p.pos]}歳）：おかね ${p.money}万 ／ まなび ★${p.learn}</p>
-    <div class="door-list">${doors}</div>
-    ${stuck ? `<div class="m-note" style="margin-top:14px">開けられるトビラが、ひとつもなかった…。</div>
-    <button class="m-btn" id="mPass">今回は見送る</button>` : ""}`);
-  if(stuck){
-    $("mPass").onclick = ()=>{ closeModal(); endTurn(); };
-  }
-  document.querySelectorAll("#modalBox .door:not(:disabled)").forEach(btn=>{
-    btn.onclick = ()=>{
-      logEntry.chosen = +btn.dataset.i;
-      const o = def.opts[+btn.dataset.i];
-      const fx = {...o.fx};
-      const notes = [];
-      /* 🎗制度サポートは、はらうお金にも効く */
-      if(fx.money){
-        fx.money = effectiveMoneyFx(p, o);
-        if(fx.money !== o.fx.money && o.special !== "shogakukin"){
-          notes.push(`🎗 制度サポートで、はらうお金が <b>${o.fx.money}万 → ${fx.money}万</b> に軽くなった。`);
-        }
+    /* 何が足りないのかを取りちがえないように、理由ごとに書きわける */
+    const short = (o.req.maxMoney != null && p.money >= o.req.maxMoney)
+      ? "所得制限で、いまのあなたは対象外だった" : "カギが足りない";
+    return `<div class="m-body">
+      <div class="c-card ${ok ? "ok" : "ng"}">
+        ${isDoor ? `<span class="d-badge ${ok ? "open" : "lock"}">${ic(ok ? "door" : "lock","s")}${ok ? "開けられるトビラ" : "カギが足りないトビラ"}</span>` : ""}
+        <div class="c-title">${o.t}</div>
+        <div class="d-desc">${o.d}</div>
+        ${key ? `<div class="c-key">カギ：${key}
+          <span class="c-now">いまのあなた：${money(p.money)}／${learn(p.learn)}</span></div>` : ""}
+        ${cost}
+      </div>
+      ${ok
+        ? `<p class="c-ask">${W.ask}</p>
+           <button class="m-btn" id="mYes" data-se="${isDoor ? "open" : "tap"}">${W.yes}</button>
+           <button class="m-btn ghost" id="mBack">${W.backAgain}</button>`
+        : `<p class="c-ask ng">${ic("lock","s")} ${short}${W.ng}</p>
+           <button class="m-btn" id="mBack">${W.back}</button>
+           ${stuck ? `<button class="m-btn ghost" id="mPass">${W.pass}</button>` : ""}`}
+    </div>`;
+  };
+
+  const bind = ()=>{
+    document.querySelectorAll("#modalBox .door.pick").forEach(b=>{
+      b.onclick = ()=>{
+        se(states[+b.dataset.i] === "open" ? "unlock" : "locked");
+        paint(confirmHtml(+b.dataset.i), +b.dataset.i);
+      };
+    });
+    if($("mBack")) $("mBack").onclick = ()=>paint(listHtml());
+    if($("mPass")) $("mPass").onclick = ()=>{ closeModal(); endTurn(); };
+  };
+  const paint = (body, pickI)=>{
+    $("modalBox").innerHTML = head + body;
+    $("modalBox").scrollTop = 0;
+    bind();
+    if(pickI != null && $("mYes")) $("mYes").onclick = ()=>choose(pickI);
+  };
+
+  function choose(i){
+    logEntry.chosen = i;
+    const o = def.opts[i];
+    const fx = {...o.fx};
+    const notes = [];
+    /* 制度サポートは、はらうお金にも効く */
+    if(fx.money){
+      fx.money = effectiveMoneyFx(p, o);
+      if(fx.money !== o.fx.money && o.special !== "shogakukin"){
+        notes.push(`${ic("spark","s")} 制度サポートで、はらうお金が <b>${o.fx.money}万 → ${fx.money}万</b> に軽くなった。`);
       }
-      if(o.special === "revealAll" && p.hidden.size > 0){
-        p.hidden.clear();
-        notes.push("👁 いままで見えていなかった選択肢が、ぜんぶ見えるようになった！");
+    }
+    if(o.special === "revealAll" && p.hidden.size > 0){
+      p.hidden.clear();
+      notes.push(`${ic("eye","s")} いままで見えていなかった選択肢が、ぜんぶ見えるようになった！`);
+    }
+    if(o.special === "reveal2"){
+      const n = revealTags(p, "any", p.perk === "tsunagari" ? 4 : 2);
+      if(n > 0) notes.push(`${ic("eye","s")} 見えていなかった選択肢が <b>${n}個</b>、見えるようになった！`);
+    }
+    if(o.special === "seidoSupport"){
+      p.seidoDiscount = true;
+      p.hidden.delete("seido");
+      notes.push(`${ic("spark","s")} これから先、制度・まなび系のトビラが <b>最大50万ぶん安くなる</b>。カギ（必要なお金）も、じっさいにはらうお金も。`);
+    }
+    if(o.special === "letter"){
+      p.letterIn = 2;
+    }
+    if(o.special === "shogakukin"){
+      if(p.seidoDiscount || p.perk === "seidoPro"){
+        notes.push(`${ic("spark","s")} 制度を知っていたおかげで<b>給付型奨学金</b>に出会えた！学費の負担も軽くなり、返済もいらない。`);
+      } else {
+        p.loan = 48;
+        notes.push(`${ic("cap","s")} これは<b>貸与型</b>（総額48万）。働きはじめたら、お給料から<b>すこしずつ（−6万）</b>、45歳まで返していく。`);
       }
-      if(o.special === "reveal2"){
-        const n = revealTags(p, "any", p.perk === "tsunagari" ? 4 : 2);
-        if(n > 0) notes.push(`👁 見えていなかった選択肢が <b>${n}個</b>、見えるようになった！`);
-      }
-      if(o.special === "seidoSupport"){
-        p.seidoDiscount = true;
-        p.hidden.delete("seido");
-        notes.push("🎗 これから先、制度・まなび系のトビラが <b>最大50万ぶん安くなる</b>。カギ（必要なお金）も、じっさいにはらうお金も。");
-      }
-      if(o.special === "letter"){
-        p.letterIn = 2;
-      }
-      if(o.special === "shogakukin"){
-        if(p.seidoDiscount || p.perk === "seidoPro"){
-          notes.push("🎗 制度を知っていたおかげで<b>給付型奨学金</b>に出会えた！学費の負担も軽くなり、返済もいらない。");
-        } else {
-          p.loan = 48;
-          notes.push("🎓 これは<b>貸与型</b>（総額48万）。働きはじめたら、お給料から<b>すこしずつ（−6万）</b>、45歳まで返していく。");
-        }
-      }
-      if(o.tag === "seido" && p.perk === "seidoPro" && !p.seidoUsed){
-        p.seidoUsed = true;
-        fx.learn = (fx.learn||0) + 1;
-        notes.push("✨ 制度を知っている強みで まなび+1");
-      }
-      openModal(`
-        <span class="m-tag" style="background:${m.tag}">${m.ic} えらんだ！</span>
-        <h2>${o.t}</h2>
-        <p class="m-body">${o.d}。</p>
+    }
+    if(o.tag === "seido" && p.perk === "seidoPro" && !p.seidoUsed){
+      p.seidoUsed = true;
+      fx.learn = (fx.learn||0) + 1;
+      notes.push(`${ic("spark","s")} 制度を知っている強みで まなび+1`);
+    }
+    openModal(`<div class="m-head">${tagChip(chipType, "えらんだ！")}<h2>${o.t}</h2></div>
+      <div class="m-body">
+        <p class="m-lead">${o.d}。</p>
         ${notes.length ? `<div class="m-note">${notes.join("<br>")}</div>` : ""}
-        ${fxChips(fx)}
-        <button class="m-btn" id="mOk">OK</button>`);
-      $("mOk").onclick = ()=>{ applyFx(p, fx); closeModal(); endTurn(); };
-    };
-  });
+        ${chgPanel(p, fx)}
+        <button class="m-btn" id="mOk">OK</button>
+      </div>`);
+    $("mOk").onclick = ()=>{ applyFx(p, fx); closeModal(); endTurn(); };
+  }
+
+  openModal(head + listHtml());
+  bind();
 }
 
 function showGoalModal(idx){
   const p = players[idx];
+  se("goal");
   const loanNote = p.loan > 0
-    ? `<div class="m-note">🎓 のこっていた奨学金 <b>${p.loan}万</b> をここで清算。<br>45歳——ようやく、返しおえた。</div>` : "";
-  openModal(`
-    <span class="m-tag" style="background:#4A3A30">🏁 ゴール</span>
-    <h2>${p.name} さん、45歳でゴール！</h2>
-    <p class="m-body">16歳からの29年間、おつかれさま！ ${p.rankAt}番目のゴールです。<br>全員がゴールしたら、けっか発表へ。</p>
-    ${loanNote}
-    ${fxChips({happy: p.rankAt===1?1:0, money: p.loan>0 ? -p.loan : 0})}
-    <button class="m-btn" id="mOk">OK</button>`);
+    ? `<div class="m-note">${ic("cap","s")} のこっていた奨学金 <b>${fm(p.loan)}</b> をここで清算。<br>45歳——ようやく、返しおえた。</div>` : "";
+  const fx = {happy: p.rankAt===1 ? 1 : 0, money: p.loan>0 ? -p.loan : 0};
+  openModal(`<div class="m-head">${tagChip("goal")}<h2>${p.name} さん、45歳でゴール！</h2></div>
+    <div class="m-body">
+      <p class="m-lead">16歳からの29年間、おつかれさま！ ${p.rankAt}番目のゴールです。<br>全員がゴールしたら、けっか発表へ。</p>
+      ${loanNote}${chgPanel(p, fx)}
+      <button class="m-btn" id="mOk">OK</button>
+    </div>`);
   $("mOk").onclick = ()=>{
     if(p.rankAt === 1) p.happy += 1;
     if(p.loan > 0){ p.money -= p.loan; p.loan = 0; }
     closeModal(); endTurn();
+  };
+}
+
+/* ---------- 家庭カードの非公開ドラフト ---------- */
+let famRevealIdx = null;
+function famCardHtml(p, foot){
+  const hiddenN = p.hidden.size;
+  const tone = FAM_TONE[p.region] || ["#E9A87C","#D98E63"];
+  const met = p.open + p.locked + p.unseen;
+  return `
+    <div class="fam-top" style="--fam:${p.color}">
+      <div class="av" style="${faceBg(p)}"></div>
+      <div style="min-width:0">
+        <span class="pill" style="color:${tone[1]}">${ic("home","s")} 家庭カード</span>
+        <div class="nm">${p.fam.name}</div>
+      </div>
+    </div>
+    <div class="m-body">
+      <div class="fam-story">${p.fam.story}
+        <div class="fam-line">${ic("home","s")}<span>まち：<b>${p.region}</b></span></div>
+        <div class="fam-line">${ic("coin","s")}<span>仕送り：<b>${p.allow>0 ? "毎回のお給料 +"+p.allow+"万" : "なし"}</b></span></div>
+        <div class="fam-line">${ic("eye","s")}<span>まだ見えていない選択肢：<b>${hiddenN}個</b>${hiddenN>0 ? `<span class="note">（そのマスでは「？？？」と表示されます）</span>` : ""}</span></div>
+      </div>
+      <div class="now-stats">
+        <div class="ns money"><div class="k">${ic("coin","s")}おかね</div><div class="v">${fm(p.money)}</div></div>
+        <div class="ns learn"><div class="k">${ic("star","s")}まなび</div><div class="v">★${p.learn}</div></div>
+        <div class="ns happy"><div class="k">${ic("heart","s")}ハッピー</div><div class="v">♥${p.happy}</div></div>
+      </div>
+      ${met > 0 ? `<div class="now-doors">
+        <div class="k">${ic("door","s")}ここまでに出会ったトビラ</div>
+        <div class="dl"><span class="lo">開けられた <b>${p.open}</b></span>
+          <span class="ll">カギが足りなかった <b>${p.locked}</b></span>
+          <span class="lu">見えなかった <b>${p.unseen}</b></span></div>
+      </div>` : ""}
+      <div class="fam-perk">
+        <div class="k">${ic("spark","s")} あなたのとくい</div>
+        <div class="v">${p.fam.perkText}</div>
+      </div>
+      <div class="fam-secret">${ic("lock","s")} このカードは、ほかの人に見せないでください。</div>
+      ${foot}
+    </div>`;
+}
+function revealFamilyCard(i){
+  if(i >= players.length){ famRevealIdx = null; closeModal(); beginTurn(); return; }
+  famRevealIdx = i;
+  const p = players[i];
+  openModal(`<div class="m-head">${tagChip("fam")}<h2>${p.name} さんだけ、見てください</h2></div>
+    <div class="m-body">
+      <p class="m-lead">ほかの人には見せずに、そっとめくってね。<br>あなたのスタート地点が書いてあります。</p>
+      <button class="m-btn" id="mFlip" data-se="card">カードをめくる</button>
+      <button class="m-btn ghost" id="mHome">${ic("home","s")} タイトルにもどる（人数を変える）</button>
+    </div>`);
+  $("mHome").onclick = showHomeConfirm;
+  $("mFlip").onclick = ()=>{
+    openModal(famCardHtml(p, `
+      <button class="m-btn" id="mNext">OK、覚えた${i < players.length-1 ? "（次の人へ）" : "（ゲームスタート！）"}</button>
+      <button class="m-btn ghost" id="mHome">${ic("home","s")} タイトルにもどる（人数を変える）</button>`));
+    $("mHome").onclick = showHomeConfirm;
+    $("mNext").onclick = ()=>revealFamilyCard(i+1);
+  };
+}
+/* タイトルにもどる（確認つき） */
+function showHomeConfirm(){
+  const inFamReveal = famRevealIdx !== null;
+  openModal(`<div class="m-head">${tagChip("fam","タイトルにもどる")}<h2>ゲームをやめて、タイトルにもどる？</h2></div>
+    <div class="m-body">
+      <p class="m-lead">いまのゲームの記録は消えます。<br>人数やメンバーを変えるときも、ここからやりなおせます。</p>
+      <button class="m-btn" id="mQuit">タイトルにもどる</button>
+      <button class="m-btn ghost" id="mStay">つづける</button>
+    </div>`);
+  $("mQuit").onclick = ()=>{ famRevealIdx = null; closeModal(); showScreen("setup"); initSetup(); };
+  $("mStay").onclick = ()=>{
+    if(inFamReveal) revealFamilyCard(famRevealIdx);
+    else closeModal();
   };
 }
 
@@ -1313,6 +2053,7 @@ function endingText(p){
 }
 function showResult(){
   showScreen("result");
+  se("result");
   const sorted = [...players].sort((a,b)=> b.happy - a.happy || b.money - a.money);
   const list = $("resultList");
   list.innerHTML = "";
@@ -1320,26 +2061,39 @@ function showResult(){
     const total = p.open + p.locked + p.unseen;
     const pct = (n)=> total ? Math.round(n/total*100) : 0;
     const diff = p.money - p.initMoney;
+    const dLearn = p.learn - p.initLearn;
+    const tone = FAM_TONE[p.region] || ["#E9A87C","#D98E63"];
     const card = document.createElement("div");
     card.className = "res-card";
     card.innerHTML = `
-      <span class="rank">${i+1}位</span>
-      <div class="r-name"><span class="p-dot" style="background:${p.color}"></span>${p.name}
-        <span class="r-fam">🏠 ${p.fam.name}</span></div>
+      <div class="res-head">
+        <div class="av" style="${faceBg(p)}; border-color:${p.color}"></div>
+        <div style="min-width:0">
+          <span class="rank">${i+1}位</span>
+          <div class="r-name">${p.name}</div>
+          <div class="r-fam" style="color:${tone[1]}">${ic("home","s")} ${p.fam.name}</div>
+        </div>
+      </div>
       <div class="r-story">${p.fam.story}</div>
       <div class="r-stats">
-        <span class="fx" style="color:#F291B5">♥ ${p.happy}</span>
-        <span class="fx">残金 ${p.money}万（スタート比 ${diff>=0?"+":""}${diff}万）</span>
-        <span class="fx" style="color:#00A3BD">まなび ★${p.learn}</span>
+        <div class="rs happy"><div class="k">${ic("heart")}ハッピー</div>
+          <div class="v"><s>0</s>${p.happy}</div>
+          <div class="d ${p.happy>0 ? "up" : ""}">${p.happy>0 ? "+"+p.happy : "変わらず"}</div></div>
+        <div class="rs money"><div class="k">${ic("coin")}おかね</div>
+          <div class="v"><s>${fm(p.initMoney)}</s>${fm(p.money)}</div>
+          <div class="d ${diff>0 ? "up" : (diff<0 ? "dn" : "")}">${diff>0 ? "+" : ""}${diff===0 ? "変わらず" : fm(diff)}</div></div>
+        <div class="rs learn"><div class="k">${ic("star")}まなび</div>
+          <div class="v"><s>★${p.initLearn}</s>★${p.learn}</div>
+          <div class="d ${dLearn>0 ? "up" : ""}">${dLearn>0 ? "+"+dLearn : "変わらず"}</div></div>
       </div>
-      <div class="r-ending">🌅 <b>45歳のいま</b>：${endingText(p)}</div>
+      <div class="r-ending"><b>🌅 45歳のいま</b>：${endingText(p)}</div>
       <div class="doorbar">
         <div class="seg-open" style="width:${pct(p.open)}%"></div>
         <div class="seg-lock" style="width:${pct(p.locked)}%"></div>
         <div class="seg-unseen" style="width:${pct(p.unseen)}%"></div>
       </div>
-      <div class="doorbar-label">出会ったトビラ ${total}枚 ── 🚪 開けられた <b>${p.open}</b>／🔒 カギが足りなかった <b>${p.locked}</b>／👁 見えていなかった <b>${p.unseen}</b></div>
-      <button class="chip-btn rv-btn" data-p="${players.indexOf(p)}">🚪 トビラのネタバラシを見る</button>`;
+      <div class="doorbar-label">出会ったトビラ ${total}枚 ── <span class="lo">開けられた ${p.open}</span>／<span class="ll">カギが足りなかった ${p.locked}</span>／<span class="lu">見えていなかった ${p.unseen}</span></div>
+      <button class="chip-btn rv-btn" data-p="${players.indexOf(p)}">${ic("door","s")} トビラのネタバラシを見る</button>`;
     list.appendChild(card);
   });
   list.querySelectorAll(".rv-btn").forEach(b=>{
@@ -1355,7 +2109,7 @@ function showResult(){
     でも今日いちばん大事なのは、たぶんこっち——<br>
     このテーブル全体で、<b>${totalUnseen}枚のトビラが「見えてすら いなかった」</b>ということ。<br>
     カギが足りないのと、扉があることを知らないのは、ぜんぜん違う。<br><br>
-    🚪 それぞれのカードの<b>「ネタバラシ」ボタン</b>で、？？？の中身をのぞいてみよう。<br><br>
+    ${ic("door","s")} それぞれのカードの<b>「ネタバラシ」ボタン</b>で、？？？の中身をのぞいてみよう。<br><br>
     🗣 話してみよう：<br>
     ・開けたかったのに、届かなかった／見えていなかったトビラはあった？<br>
     ・家庭カードを見せ合おう。同じマスで、見えていた景色はどう違った？<br>
@@ -1365,59 +2119,48 @@ function showResult(){
 /* ===================== reveal（ネタバラシ） ===================== */
 function rawReqLabel(o){
   const parts = [];
-  if(o.req.money) parts.push(`おかね${o.req.money}万`);
+  if(o.req.money) parts.push(`おかね${fm(o.req.money)}`);
   if(o.req.learn) parts.push(`★${o.req.learn}`);
-  if(o.req.maxMoney != null) parts.push(`所得制限おかね${o.req.maxMoney}万未満`);
+  if(o.req.maxMoney != null) parts.push(`所得制限おかね${fm(o.req.maxMoney)}未満`);
   return parts.join("＋");
 }
 function fxInline(fx){
   const parts = [];
-  if(fx.money) parts.push(`💰${fx.money>0?"+":""}${fx.money}万`);
+  if(fx.money) parts.push(`${fx.money>0 ? "+" : ""}${fm(fx.money)}`);
   if(fx.learn) parts.push(`★+${fx.learn}`);
   if(fx.happy) parts.push(`♥+${fx.happy}`);
   return parts.join(" ");
 }
 const RV_META = {
-  chosen:["✅","えらんだ"], open:["🚪","開けられた"],
-  locked:["🔒","カギ不足"], unseen:["👁","見えてなかった！"],
+  chosen:["check","えらんだ","#4CA872"], open:["door","開けられた","#4CA872"],
+  locked:["lock","カギ不足","#C98A3C"], unseen:["eye","見えてなかった！","#7E6BC4"],
 };
 function showRevealModal(pIdx){
   const p = players[pIdx];
   const secs = p.doorLog.map(e=>{
     const rows = e.opts.map((o,i)=>{
       const st = e.chosen === i ? "chosen" : e.states[i];
-      const [ic, label] = RV_META[st];
+      const [icon, label, col] = RV_META[st];
       const key = rawReqLabel(o);
       const fx = fxInline(o.fx);
-      return `<div class="rv-opt ${st}">
-        <span class="rv-ic">${ic}</span>
-        <span class="rv-main">
-          <span class="rv-t">${o.t}</span>
-          <span class="rv-d">${o.d}</span>
-          <span class="rv-meta">🔑 ${key || "カギなし"}${fx ? `　→ ${fx}` : ""}</span>
-        </span>
-        <span class="rv-st">${label}</span>
-      </div>`;
+      return `<div class="rv-opt ${st}"><span class="rv-ic" style="color:${col}">${ic(icon)}</span>
+        <span class="rv-main"><span class="rv-t">${o.t}</span><span class="rv-d">${o.d}</span>
+        <span class="rv-meta">${key || "カギなし"}${fx ? `　→ ${fx}` : ""}</span></span>
+        <span class="rv-st">${label}</span></div>`;
     }).join("");
     return `<div class="rv-door"><div class="rv-title">${e.age != null ? e.age+"歳 ── " : ""}${e.title}${e.variant ? `（${e.variant}の家庭）` : ""}</div>${rows}</div>`;
   }).join("");
-  openModal(`
-    <div class="rule-page">
-      <button class="rule-close" id="rvClose" aria-label="とじる">✕</button>
-      <span class="m-tag" style="background:var(--brown)">🚪 ネタバラシ</span>
+  openModal(`<div class="rule-page">
+      ${tagChip("choice","ネタバラシ")}
       <h2>${p.name} さんが出会ったトビラ、ぜんぶ</h2>
-      <p class="m-body">👁は、ゲーム中「？？？」で中身が見えなかったトビラ。<br>ほんとうは、こんな選択肢だった——</p>
-      <div class="rv-list">${secs || "<p class='m-body'>トビラには出会わなかったみたい。</p>"}</div>
-      <button class="m-btn" id="rvOk">とじる</button>
-    </div>`);
-  $("rvClose").onclick = closeModal;
+      <p class="m-lead" style="text-align:left">紫は、ゲーム中「？？？」で中身が見えなかったトビラ。<br>ほんとうは、こんな選択肢だった——</p>
+      <div class="rv-list">${secs || "<p class='m-lead'>トビラには出会わなかったみたい。</p>"}</div>
+      <button class="m-btn" id="rvOk">とじる</button></div>`, closeModal);
   $("rvOk").onclick = closeModal;
 }
 
 /* 全員分・年齢順のトビラ一覧 */
-function whoChips(list){
-  return list.map(p=>`<span class="who"><span class="p-dot" style="background:${p.color}"></span>${p.name}</span>`).join("");
-}
+const whoChips = list => list.map(p=>`<span class="who"><span class="p-dot" style="background:${p.color}"></span>${p.name}</span>`).join("");
 function showAllDoorsModal(){
   const map = new Map();
   players.forEach(p=>{
@@ -1452,95 +2195,114 @@ function showAllDoorsModal(){
       const key = rawReqLabel(o);
       const fx = fxInline(o.fx);
       const lines = [];
-      if(st.chosen.length) lines.push(`<div class="rv-who">✅ えらんだ：${whoChips(st.chosen)}</div>`);
-      if(st.locked.length) lines.push(`<div class="rv-who">🔒 カギ不足：${whoChips(st.locked)}</div>`);
-      if(st.unseen.length) lines.push(`<div class="rv-who" style="color:#c77f00">👁 見えなかった：${whoChips(st.unseen)}</div>`);
-      return `<div class="rv-opt ${st.unseen.length ? "unseen" : ""}">
-        <span class="rv-main">
-          <span class="rv-t">${o.t}</span>
-          <span class="rv-d">${o.d}</span>
-          <span class="rv-meta">🔑 ${key || "カギなし"}${fx ? `　→ ${fx}` : ""}</span>
-          ${lines.join("")}
-        </span>
-      </div>`;
+      if(st.chosen.length) lines.push(`<div class="rv-who" style="color:#4CA872">${ic("check","s")} えらんだ：${whoChips(st.chosen)}</div>`);
+      if(st.locked.length) lines.push(`<div class="rv-who" style="color:#C98A3C">${ic("lock","s")} カギ不足：${whoChips(st.locked)}</div>`);
+      if(st.unseen.length) lines.push(`<div class="rv-who" style="color:#7E6BC4">${ic("eye","s")} 見えなかった：${whoChips(st.unseen)}</div>`);
+      return `<div class="rv-opt ${st.unseen.length ? "unseen" : ""}"><span class="rv-main">
+        <span class="rv-t">${o.t}</span><span class="rv-d">${o.d}</span>
+        <span class="rv-meta">${key || "カギなし"}${fx ? `　→ ${fx}` : ""}</span>${lines.join("")}</span></div>`;
     }).join("");
     return `<div class="rv-door"${g.untrodden ? ' style="opacity:.75"' : ""}>
-      <div class="rv-title">🚪 ${g.age}歳 ── ${g.title}${g.variant ? `（${g.variant}の家庭）` : ""}${g.untrodden ? '<span class="rv-untrod">🚶 だれも通らなかった</span>' : ""}</div>${rows}</div>`;
+      <div class="rv-title">${g.age}歳 ── ${g.title}${g.variant ? `（${g.variant}の家庭）` : ""}${g.untrodden ? `<span class="rv-untrod">${ic("walk","s")} だれも通らなかった</span>` : ""}</div>${rows}</div>`;
   }).join("");
-  openModal(`
-    <div class="rule-page">
-      <button class="rule-close" id="adClose" aria-label="とじる">✕</button>
-      <span class="m-tag" style="background:var(--brown)">🚪 トビラ一覧</span>
+  openModal(`<div class="rule-page">
+      ${tagChip("choice","トビラ一覧")}
       <h2>29年間に、こんなトビラがあった</h2>
-      <p class="m-body">年齢の順に、この人生にあったトビラをぜんぶ並べた。<br>出会えたトビラも、通らなかったトビラも——見えていた景色は人それぞれ。</p>
-      <div class="rv-list">${secs || "<p class='m-body'>記録がありません。</p>"}</div>
-      <button class="m-btn" id="adOk">とじる</button>
-    </div>`);
-  $("adClose").onclick = closeModal;
+      <p class="m-lead" style="text-align:left">年齢の順に、この人生にあったトビラをぜんぶ並べた。<br>出会えたトビラも、通らなかったトビラも——見えていた景色は人それぞれ。</p>
+      <div class="rv-list">${secs || "<p class='m-lead'>記録がありません。</p>"}</div>
+      <button class="m-btn" id="adOk">とじる</button></div>`, closeModal);
   $("adOk").onclick = closeModal;
 }
 $("allDoorsBtn").onclick = showAllDoorsModal;
 
 /* ===================== rules ===================== */
 const RULE_PAGES = [
-  {tag:"🏁 めざすもの", title:"順位を決めるのは ♥ハッピー", items:[
-    ["🎲","これは<b>16歳から45歳までの29年間</b>をたどる人生すごろく。サイコロを回して、みんなでゴールをめざそう。"],
-    ["🏫","<b>高校時代（16〜18歳）はサイコロを使わず、1マスずつ</b>進む。進路を選ぶ前の、準備の時間だ。"],
-    ["♥","最後の順位は、おかねの多さじゃなく <b>♥ハッピーの数</b>で決まる！"],
-    ["🚪","♥は、人生の選択「<b>トビラ</b>」を開けるともらえる。<b>♥の数＝じぶんの意思で選べた数</b>だ。"],
+  {type:"goal", tag:"めざすもの", title:"順位を決めるのは ♥ハッピー", items:[
+    ["die","これは<b>16歳から45歳までの29年間</b>をたどる人生すごろく。サイコロを回して、みんなでゴールをめざそう。"],
+    ["walk","<b>高校時代（16〜18歳）はサイコロを使わず、1マスずつ</b>進む。進路を選ぶ前の、準備の時間だ。"],
+    ["heart","最後の順位は、おかねの多さじゃなく <b>♥ハッピーの数</b>で決まる！"],
+    ["door","♥は、人生の選択「<b>トビラ</b>」を開けるともらえる。<b>♥の数＝じぶんの意思で選べた数</b>だ。"],
   ]},
-  {tag:"🚪 トビラとカギ", title:"いい選択には「カギ」がいる", items:[
-    ["🚪","<b>光るトビラのマス</b>に止まると、人生の選択がやってくる。"],
-    ["🔑","選択肢には<b>カギ</b>（必要な💰おかね・★まなび）があるものも。"],
-    ["🔒","カギが足りないと、そのトビラは開けられない…！"],
-    ["🗣","えらぶ前に、<b>「なぜそれを選ぶのか」をひとこと</b>みんなに話してから決めよう。"],
+  {type:"choice", tag:"トビラとカギ", title:"いい選択には「カギ」がいる", items:[
+    ["door","<b>光るトビラのマス</b>に止まると、人生の選択がやってくる。"],
+    ["star",`選択肢には<b>カギ</b>（必要な${ic("coin","s")}おかね・★まなび）があるものも。`],
+    ["lock","カギが足りないと、そのトビラは開けられない…！"],
+    ["people","えらぶ前に、<b>「なぜそれを選ぶのか」をひとこと</b>みんなに話してから決めよう。"],
   ]},
-  {tag:"📚 まなびとおかね", title:"★まなびは、未来のカギ", items:[
-    ["📚","<b>まなびマス</b>やトビラ、🎴できごとで★まなびが貯まる。"],
-    ["💰","お給料は「<b>20万＋★×10万</b>」。★が多いほど、たくさん稼げる！"],
-    ["🎴","<b>できごとマス</b>では、ラッキーもアクシデントも起こる。"],
+  {type:"learn", tag:"まなびとおかね", title:"★まなびは、未来のカギ", items:[
+    ["book",`<b>まなびマス</b>やトビラ、${ic("bolt","s")}できごとで★まなびが貯まる。`],
+    ["coin","お給料は「<b>20万＋★×10万</b>」。★が多いほど、たくさん稼げる！"],
+    ["bolt","<b>できごとマス</b>では、ラッキーもアクシデントも起こる。"],
   ]},
-  {tag:"🏠 さいごに", title:"スタート地点は、人それぞれ", items:[
-    ["🏠","はじめに引く<b>家庭カード</b>で、持ちものやまちが変わる。"],
-    ["👁","とちゅうで「？？？」の選択肢に出会うかも。それが何なのかは——遊びおわってからのお楽しみ。"],
-    ["🗣","全員ゴールしたら<b>ふりかえりタイム</b>。感じたことを話してみよう。"],
+  {type:"fam", tag:"さいごに", title:"スタート地点は、人それぞれ", items:[
+    ["home","はじめに引く<b>家庭カード</b>で、持ちものやまちが変わる。"],
+    ["eye","とちゅうで「？？？」の選択肢に出会うかも。それが何なのかは——遊びおわってからのお楽しみ。"],
+    ["people","全員ゴールしたら<b>ふりかえりタイム</b>。感じたことを話してみよう。"],
   ]},
 ];
-function renderRules(page){
+function rulePageHtml(page){
   const pg = RULE_PAGES[page];
-  const items = pg.items.map(([ic,tx])=>
-    `<div class="rule-item"><span class="r-ic">${ic}</span><span>${tx}</span></div>`).join("");
-  const dots = RULE_PAGES.map((_,i)=>`<span class="${i===page?"on":""}"></span>`).join("");
+  const items = pg.items.map(([icon,tx])=>
+    `<div class="rule-item"><span class="r-ic">${ic(icon)}</span><span>${tx}</span></div>`).join("");
+  const dots = RULE_PAGES.map((_,i)=>`<span class="${i===page ? "on" : ""}"></span>`).join("");
   const last = page === RULE_PAGES.length-1;
-  openModal(`
-    <div class="rule-page">
-      <button class="rule-close" id="ruleClose" aria-label="とじる">✕</button>
-      <span class="m-tag" style="background:var(--teal)">${pg.tag}</span>
+  return `<div class="rule-page">
+      ${tagChip(pg.type, pg.tag)}
       <h2>${pg.title}</h2>
       <div class="rule-list">${items}</div>
       <div class="rule-dots">${dots}</div>
       <div class="rule-nav">
         ${page>0 ? '<button class="m-btn ghost" id="rulePrev">← まえ</button>' : ""}
+        ${last ? "" : '<button class="m-btn ghost" id="ruleClose">とじる</button>'}
         ${last ? '<button class="m-btn" id="ruleDone">OK！</button>'
                : '<button class="m-btn" id="ruleNext">つぎへ →</button>'}
-      </div>
-    </div>`);
-  $("ruleClose").onclick = closeModal;
+      </div></div>`;
+}
+/* ページをめくるたびに「つぎへ」が上下に動くと、押しまちがえる。
+   ぜんぶのページを画面の外で一度だけ測って、いちばん高いページに高さをそろえる。
+   （横幅が変われば測りなおす） */
+let ruleH = {key:"", h:0};
+function rulesMinHeight(width){
+  const key = String(Math.round(width));
+  if(ruleH.key === key) return ruleH.h;
+  const probe = document.createElement("div");
+  probe.className = "modal";
+  probe.style.cssText = `position:absolute; left:-9999px; top:0; visibility:hidden;`
+    + `width:${width}px; max-height:none; height:auto; overflow:visible; animation:none;`;
+  document.body.appendChild(probe);
+  let h = 0;
+  try{
+    RULE_PAGES.forEach((_,i)=>{
+      probe.innerHTML = rulePageHtml(i);
+      h = Math.max(h, probe.firstElementChild.offsetHeight);
+    });
+  }catch(e){ h = 0; }
+  probe.remove();
+  /* 書体がまだ読みこみ中だと高さがずれるので、そのときは覚えこまない */
+  const fontsReady = !document.fonts || document.fonts.status === "loaded";
+  ruleH = {key: fontsReady ? key : "", h};
+  return h;
+}
+function renderRules(page){
+  openModal(rulePageHtml(page), closeModal);
+  /* 開いてから測る（モーダルの横幅が決まっていないと測れない） */
+  const box = $("modalBox"), body = box.firstElementChild;
+  const h = rulesMinHeight(box.getBoundingClientRect().width);
+  if(h) body.style.minHeight = h + "px";
+  if($("ruleClose")) $("ruleClose").onclick = closeModal;
   if($("rulePrev")) $("rulePrev").onclick = ()=>renderRules(page-1);
-  if(last) $("ruleDone").onclick = closeModal;
+  if(page === RULE_PAGES.length-1) $("ruleDone").onclick = closeModal;
   else $("ruleNext").onclick = ()=>renderRules(page+1);
 }
 $("helpBtnSetup").onclick = ()=>renderRules(0);
-$("helpBtnGame").onclick = ()=>{
-  if(!$("overlay").classList.contains("open")) renderRules(0);
-};
-/* 右上の🏠ボタン（モーダル表示中は無効） */
-$("homeBtn").onclick = ()=>{
-  if($("overlay").classList.contains("open")) return;
-  showHomeConfirm();
-};
+$("helpBtnGame").onclick = ()=>{ if(!isOpen()) renderRules(0); };
+/* 右上のタイトルボタン（モーダル表示中は無効） */
+$("homeBtn").onclick = ()=>{ if(!isOpen()) showHomeConfirm(); };
 
+/* ---------- 起動 ---------- */
 initSetup();
+diceFace(3);
+syncSe();
 </script>
 </body>
 </html>
