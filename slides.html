@@ -6,371 +6,380 @@
 <title>トビラ — 全体ゲーム進行スライド</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=DotGothic16&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
+/* 配色はゲーム本体(index.html)と同じ。見た目はせかい版の進行スライドにそろえている */
 :root{
-  --green:#78BE21; --crimson:#FF6858; --orange:#FFC04B; --teal:#00A3BD;
-  --brown:#4A3A30; --cream:#FBF8F1; --paper:#FFFFFF; --momo:#F291B5;
+  --page:#F2F9FD; --card:#FFFFFF; --ink:#3F5266; --sub:#8A97A5; --line:#E3EDF4;
+  --pink:#F4879F; --gold:#FBD96B; --btn:#5B7FA8; --btn-d:#43617F;
+  --money:#D9A32B; --learn:#4E8FC0; --happy:#E4708F; --unseen:#8878C4;
+  --sh:0 6px 24px rgba(63,82,102,.08);
 }
 *{box-sizing:border-box; margin:0; padding:0;}
-html,body{height:100%; overflow:hidden; background:var(--cream);}
+html,body{height:100%; overflow:hidden; background:var(--page);}
 body{
-  font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif;
-  color:var(--brown); font-weight:700;
+  font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif;
+  color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums;
 }
-.num{font-family:"DotGothic16",monospace; font-weight:400;}
+.ic{width:1em; height:1em; flex:none; vertical-align:-.14em;}
 
-/* ---------- slide frame ---------- */
+/* ---------- 1920×1080 の台紙を、画面に合わせて拡大縮小する ---------- */
+#stage{
+  position:absolute; left:50%; top:50%; width:1920px; height:1080px;
+  transform-origin:center; background:var(--page);
+}
 .slide{
   display:none; position:absolute; inset:0;
   flex-direction:column; align-items:center; justify-content:center;
-  /* 4:3投影でも欠けない安全マージン */
-  padding:5vmin 12vmin 7vmin;
-  text-align:center; gap:3.2vmin;
+  padding:190px 140px 110px; gap:44px; text-align:center;
 }
 .slide.active{display:flex;}
+.slide.plain{padding-top:110px;}
 
-/* ---------- chrome (常時表示) ---------- */
-#partChip{
-  position:fixed; top:2.4vmin; left:2.8vmin; z-index:10;
-  background:var(--brown); color:var(--cream);
-  border-radius:99px; padding:.7vmin 2.4vmin;
-  font-size:2vmin; font-weight:900; letter-spacing:.08em;
-  transform:rotate(-1.5deg);
-}
-#pageNum{
-  position:fixed; bottom:2vmin; right:2.8vmin; z-index:10;
-  font-size:2.2vmin; opacity:.45;
-}
-#navHint{
-  position:fixed; bottom:2vmin; left:2.8vmin; z-index:10;
-  font-size:1.7vmin; opacity:.35;
-}
-#progress{
-  position:fixed; top:0; left:0; height:.7vmin; background:var(--orange); z-index:10;
-  transition:width .25s ease;
-}
+/* ---------- chrome ---------- */
+#progress{position:absolute; top:0; left:0; height:8px; background:var(--pink);
+  border-radius:0 8px 8px 0; transition:width .25s ease; z-index:10;}
+#pageNum{position:absolute; bottom:34px; right:48px; font-size:24px; color:var(--sub); z-index:10;}
+#navHint{position:absolute; bottom:34px; left:48px; font-size:20px; color:var(--sub); opacity:.7; z-index:10;}
 
-/* ---------- typography ---------- */
-.kicker{
-  font-size:2.6vmin; font-weight:900; letter-spacing:.2em;
-  color:var(--paper); background:var(--teal);
-  border-radius:99px; padding:.8vmin 3.2vmin;
-  transform:rotate(-1deg);
+/* ---------- 見出しのピル（上中央） ---------- */
+.pill{
+  position:absolute; top:56px; left:50%; transform:translateX(-50%);
+  display:inline-flex; align-items:center; gap:22px; white-space:nowrap;
+  background:var(--btn); color:#fff; border-radius:999px;
+  padding:16px 64px; font-size:36px; font-weight:900; letter-spacing:.06em;
 }
-.kicker.or{background:var(--orange); color:var(--brown);}
-.kicker.cr{background:var(--crimson);}
-.kicker.gr{background:var(--green);}
-h1{font-size:6.2vmin; font-weight:900; line-height:1.35; letter-spacing:.04em;}
-h1 .em{color:var(--crimson);}
-h1 .em-t{color:var(--teal);}
-.lead{font-size:3.1vmin; line-height:1.8; font-weight:700; max-width:78vw;}
-.lead b{font-weight:900; border-bottom:.6vmin solid var(--orange);}
-.small{font-size:2.2vmin; opacity:.7; font-weight:700;}
+.pill .ic{width:38px; height:38px;}
+.pill.pink{background:var(--pink);}
+.pill.gold{background:var(--gold); color:#7A6320;}
+.pill.sm{font-size:30px; padding:12px 48px;}
 
-/* ---------- parts ---------- */
-.band{
-  background:var(--brown); color:var(--cream);
-  border-radius:2.4vmin; padding:3.2vmin 5vmin;
-  font-size:3.4vmin; font-weight:900; line-height:1.8; max-width:82vw;
-}
-.band b{color:var(--orange);}
-.band .heart{color:var(--crimson);}
+/* ---------- 文字 ---------- */
+h1{font-size:72px; font-weight:900; line-height:1.5; letter-spacing:.04em;}
+.em{color:var(--pink);}
+.em-b{color:var(--btn);}
+.lead{font-size:36px; line-height:1.9; font-weight:700; color:var(--ink);}
+.note{font-size:28px; line-height:1.9; color:var(--sub);}
 
-.card{
-  background:var(--paper); border:.55vmin solid var(--brown); border-radius:2.4vmin;
-  padding:2.6vmin 3.6vmin; text-align:left;
-}
-.steps{display:flex; flex-direction:column; gap:2.2vmin; max-width:80vw;}
-.step{display:flex; align-items:center; gap:2.6vmin;}
-.step .no{
-  flex:none; width:6vmin; height:6vmin; border-radius:50%;
-  background:var(--orange); color:var(--brown);
-  display:grid; place-items:center; font-size:3.2vmin; font-weight:900;
-  border:.45vmin solid var(--brown);
-}
-.step p{font-size:3vmin; line-height:1.6; font-weight:700; text-align:left;}
-.step p b{font-weight:900; color:var(--crimson);}
+/* ---------- カード ---------- */
+.card{background:var(--card); border-radius:28px; box-shadow:var(--sh);}
+.rows{display:flex; flex-direction:column; gap:30px; width:1560px;}
+.row{display:flex; align-items:center; gap:36px; padding:34px 52px; text-align:left;}
+.row .no{flex:none; width:72px; height:72px; border-radius:50%; background:var(--pink); color:#fff;
+  display:grid; place-items:center; font-size:34px; font-weight:900;}
+.row .ri{flex:none; width:56px; height:56px; color:var(--pink);}
+.row .ri.b{color:var(--btn);} .row .ri.g{color:var(--money);} .row .ri.v{color:var(--unseen);}
+.row p{font-size:34px; line-height:1.7; font-weight:700;}
+.row p b{color:var(--btn); font-weight:900;}
+.row p b.em{color:var(--pink);}
+.row h3{font-size:34px; font-weight:900; margin-bottom:6px;}
+.row h3 + p{font-size:30px; color:var(--sub);}
+
+/* 今日の流れ */
+.flow{display:flex; flex-direction:column; gap:20px; width:1680px;}
+.flow .fr{display:flex; align-items:center; gap:40px; padding:22px 48px; text-align:left;
+  font-size:34px; font-weight:900;}
+.flow .fr .t{flex:none; width:110px; text-align:right; color:var(--btn);}
+.flow .fr .ic{width:38px; height:38px; color:var(--ink);}
+.flow .fr.on{background:var(--btn); color:#fff;}
+.flow .fr.on .t, .flow .fr.on .ic{color:#fff;}
 
 /* マスの種類 */
-.sq-list{display:flex; flex-direction:column; gap:1.6vmin; width:80vw; max-width:1400px;}
-.sq-row{display:flex; align-items:center; gap:2.4vmin; background:var(--paper);
-  border:.45vmin solid var(--brown); border-radius:2vmin; padding:1.4vmin 2.4vmin;}
-.sq-tag{
-  flex:none; width:22vmin; text-align:center; border-radius:1.4vmin;
-  border:.4vmin solid var(--brown); font-size:2.7vmin; font-weight:900; padding:1vmin 0;
-}
-.sq-row p{flex:1; font-size:2.6vmin; line-height:1.5; text-align:left; font-weight:700;}
-.sq-row p b{font-weight:900;}
-.t-income{background:#EDF7DC;} .t-cost{background:#FFE9E7;} .t-event{background:#FFF3DC;}
-.t-learn{background:#E0F4F8;} .t-door{background:var(--brown); color:var(--cream); border-color:var(--orange);}
-
-/* door logo */
-.door-mark{
-  width:14vmin; height:17.5vmin; background:var(--brown); border-radius:7vmin 7vmin 1.2vmin 1.2vmin;
-  display:grid; place-items:center;
-}
-.door-mark span{width:10.5vmin; height:14vmin; background:var(--teal);
-  border-radius:5.2vmin 5.2vmin 1vmin 1vmin; position:relative;}
-.door-mark span::after{content:""; position:absolute; right:1.4vmin; top:6.4vmin;
-  width:1.7vmin; height:1.7vmin; border-radius:50%; background:var(--orange);}
-
-.chips{display:flex; gap:1.8vmin; flex-wrap:wrap; justify-content:center;}
-.chip{background:var(--paper); border:.4vmin solid var(--brown); border-radius:99px;
-  padding:.9vmin 3vmin; font-size:2.4vmin; font-weight:900; white-space:nowrap;}
-
-/* ふりかえりQ */
-.q-no{
-  font-size:3vmin; font-weight:900; color:var(--paper); background:var(--crimson);
-  border-radius:99px; padding:.8vmin 4vmin; transform:rotate(-1.5deg); letter-spacing:.15em;
-}
-.q-text{font-size:5.4vmin; font-weight:900; line-height:1.6; max-width:80vw;}
-.q-text b{color:var(--teal);}
+.tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:36px; width:1640px;}
+.tile{display:flex; align-items:center; gap:30px; padding:34px 40px; text-align:left;}
+.tile .sw{flex:none; width:96px; height:96px; border-radius:22px; display:grid; place-items:center;}
+.tile .sw .ic{width:48px; height:48px;}
+.tile h3{font-size:36px; font-weight:900;}
+.tile p{font-size:25px; line-height:1.6; color:var(--sub); margin-top:4px;}
 
 /* 格差の連鎖 */
-.chain{display:flex; align-items:center; gap:1.6vmin; flex-wrap:wrap; justify-content:center;}
-.chain .c-box{
-  background:var(--paper); border:.5vmin solid var(--brown); border-radius:2vmin;
-  padding:1.8vmin 3.4vmin; font-size:3.6vmin; font-weight:900;
-}
-.chain .c-box small{display:block; font-size:2vmin; font-weight:700; opacity:.65; margin-top:.4vmin;}
-.chain .c-arrow{font-size:4.5vmin; color:var(--crimson); font-weight:900;}
+.chain{display:flex; align-items:center; gap:40px;}
+.chain .cb{padding:36px 56px; min-width:380px;}
+.chain .cb strong{display:block; font-size:44px; font-weight:900;}
+.chain .cb small{display:block; font-size:24px; color:var(--sub); margin-top:8px;}
+.chain .arr{font-size:52px; color:var(--pink); font-weight:900;}
+
+/* 問い */
+.q{font-size:60px; font-weight:900; line-height:1.75;}
+.q b{color:var(--pink);}
+
+/* 一番伝えたいこと */
+.key{font-size:66px; font-weight:900; line-height:1.75;}
 
 /* タイマー */
-#timer{
-  font-size:22vmin; line-height:1;
-  color:var(--brown); letter-spacing:.05em;
-}
-#timer.warn{color:var(--crimson); animation:blink 1s step-end infinite;}
-@keyframes blink{50%{opacity:.35;}}
-.t-btns{display:flex; gap:1.8vmin;}
-.t-btns button{
-  font-family:inherit; font-size:2.6vmin; font-weight:900; color:var(--brown);
-  background:var(--paper); border:.45vmin solid var(--brown); border-radius:99px;
-  padding:1.2vmin 3.6vmin; cursor:pointer;
-}
-.t-btns button.main{background:var(--green); color:#fff; border-color:var(--brown);}
-.t-btns button:active{transform:translateY(.4vmin);}
-.play-notes{display:flex; gap:2vmin; flex-wrap:wrap; justify-content:center;}
-.play-notes .chip{font-size:2.2vmin;}
+#timer{font-size:300px; font-weight:900; line-height:1; color:var(--btn); letter-spacing:.06em;}
+#timer.warn{color:var(--pink); animation:blink 1s step-end infinite;}
+#timer.done{font-size:200px; color:var(--pink); animation:none;}
+@keyframes blink{50%{opacity:.4;}}
+.t-btns{display:flex; gap:22px;}
+.t-btns button{font-family:inherit; font-size:28px; font-weight:900; color:var(--ink);
+  background:var(--card); border:none; border-radius:999px; padding:16px 40px; cursor:pointer; box-shadow:var(--sh);}
+.t-btns button.main{background:var(--btn); color:#fff; box-shadow:0 5px 0 var(--btn-d);}
+.t-btns button:active{transform:translateY(3px);}
+.chips{display:flex; gap:22px; flex-wrap:wrap; justify-content:center;}
+.chip{display:inline-flex; align-items:center; gap:12px; background:var(--card); border-radius:999px;
+  padding:14px 36px; font-size:28px; font-weight:900; box-shadow:var(--sh);}
+.chip .ic{width:30px; height:30px; color:var(--btn);}
 
-/* 2-up list (けっか発表) */
-.flow-list{display:flex; flex-direction:column; gap:1.8vmin; max-width:78vw;}
-.flow-list .step p{font-size:2.9vmin;}
+/* トビラのマーク（ゲームのタイトル画面と同じ） */
+.door-mark{width:180px; height:222px; background:var(--pink); border-radius:90px 90px 18px 18px;
+  display:grid; place-items:center; box-shadow:0 10px 0 rgba(214,104,130,.4);}
+.door-mark span{width:142px; height:184px; background:var(--gold); border-radius:71px 71px 12px 12px; position:relative;}
+.door-mark span::after{content:""; position:absolute; right:20px; top:96px; width:20px; height:20px;
+  border-radius:50%; background:var(--btn);}
+.door-mark.sm{transform:scale(.62); margin:-40px 0;}
+.title{font-size:150px; font-weight:900; letter-spacing:.14em; line-height:1.1;}
 </style>
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="ic-coin" viewBox="0 0 24 24"><ellipse cx="12" cy="8.6" rx="8" ry="3.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4 8.6v6.8c0 1.9 3.6 3.4 8 3.4s8-1.5 8-3.4V8.6" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+<symbol id="ic-cost" viewBox="0 0 24 24"><circle cx="9.5" cy="9.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M18 12v7M18 20.5l-3.2-3.2M18 20.5l3.2-3.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z" fill="currentColor"/></symbol>
+<symbol id="ic-book" viewBox="0 0 24 24"><path d="M3 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H3z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M21 5h-7a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h7z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-door" viewBox="0 0 24 24"><path d="M6 21V7a6 6 0 0 1 12 0v14z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="14.6" cy="13.5" r="1.4" fill="currentColor"/></symbol>
+<symbol id="ic-doorway" viewBox="0 0 24 24"><path d="M6 21V7a6 6 0 0 1 12 0v14z" fill="currentColor" opacity=".22"/></symbol>
+<symbol id="ic-door-leaf" viewBox="0 0 24 24"><path d="M6 21V7a6 6 0 0 1 12 0v14z" fill="var(--leaf-fill,#E8F0F8)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="14.6" cy="13.5" r="1.4" fill="currentColor"/></symbol>
+<symbol id="ic-start" viewBox="0 0 24 24"><path d="M4 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-goal" viewBox="0 0 24 24"><path d="M6 21V4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M6 4h13v9H6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M6 4h6.5v4.5H6zM12.5 8.5H19V13h-6.5z" fill="currentColor"/></symbol>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10.5V20h13V10.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-sun" viewBox="0 0 24 24"><path d="M2 18h20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M6 18a6 6 0 0 1 12 0" fill="currentColor" opacity=".25"/><path d="M6 18a6 6 0 0 1 12 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 5v2.4M5 8l1.7 1.7M19 8l-1.7 1.7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8.4 10.5V7.8a3.6 3.6 0 0 1 7.2 0v2.7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></symbol>
+<symbol id="ic-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.8 6.3.8-4.7 4.4 1.2 6.2L12 17.3 6.5 20.2l1.2-6.2L3 9.6l6.3-.8z" fill="currentColor"/></symbol>
+<symbol id="ic-heart" viewBox="0 0 24 24"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0 1 12 6.6a4.7 4.7 0 0 1 8.5 2.6c0 5.8-8.5 11.3-8.5 11.3z" fill="currentColor"/></symbol>
+<symbol id="ic-spark" viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/><path d="M19 15l.9 2.6L22.5 18l-2.6.9L19 21.5l-.9-2.6L15.5 18l2.6-.9z" fill="currentColor" opacity=".7"/></symbol>
+<symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3C9.4 5.6 9.4 18.4 12 21" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+<symbol id="ic-die" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="8.4" cy="8.4" r="1.7" fill="currentColor"/><circle cx="15.6" cy="15.6" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/></symbol>
+<symbol id="ic-card" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="8.5" cy="11" r="2.2" fill="currentColor"/><path d="M5 16.5c.7-1.6 5-1.6 5.8 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14.5 10h4.5M14.5 13.6h4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-help" viewBox="0 0 24 24"><path d="M9 9a3 3 0 1 1 3.6 2.9c-.8.2-1.1.8-1.1 1.6v.6" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="11.6" cy="17.6" r="1.5" fill="currentColor"/></symbol>
+<symbol id="ic-tools" viewBox="0 0 24 24"><path d="M10.1 2.8h3.8l.4 2.4 2 1.2 2.3-.9 1.9 3.3-1.9 1.5v2.4l1.9 1.5-1.9 3.3-2.3-.9-2 1.2-.4 2.4h-3.8l-.4-2.4-2-1.2-2.3.9-1.9-3.3 1.9-1.5v-2.4L3.5 8.8l1.9-3.3 2.3.9 2-1.2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="ic-cap" viewBox="0 0 24 24"><path d="M12 4 22 9l-10 5L2 9z" fill="currentColor"/><path d="M6 11.4V16c0 1.6 2.7 2.8 6 2.8s6-1.2 6-2.8v-4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="M4 12.5 9.5 18 20 6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 6.8V12l3.6 2.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-walk" viewBox="0 0 24 24"><circle cx="13" cy="4.2" r="2.2" fill="currentColor"/><path d="M13.5 8 10 11l1 4 3 5M10 11 7 15M11 15l-2 6M13.5 9.5 17 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M2.8 20c0-3.4 2.8-5.4 6.2-5.4s6.2 2 6.2 5.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16.4 5.2a3.4 3.4 0 0 1 0 6.6M18 14.9c2.2.6 3.6 2.4 3.6 5.1" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="currentColor"/><path d="M15.8 9.2a4 4 0 0 1 0 5.6M18.4 6.6a7.6 7.6 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+</svg>
+
+<div id="stage">
 <div id="progress"></div>
-<div id="partChip"></div>
-<div id="pageNum" class="num"></div>
-<div id="navHint">← → キーで進む</div>
+<div id="pageNum"></div>
+<div id="navHint">← → キーで進む ／ F で全画面</div>
 
 <!-- 1. タイトル -->
-<section class="slide" data-part="トビラ">
+<section class="slide plain">
   <div class="door-mark"><span></span></div>
-  <h1 style="font-size:10vmin; letter-spacing:.14em;">トビラ</h1>
-  <p class="lead">16歳から45歳を生きる、お金と選択肢の人生すごろく</p>
+  <div class="title">トビラ</div>
+  <p class="lead">16歳から45歳を生きる、おかねと選択肢の人生すごろく</p>
   <div class="chips">
-    <span class="chip">👥 1テーブル 2〜6人</span>
-    <span class="chip">⏱ プレイ約25分</span>
-    <span class="chip">📱 1台の画面を囲んで遊ぶ</span>
+    <span class="chip"><svg class="ic"><use href="#ic-people"/></svg>1台を3人で囲む</span>
+    <span class="chip"><svg class="ic"><use href="#ic-clock"/></svg>プレイ35〜40分</span>
+    <span class="chip"><svg class="ic"><use href="#ic-heart"/></svg>順位は♥ハッピーの数</span>
   </div>
 </section>
 
-<!-- 2. きょうのながれ -->
-<section class="slide" data-part="導入">
-  <div class="kicker">今日の流れ</div>
-  <div class="steps">
-    <div class="step"><span class="no">1</span><p>ゲームの説明（10分ほど）</p></div>
-    <div class="step"><span class="no">2</span><p>テーブルごとにプレイ（<b>約25分</b>）</p></div>
-    <div class="step"><span class="no">3</span><p>結果発表 — 順位と、ある秘密の公開</p></div>
-    <div class="step"><span class="no">4</span><p>振り返り — 近くの人と話してみよう</p></div>
+<!-- 2. 今日の流れ（90分版） -->
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-clock"/></svg>今日の流れ</div>
+  <div class="flow">
+    <div class="fr card"><span class="t">10分</span><svg class="ic"><use href="#ic-door"/></svg>導入 — このゲームは何を体験するものか</div>
+    <div class="fr card"><span class="t">10分</span><svg class="ic"><use href="#ic-die"/></svg>ルール説明・家庭カードを引く</div>
+    <div class="fr card on"><span class="t">40分</span><svg class="ic"><use href="#ic-walk"/></svg>プレイ</div>
+    <div class="fr card"><span class="t">10分</span><svg class="ic"><use href="#ic-goal"/></svg>結果発表 — 順位と、ある秘密の公開</div>
+    <div class="fr card"><span class="t">15分</span><svg class="ic"><use href="#ic-people"/></svg>振り返り — 近くの人と話してみよう</div>
+    <div class="fr card"><span class="t">5分</span><svg class="ic"><use href="#ic-heart"/></svg>まとめ</div>
   </div>
 </section>
 
-<!-- 3. なんのゲーム? -->
-<section class="slide" data-part="導入">
-  <div class="kicker">どんなゲーム？</div>
-  <h1><span class="em-t">16歳</span>から<span class="em-t">45歳</span>まで、<br>29年間の人生を歩くすごろくです</h1>
-  <p class="lead">進学、住まい、仕事、挑戦——<br>人生は<b>「選ぶこと」の連続</b>。<br>あなたなら、どのトビラを開く？</p>
+<!-- 3. このゲームで起きること -->
+<section class="slide">
+  <div class="pill pink sm"><svg class="ic"><use href="#ic-spark"/></svg>このゲームで起きること</div>
+  <h1>16歳から45歳まで、29年間の人生すごろくです</h1>
+  <h1 style="font-size:64px;">同じ盤面、同じサイコロ、同じルール<br><span class="em">違うのは、生まれた家庭だけ</span></h1>
 </section>
 
-<!-- 4. 順位はハッピー -->
-<section class="slide" data-part="導入">
-  <div class="kicker cr">一番大事なルール</div>
-  <h1>順位を決めるのは、お金じゃなく<br><span class="em">♥ハッピーの数</span></h1>
-  <div class="band">
-    ♥の数 ＝ <b>人生の選択肢をたくさん持ち、自分の意思で選べた数</b>。<br>
-    💰お金と📚★まなびは、そのための<b>「カギ」</b>です。
+<!-- 4. ゲームルール -->
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-cap"/></svg>ゲームルール</div>
+  <div class="rows">
+    <div class="row card"><span class="no">1</span><p>止まったマスで、人生のトビラを開ける。<br><b>おかね・★まなび・♥ハッピー</b>の3つの数字が増えたり減ったりする</p></div>
+    <div class="row card"><span class="no">2</span><p>順位を決めるのは、おかねではなく<b class="em">♥ハッピーの数</b><br>＝<b>人生の選択肢を多く持ち、自分の意思で選べた数</b></p></div>
   </div>
 </section>
 
 <!-- 5. 家庭カード -->
-<section class="slide" data-part="家庭カード">
-  <div class="kicker or">🏠 家庭カードを引こう</div>
-  <div class="steps">
-    <div class="step"><span class="no">1</span><p>ひとり1枚、<b>こっそり</b>引く（ほかの人に見せない！）</p></div>
-    <div class="step"><span class="no">2</span><p>カードで<b>最初のお金・仕送り・住む町</b>が決まる。スタート地点は人それぞれ</p></div>
-    <div class="step"><span class="no">3</span><p>途中で<b>「？？？」</b>に出会うかも。なぜかは……終わってからのお楽しみ</p></div>
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-home"/></svg>家庭カードを引こう</div>
+  <div class="rows">
+    <div class="row card"><svg class="ri"><use href="#ic-lock"/></svg><p>ひとり1枚引く。カードは見せ合ってOK。でも<b class="em">「とくい」だけは</b>最後まで秘密</p></div>
+    <div class="row card"><svg class="ri g"><use href="#ic-coin"/></svg><p>カードで<b>最初のおかね・仕送り・住むまち</b>が決まる。スタート地点は人それぞれ</p></div>
+    <div class="row card"><svg class="ri v"><use href="#ic-eye"/></svg><p>とちゅうで<b>「？？？」</b>に出会うかも。それが何なのかは——遊びおわってからのお楽しみ</p></div>
   </div>
 </section>
 
-<!-- 6. すすみ方 -->
-<section class="slide" data-part="ルール">
-  <div class="kicker gr">🎲 進み方</div>
-  <div class="steps">
-    <div class="step"><span class="no">1</span><p><b>高校時代（16〜18歳）</b>はサイコロなし。「一歩すすむ」ボタンで1マスずつ——進路を選ぶ前の<b>準備の時間</b></p></div>
-    <div class="step"><span class="no">2</span><p><b>18歳の進路トビラ</b>からはサイコロ！ 順番に振って、止まったマスの指示に従う</p></div>
-    <div class="step"><span class="no">3</span><p>全員が<b>45歳のゴール</b>に着いたら、結果発表へ</p></div>
+<!-- 6. 止まるマス -->
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-home"/></svg>止まるマスはこの5種類</div>
+  <div class="tiles">
+    <div class="tile card"><span class="sw" style="background:#FCE7A6;color:#D9A32B"><svg class="ic"><use href="#ic-coin"/></svg></span><div><h3>おしごと</h3><p>給料が入る<br>20万＋★まなび×10万</p></div></div>
+    <div class="tile card"><span class="sw" style="background:#F9C9C9;color:#D9737B"><svg class="ic"><use href="#ic-cost"/></svg></span><div><h3>しゅっぴ</h3><p>生きていると<br>おかねはかかる</p></div></div>
+    <div class="tile card"><span class="sw" style="background:#DCD3F5;color:#8878C4"><svg class="ic"><use href="#ic-bolt"/></svg></span><div><h3>できごと</h3><p>ラッキーも<br>アクシデントも</p></div></div>
+  </div>
+  <div class="tiles" style="grid-template-columns:repeat(2,1fr); width:1080px; margin-top:-8px;">
+    <div class="tile card"><span class="sw" style="background:#C6E3F7;color:#4E8FC0"><svg class="ic"><use href="#ic-book"/></svg></span><div><h3>まなび</h3><p>自分に投資する<br>0円でも学べる</p></div></div>
+    <div class="tile card"><span class="sw" style="background:#F7A9C4;color:#FFFFFF"><svg class="ic"><use href="#ic-door"/></svg></span><div><h3>トビラ</h3><p>光るマス＝人生の分岐点<br>通ったら必ず選ぶ</p></div></div>
   </div>
 </section>
 
-<!-- 7. マスの種類 -->
-<section class="slide" data-part="ルール">
-  <div class="kicker gr">🗺 マスの種類</div>
-  <div class="sq-list">
-    <div class="sq-row"><span class="sq-tag t-income">💰 おしごと</span><p>給料が入る。<b>20万＋★まなび×10万</b>＋仕送り</p></div>
-    <div class="sq-row"><span class="sq-tag t-cost">💸 しゅっぴ</span><p>生きているとお金はかかる。決まった額を支払う</p></div>
-    <div class="sq-row"><span class="sq-tag t-event">⚡ できごと</span><p>カードを1枚引く。ラッキーもアクシデントも</p></div>
-    <div class="sq-row"><span class="sq-tag t-learn">📚 まなび</span><p>自分に投資するチャンス。0円でも学べる</p></div>
-    <div class="sq-row"><span class="sq-tag t-door">🚪 トビラ</span><p><b>光るマス＝人生の分岐点</b>。止まらなくても、通ったら必ず選ぶ</p></div>
+<!-- 7. 進み方 -->
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-walk"/></svg>進み方</div>
+  <div class="rows">
+    <div class="row card"><span class="no">1</span><p><b>高校時代（16〜18歳）はサイコロなし</b>。「一歩すすむ」で1マスずつ<br>——進路を選ぶ前の、準備の時間</p></div>
+    <div class="row card"><span class="no">2</span><p><b>18歳の進路のトビラから、サイコロ</b>が始まる。順番に振って、止まったマスに従う</p></div>
+    <div class="row card"><span class="no">3</span><p>全員が<b>45歳のゴール</b>に着いたら、結果発表へ</p></div>
   </div>
 </section>
 
 <!-- 8. トビラとカギ -->
-<section class="slide" data-part="ルール">
-  <div class="kicker gr">🔑 トビラとカギ</div>
-  <div class="steps">
-    <div class="step"><span class="no">1</span><p>いい選択には<b>カギ</b>（必要なお金・★まなび）がいる。足りないと 🔒 開けられない</p></div>
-    <div class="step"><span class="no">2</span><p>カギなし（0円）の道は、<b>いつでも必ず選べる</b></p></div>
-    <div class="step"><span class="no">3</span><p>お金の増減は選ぶ前に見える。でも<b>★と♥は選ぶまでわからない</b>——値段はわかっても、価値はわからない</p></div>
+<section class="slide">
+  <div class="pill pink"><svg class="ic"><use href="#ic-door"/></svg>トビラとカギ</div>
+  <div class="rows">
+    <div class="row card"><svg class="ri"><use href="#ic-star"/></svg><div><h3>いい選択には「カギ」がいる</h3><p>カギ＝必要なおかね・★まなび</p></div></div>
+    <div class="row card"><svg class="ri g"><use href="#ic-lock"/></svg><div><h3>カギが足りなければ、開けられない</h3><p>でも、カギの要らない道（0円）は、借金中でも必ず選べる</p></div></div>
+    <div class="row card"><svg class="ri b"><use href="#ic-people"/></svg><div><h3>えらぶ前に、「なぜそれを選ぶのか」をひとこと</h3><p>みんなに話してから決めよう</p></div></div>
   </div>
 </section>
 
 <!-- 9. 奨学金 -->
-<section class="slide" data-part="ルール">
-  <div class="kicker gr">🎓 奨学金</div>
-  <div class="steps">
-    <div class="step"><span class="no">1</span><p>「奨学金を借りて進学」は<b>貸与型（総額48万）</b>。働くたびに−6万ずつ、45歳まで返し続ける</p></div>
-    <div class="step"><span class="no">2</span><p><b>制度を知っている人</b>は、返さなくていい<b>給付型</b>に出会えることも。「知っていること」自体が力になる</p></div>
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-cap"/></svg>奨学金</div>
+  <div class="rows">
+    <div class="row card"><span class="no">1</span><p>「奨学金を借りて進学」は<b>貸与型（総額48万）</b>。<br>給料のたびに−6万ずつ返し、45歳のゴールで残りを清算</p></div>
+    <div class="row card"><span class="no">2</span><p><b>制度を知っている人</b>は、返さなくていい<b class="em">給付型</b>に出会えることも。<br>「知っていること」自体が力になる</p></div>
   </div>
-  <p class="small">⚠️ 困ったこと・わからないことがあれば、いつでも手を挙げてください</p>
+  <p class="note">困ったこと・わからないことがあれば、いつでも手を挙げてください</p>
 </section>
 
 <!-- 10. プレイタイム -->
-<section class="slide" data-part="プレイ">
-  <div class="kicker or">🎮 プレイタイム！</div>
-  <div id="timer" class="num">25:00</div>
+<section class="slide">
+  <div class="pill pink sm"><svg class="ic"><use href="#ic-walk"/></svg>プレイタイム</div>
+  <div id="timer">35:00</div>
   <div class="t-btns">
     <button class="main" id="tStart">▶ スタート</button>
-    <button id="tPause">⏸ 一時停止</button>
+    <button id="tPause">一時停止</button>
     <button id="tMinus">−1分</button>
     <button id="tPlus">＋1分</button>
-    <button id="tReset">↺ リセット</button>
+    <button id="tReset">リセット</button>
   </div>
-  <div class="play-notes">
-    <span class="chip">🏠 家庭カードは最後まで秘密</span>
-    <span class="chip">🙋 困ったら手を挙げる</span>
-    <span class="chip">🏁 全員45歳ゴールで終了</span>
-  </div>
-</section>
-
-<!-- 11. けっか発表 -->
-<section class="slide" data-part="結果発表">
-  <div class="kicker cr">🎉 結果発表</div>
-  <div class="flow-list steps">
-    <div class="step"><span class="no">1</span><p>順位は<b>♥の数</b>！（同じなら残ったお金）</p></div>
-    <div class="step"><span class="no">2</span><p><b>家庭カードを公開</b>——お互いのスタート地点を初めて知る</p></div>
-    <div class="step"><span class="no">3</span><p><b>ネタバラシ</b>——「？？？」の中身を全部公開</p></div>
-    <div class="step"><span class="no">4</span><p><b>トビラ一覧</b>——29年間のすべてのトビラを、通らなかった道も</p></div>
+  <div class="chips">
+    <span class="chip"><svg class="ic"><use href="#ic-home"/></svg>「とくい」は最後まで秘密</span>
+    <span class="chip"><svg class="ic"><use href="#ic-people"/></svg>選ぶ前に、理由をひとこと</span>
+    <span class="chip"><svg class="ic"><use href="#ic-goal"/></svg>全員45歳でゴール</span>
   </div>
 </section>
 
-<!-- 12. ふりかえり導入 -->
-<section class="slide" data-part="振り返り">
-  <div class="kicker">🗣 振り返り</div>
-  <h1>近くの人と、<br>話してみよう</h1>
-  <p class="lead">これから4つの問いを出します。<br>正解はありません。<b>感じたこと</b>をそのまま話してみてください。</p>
+<!-- 11. 結果発表 -->
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-goal"/></svg>まず、結果を見ます</div>
+  <div class="rows">
+    <div class="row card"><svg class="ri"><use href="#ic-heart"/></svg><div><h3>順位は♥の数</h3><p>同じなら、残ったおかねで決める</p></div></div>
+    <div class="row card"><svg class="ri g"><use href="#ic-home"/></svg><div><h3>「とくい」を公開</h3><p>秘密にしていた「とくい」と、お互いのスタート地点を見くらべる</p></div></div>
+    <div class="row card"><svg class="ri v"><use href="#ic-eye"/></svg><div><h3>ネタバラシ</h3><p>「？？？」の中身を公開。だれに、何が見えていなかった？</p></div></div>
+    <div class="row card"><svg class="ri b"><use href="#ic-door"/></svg><div><h3>29年間のトビラを見る</h3><p>だれがどのトビラを通ったのか。通らなかった道もふくめて</p></div></div>
+  </div>
 </section>
 
-<!-- 13. Q1 -->
-<section class="slide" data-part="振り返り">
-  <div class="q-no">問い 1</div>
-  <p class="q-text"><b>届かなかったトビラ</b>はあった？<br>それは、<b>自分の努力だけ</b>の問題だった？</p>
+<!-- 12. 今日いちばん見てほしいこと（ネタバラシのあと） -->
+<section class="slide">
+  <div class="pill pink sm"><svg class="ic"><use href="#ic-eye"/></svg>今日いちばん見てほしいこと</div>
+  <p class="key">カギが足りずに開けられないのと、<br><span class="em">扉があることすら知らない</span>のは、<br>まったく違う</p>
 </section>
 
-<!-- 14. Q2 -->
-<section class="slide" data-part="振り返り">
-  <div class="q-no">問い 2</div>
-  <p class="q-text"><b>スタートのお金の違い</b>は、<br>選べる<b>進路や学び</b>に<br>どうつながっていた？</p>
+<!-- 13. 振り返り -->
+<section class="slide">
+  <div class="pill"><svg class="ic"><use href="#ic-people"/></svg>振り返り</div>
+  <h1>近くの人と、話してみよう</h1>
+  <p class="lead">これから4つの問いを出します。<br>正解はありません。<span class="em">感じたこと</span>をそのまま話してみてください。</p>
 </section>
 
-<!-- 15. Q3 -->
-<section class="slide" data-part="振り返り">
-  <div class="q-no">問い 3</div>
-  <p class="q-text">給付型奨学金のような<br><b>「知っていれば使えた支援」</b>、<br>現実にはどんなものがある？</p>
+<!-- 14-17. 問い -->
+<section class="slide">
+  <div class="pill pink sm">問い 1</div>
+  <p class="q"><b>届かなかったトビラ</b>はあった？<br>それは、自分の努力だけの問題だった？</p>
+</section>
+<section class="slide">
+  <div class="pill pink sm">問い 2</div>
+  <p class="q"><b>スタートのおかねの違い</b>は、<br>選べる進路や学びに、どうつながっていた？</p>
+</section>
+<section class="slide">
+  <div class="pill pink sm">問い 3</div>
+  <p class="q">給付型奨学金のような<br><b>「知っていれば使えた支援」</b>、<br>現実にはどんなものがある？</p>
+</section>
+<section class="slide">
+  <div class="pill pink sm">問い 4</div>
+  <p class="q"><b>支援が必要になる日</b>は、だれにでも来るかもしれない。<br>そのとき、何が助けになる？</p>
 </section>
 
-<!-- 16. Q4 -->
-<section class="slide" data-part="振り返り">
-  <div class="q-no">問い 4</div>
-  <p class="q-text"><b>支援が必要になる日</b>は、<br>誰にでも来るかもしれない。<br>そのとき、<b>何が助けになる</b>？</p>
-</section>
-
-<!-- 16. ゲームから現実へ: 格差の連鎖 -->
-<section class="slide" data-part="まとめ">
-  <div class="kicker cr">ゲームから現実へ</div>
-  <h1>スタートの差は、<br>つながっていく</h1>
+<!-- 18. ゲームから現実へ -->
+<section class="slide">
+  <div class="pill pink"><svg class="ic"><use href="#ic-globe"/></svg>ゲームから現実へ</div>
+  <h1 class="em" style="font-size:60px;">スタートの差は、つながっていく</h1>
   <div class="chain">
-    <div class="c-box">💰 経済格差<small>最初のお金・仕送りの差</small></div>
-    <div class="c-arrow">→</div>
-    <div class="c-box">🚪 機会格差<small>選べる進路・挑戦の差</small></div>
-    <div class="c-arrow">→</div>
-    <div class="c-box">📚 教育格差<small>学べること・知れることの差</small></div>
+    <div class="cb card"><strong>経済格差</strong><small>最初のおかね・仕送りの差</small></div>
+    <span class="arr">→</span>
+    <div class="cb card"><strong>機会格差</strong><small>選べる進路・挑戦の差</small></div>
+    <span class="arr">→</span>
+    <div class="cb card"><strong>教育格差</strong><small>学べること・知れることの差</small></div>
   </div>
-  <p class="lead">そしてその差は、<b>次の世代の経済格差</b>へ——。<br>ゲームで見た「？？？」や 🔒 は、現実の社会にもあります。</p>
+  <p class="lead" style="font-size:32px;">そしてその差は、次の世代の経済格差へ——。<br>ゲームで見た「？？？」も「カギ不足」も、いまの社会に実在します。</p>
 </section>
 
-<!-- 17. だから支援がある -->
-<section class="slide" data-part="まとめ">
-  <div class="kicker or">だから、「支援」がある</div>
-  <div class="steps">
-    <div class="step"><span class="no">1</span><p>この連鎖は、<b>個人の努力だけでは断ち切れない</b>。だから給付型奨学金のような支援や制度がある</p></div>
-    <div class="step"><span class="no">2</span><p>病気、災害、家族との別れ——<b>いつ自分が「支援が必要になる側」になるか</b>は、誰にもわからない</p></div>
-    <div class="step"><span class="no">3</span><p>だからこそ、<b>知っておくこと</b>が全員に必要。知っていれば、自分も、いつか誰かも助けられる</p></div>
+<!-- 19. だから支援がある -->
+<section class="slide">
+  <div class="pill gold"><svg class="ic"><use href="#ic-spark"/></svg>だから、「支援」がある</div>
+  <div class="rows">
+    <div class="row card"><span class="no">1</span><p>この連鎖は、<b>本人の努力だけでは断ち切れない</b>。だから給付型奨学金のような支援や制度がある</p></div>
+    <div class="row card"><span class="no">2</span><p>病気、災害、家族との別れ——<b>いつ自分が「支援が必要になる側」になるか</b>は、だれにもわからない</p></div>
+    <div class="row card"><span class="no">3</span><p>だからこそ、<b class="em">知っておくこと</b>が全員に必要。知っていれば、自分も、いつかだれかも助けられる</p></div>
   </div>
 </section>
 
-<!-- 18. まとめ -->
-<section class="slide" data-part="まとめ">
-  <div class="kicker">💡 一番伝えたいこと</div>
-  <div class="band" style="font-size:4vmin; line-height:2;">
-    カギが足りずに開けられないのと、<br>
-    <b>扉があることすら知らない</b>のは、<br>
-    全然違う。
-  </div>
-  <p class="lead">このゲームは、<b>「知る」ための第一歩</b>。<br>今日見つけた「見えていなかったトビラ」のこと、<br>ぜひ誰かに話してみてください。</p>
+<!-- 20. 一番伝えたいこと -->
+<section class="slide">
+  <div class="pill pink sm"><svg class="ic"><use href="#ic-heart"/></svg>一番伝えたいこと</div>
+  <p class="key" style="font-size:58px;">カギが足りずに開けられないのと、<br><span class="em">扉があることすら知らない</span>のは、まったく違う</p>
+  <p class="lead">このゲームは、<span class="em-b">「知る」ための第一歩</span>。<br>今日見つけた「見えていなかったトビラ」のこと、ぜひだれかに話してみてください。</p>
 </section>
 
-<!-- 17. おわり -->
-<section class="slide" data-part="おわり">
-  <div class="door-mark"><span></span></div>
-  <h1 style="font-size:7vmin;">ありがとうございました</h1>
+<!-- 21. おわり -->
+<section class="slide plain">
+  <div class="door-mark sm"><span></span></div>
+  <h1 style="font-size:84px;">ありがとうございました</h1>
   <p class="lead">あなたの前にも、まだ見ぬトビラがたくさんある。</p>
 </section>
+</div>
 
 <script>
+/* ---------- 台紙の拡大縮小 ---------- */
+const stage=document.getElementById('stage');
+function fit(){
+  const s=Math.min(innerWidth/1920, innerHeight/1080);
+  stage.style.transform=`translate(-50%,-50%) scale(${s})`;
+}
+addEventListener('resize',fit); fit();
+
 /* ---------- スライド送り ---------- */
 const slides=[...document.querySelectorAll('.slide')];
-const partChip=document.getElementById('partChip');
 const pageNum=document.getElementById('pageNum');
 const progress=document.getElementById('progress');
 let cur=0;
 function show(i){
   cur=Math.max(0,Math.min(slides.length-1,i));
   slides.forEach((s,j)=>s.classList.toggle('active',j===cur));
-  partChip.textContent=slides[cur].dataset.part;
   pageNum.textContent=(cur+1)+' / '+slides.length;
   progress.style.width=((cur+1)/slides.length*100)+'%';
 }
@@ -383,15 +392,15 @@ addEventListener('keydown',e=>{
 });
 show(0);
 
-/* ---------- プレイタイマー ---------- */
+/* ---------- プレイタイマー（実測に合わせて35分から） ---------- */
+const START=35*60;
 const tEl=document.getElementById('timer');
-let total=25*60, left=total, tick=null;
+let left=START, tick=null;
 function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
 function render(){
-  tEl.textContent=fmt(left);
+  tEl.textContent=left===0?'終了！':fmt(left);
   tEl.classList.toggle('warn',left<=180&&left>0);
-  if(left===0){tEl.textContent='終了！'; tEl.style.fontSize='14vmin';}
-  else tEl.style.fontSize='';
+  tEl.classList.toggle('done',left===0);
 }
 function stop(){clearInterval(tick); tick=null;}
 document.getElementById('tStart').onclick=()=>{
@@ -399,8 +408,8 @@ document.getElementById('tStart').onclick=()=>{
   tick=setInterval(()=>{ if(left>0){left--;render();} if(left===0)stop(); },1000);
 };
 document.getElementById('tPause').onclick=stop;
-document.getElementById('tReset').onclick=()=>{stop(); left=total=25*60; render();};
-document.getElementById('tPlus').onclick=()=>{left+=60; total+=60; render();};
+document.getElementById('tReset').onclick=()=>{stop(); left=START; render();};
+document.getElementById('tPlus').onclick=()=>{left+=60; render();};
 document.getElementById('tMinus').onclick=()=>{left=Math.max(0,left-60); render();};
 render();
 </script>
