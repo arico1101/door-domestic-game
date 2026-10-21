@@ -452,7 +452,8 @@ h1.game-title{font-size:clamp(32px,8vw,48px); font-weight:900; letter-spacing:.1
     </label>
     <button class="big-btn" id="startBtn">スタート！</button>
     <p class="setup-note">
-      はじめに、それぞれが<b>「家庭カード」</b>をこっそり引きます。<br>
+      はじめに、それぞれが<b>「家庭カード」</b>を引きます。<br>
+      カードは見せ合ってOK。でも<b>「とくい」だけは</b>本人だけの秘密。<br>
       スタート地点は、人によってちがう。<br>
       1台の画面を囲んで、順番にサイコロを回して遊ぼう。
     </p>
@@ -1970,7 +1971,7 @@ function famCardHtml(p, foot){
         <div class="k">${ic("spark","s")} あなたのとくい</div>
         <div class="v">${p.fam.perkText}</div>
       </div>
-      <div class="fam-secret">${ic("lock","s")} このカードは、ほかの人に見せないでください。</div>
+      <div class="fam-secret">${ic("lock","s")} カードは見せ合ってOK。でも「とくい」だけは、ほかの人に言わないでね。</div>
       ${foot}
     </div>`;
 }
@@ -1978,9 +1979,9 @@ function revealFamilyCard(i){
   if(i >= players.length){ famRevealIdx = null; closeModal(); beginTurn(); return; }
   famRevealIdx = i;
   const p = players[i];
-  openModal(`<div class="m-head">${tagChip("fam")}<h2>${p.name} さんだけ、見てください</h2></div>
+  openModal(`<div class="m-head">${tagChip("fam")}<h2>${p.name} さんの家庭カード</h2></div>
     <div class="m-body">
-      <p class="m-lead">ほかの人には見せずに、そっとめくってね。<br>あなたのスタート地点が書いてあります。</p>
+      <p class="m-lead">あなたのスタート地点が書いてあります。カードはみんなで見てOK。<br>でも<b>「とくい」の欄だけは${p.name} さんだけ</b>が見てね（ほかの人は目をそらして）。</p>
       <button class="m-btn" id="mFlip" data-se="card">カードをめくる</button>
       <button class="m-btn ghost" id="mHome">${ic("home","s")} タイトルにもどる（人数を変える）</button>
     </div>`);
@@ -2112,7 +2113,7 @@ function showResult(){
     ${ic("door","s")} それぞれのカードの<b>「ネタバラシ」ボタン</b>で、？？？の中身をのぞいてみよう。<br><br>
     🗣 話してみよう：<br>
     ・開けたかったのに、届かなかった／見えていなかったトビラはあった？<br>
-    ・家庭カードを見せ合おう。同じマスで、見えていた景色はどう違った？<br>
+    ・秘密にしていた「とくい」も見せ合おう。同じマスで、見えていた景色はどう違った？<br>
     ・現実の世界で「カギ」になるものは、お金のほかに何があるだろう？`;
 }
 
