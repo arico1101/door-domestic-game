@@ -18,10 +18,12 @@ html,body{background:#888;}
 body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color:var(--brown);}
 .sheet{
   width:210mm; height:297mm; margin:0 auto; background:var(--cream);
-  padding:8mm 10mm; display:flex; flex-direction:column; gap:2.4mm;
+  padding:8mm 10mm; overflow:hidden;
   -webkit-print-color-adjust:exact; print-color-adjust:exact;
 }
-@media print{ html,body{background:var(--cream);} .sheet{margin:0; box-shadow:none;} }
+/* 中身は .fit にまとめる。はみ出すときだけページ末尾のスクリプトで自動縮小する */
+.fit{display:flex; flex-direction:column; gap:2.4mm; height:100%; transform-origin:top center;}
+@media print{ html,body{background:var(--cream);} .sheet{margin:0; box-shadow:none; height:296mm;} }
 @media screen{ .sheet{box-shadow:0 4px 30px rgba(0,0,0,.4); margin:20px auto;} }
 
 /* header */
@@ -142,6 +144,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
 </head>
 <body>
 <div class="sheet">
+<div class="fit">
 
   <div class="head">
     <div class="door-mark"><span></span></div>
@@ -151,7 +154,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
     </div>
     <div class="meta">
       <span class="chip">👥 2〜6人</span>
-      <span class="chip">⏱ 約25分</span>
+      <span class="chip">⏱ プレイ35〜40分</span>
       <span class="chip">📱 1台の画面を囲んで遊ぶ</span>
     </div>
   </div>
@@ -238,7 +241,7 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
     <div class="box">
       <h2>📢 ネタバラシ</h2>
       <ul>
-        <li>家庭カードを<b>公開</b>。「？？？」の中身も見える</li>
+        <li>秘密だった<b>「とくい」</b>と、「？？？」の中身を<b>公開</b></li>
         <li>29年間の<b>全トビラを一覧</b>で。<b>通らなかったトビラ</b>も</li>
       </ul>
     </div>
@@ -260,5 +263,28 @@ body{font-family:"Zen Maru Gothic",'Hiragino Maru Gothic ProN',sans-serif; color
   </div>
 
 </div>
+</div>
+<script>
+/* A4・1枚に収めるための保険。Webフォントが読み込めない環境では文字が大きくなり
+   1枚に収まらなくなるので、そのときだけ全体をわずかに縮める（収まっていれば何もしない） */
+(function(){
+  var fit = document.querySelector(".fit");
+  function apply(){
+    fit.style.transform = "none";
+    fit.style.height = "auto";
+    var need = fit.getBoundingClientRect().height;   /* 中身の自然な高さ */
+    fit.style.height = "";
+    var avail = fit.clientHeight;                    /* 1枚に使える高さ */
+    if(need > avail + 1){
+      var k = Math.max(.8, avail / need);
+      fit.style.transform = "scale(" + k + ")";
+      fit.style.height = (100 / k) + "%";             /* 縮小後もページ下端まで埋める */
+    }
+  }
+  window.addEventListener("load", apply);
+  window.addEventListener("beforeprint", apply);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(apply);
+})();
+</script>
 </body>
 </html>
