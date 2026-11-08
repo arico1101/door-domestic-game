@@ -1939,7 +1939,6 @@ function showGoalModal(idx){
 /* ---------- 家庭カードの非公開ドラフト ---------- */
 let famRevealIdx = null;
 function famCardHtml(p, foot){
-  const hiddenN = p.hidden.size;
   const tone = FAM_TONE[p.region] || ["#E9A87C","#D98E63"];
   const met = p.open + p.locked + p.unseen;
   return `
@@ -1954,7 +1953,6 @@ function famCardHtml(p, foot){
       <div class="fam-story">${p.fam.story}
         <div class="fam-line">${ic("home","s")}<span>まち：<b>${p.region}</b></span></div>
         <div class="fam-line">${ic("coin","s")}<span>仕送り：<b>${p.allow>0 ? "毎回のお給料 +"+p.allow+"万" : "なし"}</b></span></div>
-        <div class="fam-line">${ic("eye","s")}<span>まだ見えていない選択肢：<b>${hiddenN}個</b>${hiddenN>0 ? `<span class="note">（そのマスでは「？？？」と表示されます）</span>` : ""}</span></div>
       </div>
       <div class="now-stats">
         <div class="ns money"><div class="k">${ic("coin","s")}おかね</div><div class="v">${fm(p.money)}</div></div>
@@ -1967,11 +1965,20 @@ function famCardHtml(p, foot){
           <span class="ll">カギが足りなかった <b>${p.locked}</b></span>
           <span class="lu">見えなかった <b>${p.unseen}</b></span></div>
       </div>` : ""}
+      <div class="fam-secret">${ic("lock","s")} このカードはみんなで見てOK。「とくい」はこのあと${p.name} さんだけが見ます。</div>
+      ${foot}
+    </div>`;
+}
+/* 「とくい」は本人だけの画面に分ける。1台をみんなで囲むので、
+   カードと同じ画面に出すと「目をそらして」頼みになってしまう */
+function famPerkHtml(p, foot){
+  return `<div class="m-head">${tagChip("fam")}<h2>${p.name} さんの「とくい」</h2></div>
+    <div class="m-body">
       <div class="fam-perk">
         <div class="k">${ic("spark","s")} あなたのとくい</div>
         <div class="v">${p.fam.perkText}</div>
       </div>
-      <div class="fam-secret">${ic("lock","s")} カードは見せ合ってOK。でも「とくい」だけは、ほかの人に言わないでね。</div>
+      <div class="fam-secret">${ic("lock","s")} 「とくい」は結果発表で答え合わせするので、それまでほかの人には言わないでね。</div>
       ${foot}
     </div>`;
 }
@@ -1979,19 +1986,36 @@ function revealFamilyCard(i){
   if(i >= players.length){ famRevealIdx = null; closeModal(); beginTurn(); return; }
   famRevealIdx = i;
   const p = players[i];
+  const homeBtn = `<button class="m-btn ghost" id="mHome">${ic("home","s")} タイトルにもどる（人数を変える）</button>`;
   openModal(`<div class="m-head">${tagChip("fam")}<h2>${p.name} さんの家庭カード</h2></div>
     <div class="m-body">
-      <p class="m-lead">あなたのスタート地点が書いてあります。カードはみんなで見てOK。<br>でも<b>「とくい」の欄だけは${p.name} さんだけ</b>が見てね（ほかの人は目をそらして）。</p>
+      <p class="m-lead">${p.name} さんのスタート地点が書いてあります。<br>家庭カードは<b>みんなで見てOK</b>。</p>
       <button class="m-btn" id="mFlip" data-se="card">カードをめくる</button>
-      <button class="m-btn ghost" id="mHome">${ic("home","s")} タイトルにもどる（人数を変える）</button>
+      ${homeBtn}
     </div>`);
   $("mHome").onclick = showHomeConfirm;
   $("mFlip").onclick = ()=>{
     openModal(famCardHtml(p, `
-      <button class="m-btn" id="mNext">OK、覚えた${i < players.length-1 ? "（次の人へ）" : "（ゲームスタート！）"}</button>
-      <button class="m-btn ghost" id="mHome">${ic("home","s")} タイトルにもどる（人数を変える）</button>`));
+      <button class="m-btn" id="mPerk">${p.name} さんの「とくい」を見る</button>
+      ${homeBtn}`));
     $("mHome").onclick = showHomeConfirm;
-    $("mNext").onclick = ()=>revealFamilyCard(i+1);
+    /* 押した瞬間に全員に見えないよう、画面を本人に渡すワンクッションをはさむ */
+    $("mPerk").onclick = ()=>{
+      openModal(`<div class="m-head">${tagChip("fam")}<h2>${p.name} さんだけ見てね</h2></div>
+        <div class="m-body">
+          <p class="m-lead">ここからは<b>${p.name} さんだけ</b>が画面を見ます。<br>ほかの人は、画面から目をはなしてね。</p>
+          <button class="m-btn" id="mShowPerk">${p.name} さん：「とくい」を見る</button>
+          ${homeBtn}
+        </div>`);
+      $("mHome").onclick = showHomeConfirm;
+      $("mShowPerk").onclick = ()=>{
+        openModal(famPerkHtml(p, `
+          <button class="m-btn" id="mNext">OK、覚えた${i < players.length-1 ? "（次の人へ）" : "（ゲームスタート！）"}</button>
+          ${homeBtn}`));
+        $("mHome").onclick = showHomeConfirm;
+        $("mNext").onclick = ()=>revealFamilyCard(i+1);
+      };
+    };
   };
 }
 /* タイトルにもどる（確認つき） */
