@@ -297,6 +297,7 @@ h1.game-title{font-size:clamp(32px,8vw,48px); font-weight:900; letter-spacing:.1
 .fam-perk .k{font-size:10.5px; font-weight:900; color:#A9629B; letter-spacing:.08em;
   display:flex; align-items:center; gap:5px;}
 .fam-perk .v{font-size:13px; font-weight:900; line-height:1.6; color:#5B4A6B;}
+.fam-perk .v small{display:block; font-weight:700; font-size:11.5px; margin-top:2px; line-height:1.7;}
 .fam-secret{margin-top:11px; font-size:11px; font-weight:700; color:var(--sub); text-align:center;
   display:flex; align-items:center; justify-content:center; gap:5px;}
 
@@ -340,6 +341,10 @@ h1.game-title{font-size:clamp(32px,8vw,48px); font-weight:900; letter-spacing:.1
 .doorbar-label{font-size:11.5px; font-weight:900; color:var(--sub); margin-top:7px; line-height:1.7;}
 .doorbar-label .lo{color:#4CA872;} .doorbar-label .ll{color:#C98A3C;} .doorbar-label .lu{color:#7E6BC4;}
 .rv-btn{margin-top:11px; font-size:13px;}
+.r-btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:11px;}
+.r-btns .chip-btn{margin-top:0; font-size:13px; display:inline-flex; align-items:center; gap:6px;}
+.fam-start-k{font-size:10.5px; font-weight:900; color:var(--sub); letter-spacing:.06em;
+  display:flex; align-items:center; gap:5px; margin:11px 0 6px;}
 .res-btns{text-align:center; margin-top:24px;}
 /* ふりかえりのまとめ箱。文字を反転させるが、角も色もやわらかく */
 .insight{background:#47596B; color:#EDF4F9; border-radius:22px; padding:22px; margin-top:24px;
@@ -634,19 +639,19 @@ const FAMILIES = [
    perkText:"とくになし"},
   {id:"f2", name:"都心のひとり親家庭", region:"都心", money:40, allow:0, hide:[], perk:"dandori",
    story:"親はいつも働いている。ごはんの支度も、手続きの書類も、気づけば自分でできるようになっていた。まちには情報だけは、たくさんある。",
-   perkText:"段取り力：はじめから まなび+1／独学の効果が上がる"},
+   perkText:"段取り力：はじめから まなび★+1。まなびのマスで、お金をかけない学び方（本や動画）を選ぶと ★+2（ふつうは +1）"},
   {id:"f3", name:"地方の三世代家庭", region:"地方", money:60, allow:5, hide:["seido","career"], perk:"tsunagari",
    story:"じいちゃんの畑と、近所の顔見知り。困ったとき、頼れる人の顔がすぐ浮かぶ。ただ、進路の選択肢は、正直あまり聞いたことがない。",
-   perkText:"つながり：情報が手に入るできごとの効果が2倍"},
+   perkText:"つながり：できごとで「？？？」が見えるようになるとき、見えるようになる数が2倍"},
   {id:"f4", name:"地方のひとり親家庭", region:"地方", money:40, allow:0, hide:["seido","career","global"], perk:"dandori",
    story:"親はいつも働いている。手続きの書類も、気づけば自分でできるようになっていた。このまちで見たことのある仕事は、数えるほどしかない。",
-   perkText:"段取り力：はじめから まなび+1／独学の効果が上がる"},
+   perkText:"段取り力：はじめから まなび★+1。まなびのマスで、お金をかけない学び方（本や動画）を選ぶと ★+2（ふつうは +1）"},
   {id:"f5", name:"はやくに親を亡くした家庭", region:"地方", money:30, allow:0, hide:[], perk:"seidoPro",
    story:"中学のとき、父を亡くした。大変だった。でもそのとき、支えてくれる制度と人がいることを、誰よりも早く知った。",
-   perkText:"制度を知っている：支援・奨学金の選択肢がすべて見えている／はじめて使うと まなび+1"},
+   perkText:"制度を知っている：支援・奨学金の選択肢が、はじめから全部見えている。はじめて選ぶと まなび★+1。奨学金は返さなくていい（給付型）"},
   {id:"f6", name:"地方の自営業の家庭", region:"地方", money:80, allow:0, hide:["seido","career"], perk:"akinai",
    story:"家の店を手伝って育った。お金が「入ってきて、出ていくもの」だと肌で知っている。ただし、いい月と悪い月がある。",
-   perkText:"商いの感覚：臨時収入のできごとが +10万"},
+   perkText:"商いの感覚：できごとでおかねが入るとき、いつも さらに +10万"},
 ];
 
 /* 各マスの年齢（16歳→45歳の29年間） */
@@ -1939,6 +1944,12 @@ function showGoalModal(idx){
   };
 }
 
+/* 「とくい」は「名前：どこに・どう効くか」の形で書いてある。名前を太字、効きかたを下に小さく出す */
+function perkHtml(fam){
+  const t = fam.perkText, i = t.indexOf("：");
+  return i < 0 ? t : `${t.slice(0, i)}<small>${t.slice(i + 1)}</small>`;
+}
+
 /* ---------- 家庭カードの非公開ドラフト ---------- */
 let famRevealIdx = null;
 function famCardHtml(p, foot){
@@ -1972,6 +1983,39 @@ function famCardHtml(p, foot){
       ${foot}
     </div>`;
 }
+/* 結果発表のあとに、だれの家庭カードでも見なおせる。
+   ふりかえりで「だれが、どんな家庭だったか」を確かめるため。とくいもここでは公開ずみ */
+function showFamResultModal(i){
+  const p = players[i];
+  if(!p) return;
+  const tone = FAM_TONE[p.region] || ["#E9A87C","#D98E63"];
+  openModal(`
+    <div class="fam-top" style="--fam:${p.color}">
+      <div class="av" style="${faceBg(p)}"></div>
+      <div style="min-width:0">
+        <span class="pill" style="color:${tone[1]}">${ic("home","s")} ${p.name} さんの家庭カード</span>
+        <div class="nm">${p.fam.name}</div>
+      </div>
+    </div>
+    <div class="m-body">
+      <div class="fam-story">${p.fam.story}
+        <div class="fam-line">${ic("home","s")}<span>まち：<b>${p.region}</b></span></div>
+        <div class="fam-line">${ic("coin","s")}<span>仕送り：<b>${p.fam.allow>0 ? "毎回のお給料 +"+p.fam.allow+"万" : "なし"}</b></span></div>
+      </div>
+      <div class="fam-start-k">${ic("start","s")} スタートのとき</div>
+      <div class="now-stats">
+        <div class="ns money"><div class="k">${ic("coin","s")}おかね</div><div class="v">${fm(p.initMoney)}</div></div>
+        <div class="ns learn"><div class="k">${ic("star","s")}まなび</div><div class="v">★${p.initLearn}</div></div>
+        <div class="ns happy"><div class="k">${ic("heart","s")}ハッピー</div><div class="v">♥0</div></div>
+      </div>
+      <div class="fam-perk">
+        <div class="k">${ic("spark","s")} とくい</div>
+        <div class="v">${perkHtml(p.fam)}</div>
+      </div>
+      <button class="m-btn" id="mFcOk">とじる</button>
+    </div>`);
+  $("mFcOk").onclick = closeModal;
+}
 /* 「とくい」は本人だけの画面に分ける。1台をみんなで囲むので、
    カードと同じ画面に出すと「目をそらして」頼みになってしまう */
 function famPerkHtml(p, foot){
@@ -1979,7 +2023,7 @@ function famPerkHtml(p, foot){
     <div class="m-body">
       <div class="fam-perk">
         <div class="k">${ic("spark","s")} あなたのとくい</div>
-        <div class="v">${p.fam.perkText}</div>
+        <div class="v">${perkHtml(p.fam)}</div>
       </div>
       <div class="fam-secret">${ic("lock","s")} 「とくい」は結果発表で答え合わせするので、それまでほかの人には言わないでね。</div>
       ${foot}
@@ -2122,8 +2166,14 @@ function showResult(){
         <div class="seg-unseen" style="width:${pct(p.unseen)}%"></div>
       </div>
       <div class="doorbar-label">出会ったトビラ ${total}枚 ── <span class="lo">開けられた ${p.open}</span>／<span class="ll">カギが足りなかった ${p.locked}</span>／<span class="lu">見えていなかった ${p.unseen}</span></div>
-      <button class="chip-btn rv-btn" data-p="${players.indexOf(p)}">${ic("door","s")} トビラのネタバラシを見る</button>`;
+      <div class="r-btns">
+        <button class="chip-btn fc-btn" data-p="${players.indexOf(p)}">${ic("home","s")} 家庭カードを見る</button>
+        <button class="chip-btn rv-btn" data-p="${players.indexOf(p)}">${ic("door","s")} トビラのネタバラシを見る</button>
+      </div>`;
     list.appendChild(card);
+  });
+  list.querySelectorAll(".fc-btn").forEach(b=>{
+    b.onclick = ()=>showFamResultModal(+b.dataset.p);
   });
   list.querySelectorAll(".rv-btn").forEach(b=>{
     b.onclick = ()=>showRevealModal(+b.dataset.p);
